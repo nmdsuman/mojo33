@@ -24,47 +24,6 @@
             -moz-appearance: textfield;
         }
         
-        /* Dropdown menu styling */
-        .dropdown {
-            position: relative;
-            display: inline-block;
-        }
-        
-        .dropdown-content {
-            display: none;
-            position: absolute;
-            background-color: #fff;
-            min-width: 120px;
-            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
-            z-index: 10;
-            right: 0;
-            border-radius: 0.5rem;
-            padding: 0.5rem;
-            margin-top: 0.5rem;
-            flex-direction: column; /* Changed to column layout for vertical arrangement */
-            gap: 0.5rem;
-            justify-content: space-around;
-        }
-        
-        .dropdown-content.active {
-            display: flex;
-        }
-        
-        .dropdown-button {
-            display: block;
-            width: 100%;
-            padding: 0.5rem 1rem;
-            text-align: center;
-            border-radius: 0.5rem;
-            font-weight: 500;
-            color: #4B5563;
-            transition: background-color 0.2s;
-        }
-        
-        .dropdown-button:hover {
-            background-color: #F3F4F6;
-        }
-        
         /* Modal styling */
         .modal-content {
             background-color: #fff;
@@ -92,7 +51,7 @@
             হাতিয়াড় মেজো-৩৩
         </h1>
 
-        <!-- Clear Button, Toggle Switch and Dropdown Menu -->
+        <!-- Clear Button, Toggle Switch and Player Button -->
         <div class="flex flex-col items-center mb-4 space-y-4">
             <div class="flex justify-center items-center space-x-4">
                 <button id="clearBtn" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-6 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105">
@@ -107,20 +66,10 @@
                         <path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                     </svg>
                 </button>
-                <div class="dropdown">
-                    <button id="menuBtn" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105">
-                        •••
-                    </button>
-                    <div id="menuContent" class="dropdown-content">
-                        <button class="dropdown-button" data-select="1">1</button>
-                        <button class="dropdown-button" data-select="2">2</button>
-                        <button class="dropdown-button" data-select="3">3</button>
-                        <button class="dropdown-button" data-select="4">4</button>
-                        <button id="playerBtn" class="dropdown-button">
-                            Player
-                        </button>
-                    </div>
-                </div>
+                <!-- Player Button moved here -->
+                <button id="playerBtn" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-6 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105">
+                    Player
+                </button>
             </div>
         </div>
 
@@ -206,16 +155,13 @@
         // Use a single script block for all JavaScript logic.
         document.addEventListener('DOMContentLoaded', () => {
             // State management using plain JavaScript variables
-            let columnNames = ['SUMAN', 'Rakib', 'Akij', 'Naim'];
+            let columnNames = ['হামিম', 'সোহেল', 'চঞ্চল', 'আকিজ'];
             const numRows = 20;
             const subtractValue = 360;
             let isLocked = true; // Default state is locked
             
             let presetPlayers = [
-                'রিয়াজ', 'কামাল', 'জমির', 'শফিক', 'করিম', 
-                'সেলিম', 'আশিক', 'সাজিদ', 'ফারহান', 'আরিফ',
-                'মামুন', 'আসিফ', 'তানভীর', 'ইমরান', 'হাসান',
-                'রাজু', 'মাসুম', 'বাবু', 'নিয়াজ', 'জাহিদ'
+                'হামিম', 'সোহেল', 'চঞ্চল', 'আকিজ', 'সুমন', 'ফয়ছাল', 'নাঈম', 'মওলা', 'পলাশ', 'ইমরান', 'জসিম'
             ];
             
             let rowData = [];
@@ -238,7 +184,7 @@
                 if (savedData) {
                     try {
                         const parsedData = JSON.parse(savedData);
-                        columnNames = parsedData.columnNames || ['SUMAN', 'Rakib', 'Akij', 'Naim'];
+                        columnNames = parsedData.columnNames || ['হামিম', 'সোহেল', 'চঞ্চল', 'আকিজ'];
                         rowData = parsedData.rowData;
                         const initialData = [];
                         for (let i = 0; i < numRows; i++) {
@@ -295,9 +241,7 @@
             const clearConfirmModal = document.getElementById('clearConfirmModal');
             const confirmClearBtn = document.getElementById('confirmClearBtn');
             const cancelClearBtn = document.getElementById('cancelClearBtn');
-            const menuBtn = document.getElementById('menuBtn');
-            const menuContent = document.getElementById('menuContent');
-            const playerBtn = document.getElementById('playerBtn');
+            const playerBtn = document.getElementById('playerBtn'); // Direct reference to the player button
             const playerModal = document.getElementById('playerModal');
             const playerListContainer = document.getElementById('playerListContainer');
             const savePlayerListBtn = document.getElementById('savePlayerListBtn');
@@ -425,7 +369,7 @@
                     const sumOfFirstFour = calculateSumOfFirstFourColumns(row);
                     const shouldShowLachha = sumOfFirstFour === 360;
                     
-                    const lachhaColumns = ['Rakib', 'Akij', 'Naim'];
+                    const lachhaColumns = ['আকিজ'];
 
                     columnNames.forEach((colName, colIndex) => {
                         const cell = document.createElement('td');
@@ -505,7 +449,7 @@
                         const rowElement = dataBody.children[rowIndex];
                         const sumOfFirstFour = calculateSumOfFirstFourColumns(rowData[rowIndex]);
                         const shouldShowLachha = sumOfFirstFour === 360;
-                        const lachhaColumns = ['Rakib', 'Akij', 'Naim'];
+                        const lachhaColumns = ['আকিজ'];
 
                         lachhaColumns.forEach(lachhaColName => {
                             const lachhaColIndex = columnNames.indexOf(lachhaColName);
@@ -547,22 +491,12 @@
             cancelClearBtn.addEventListener('click', () => {
                 clearConfirmModal.classList.add('hidden');
             });
-
-            menuBtn.addEventListener('click', (event) => {
-                event.stopPropagation(); // Prevents the document click listener from firing immediately
-                menuContent.classList.toggle('active');
-            });
-            
-            document.addEventListener('click', (event) => {
-                if (!menuBtn.contains(event.target) && !menuContent.contains(event.target)) {
-                    menuContent.classList.remove('active');
-                }
-            });
             
             editToggleBtn.addEventListener('click', () => {
                 isLocked = !isLocked;
                 lockIcon.classList.toggle('hidden', !isLocked);
                 editIcon.classList.toggle('hidden', isLocked);
+                playerBtn.classList.toggle('hidden', isLocked); // This line now controls the player button
                 renderTable();
                 saveData();
             });
@@ -675,27 +609,6 @@
                 saveData(); // Save the updated list when the modal is closed
             });
             
-            // Event listener for the 1, 2, 3, 4 buttons
-            menuContent.addEventListener('click', (event) => {
-                const target = event.target.closest('.dropdown-button');
-                if (target && target.dataset.select) {
-                    currentColumnIndex = parseInt(target.dataset.select, 10) - 1;
-                    
-                    // Populate and show the dynamic player selection modal
-                    dynamicPlayerList.innerHTML = '';
-                    presetPlayers.forEach(player => {
-                        const playerItem = document.createElement('div');
-                        playerItem.className = "cursor-pointer p-2 rounded-lg hover:bg-gray-100 transition duration-150";
-                        playerItem.textContent = player;
-                        playerItem.dataset.name = player;
-                        dynamicPlayerList.appendChild(playerItem);
-                    });
-                    
-                    dynamicPlayerModal.classList.remove('hidden');
-                    // We don't hide the main menu content here
-                }
-            });
-
             // প্লেয়ারের নাম নির্বাচন করা হলে, এই ইভেন্টটি টেবিলের হেডার আপডেট করবে।
             dynamicPlayerList.addEventListener('click', (event) => {
                 const target = event.target.closest('div');
@@ -756,6 +669,7 @@
             loadData();
             lockIcon.classList.toggle('hidden', !isLocked);
             editIcon.classList.toggle('hidden', isLocked);
+            playerBtn.classList.toggle('hidden', isLocked);
             renderTable();
         });
     </script>
