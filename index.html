@@ -390,15 +390,15 @@
                     const th = document.createElement('th');
                     th.className = "table-cell-padding text-center text-xs font-medium uppercase tracking-wider";
                     th.scope = "col";
-                    th.innerHTML = `
-                        <input
-                            type="text"
-                            value="${name}"
-                            data-col-index="${index}"
-                            class="bg-transparent border-b border-white focus:outline-none text-center text-white placeholder-gray-300 w-12 sm:w-16 md:w-28 rounded-sm px-1 py-0.5"
-                            ${isLocked ? 'disabled' : ''}
-                        />
-                    `;
+                    if(isLocked) {
+                        th.innerHTML = `
+                            <span data-col-index="${index}" class="cursor-pointer bg-transparent border-b border-white focus:outline-none text-center text-white placeholder-gray-300 w-12 sm:w-16 md:w-28 rounded-sm px-1 py-0.5">${name}</span>
+                        `;
+                    } else {
+                        th.innerHTML = `
+                            <span data-col-index="${index}" class="cursor-pointer bg-transparent border-b border-white focus:outline-none text-center text-white placeholder-gray-300 w-12 sm:w-16 md:w-28 rounded-sm px-1 py-0.5">${name}</span>
+                        `;
+                    }
                     tableHeaderRow.appendChild(th);
                 });
                 const totalTh = document.createElement('th');
@@ -532,34 +532,7 @@
                     }
                 }
             });
-
-            // প্লেয়ারের নাম ইনপুট ফিল্ডে টাইপ করার সময় ফোকাস যাতে না হারায়, তার জন্য এই ইভেন্ট লিসেনারটি আপডেট করা হলো।
-            // পুরো টেবিলটি পুনরায় রেন্ডার করার পরিবর্তে, এটি শুধু ডেটার কাঠামো আপডেট করবে।
-            tableHeaderRow.addEventListener('input', (event) => {
-                const target = event.target;
-                if (target.tagName === 'INPUT' && target.type === 'text') {
-                    const colIndex = parseInt(target.dataset.colIndex, 10);
-                    const newName = target.value;
-                    
-                    if (!isNaN(colIndex)) {
-                        const oldName = columnNames[colIndex];
-                        columnNames[colIndex] = newName;
-                        
-                        // rowData-এর অবজেক্টগুলি সরাসরি আপডেট করা হচ্ছে যাতে ফোকাস না হারায়।
-                        rowData.forEach(row => {
-                            if (typeof row[oldName] !== 'undefined') {
-                                row[newName] = row[oldName];
-                                delete row[oldName];
-                            }
-                        });
-
-                        updateTableTotals();
-                        saveData();
-                        // এখানে renderTable() কল করা হচ্ছে না যাতে ফোকাস না হারায়।
-                    }
-                }
-            });
-
+            
             clearBtn.addEventListener('click', () => {
                 clearConfirmModal.classList.remove('hidden');
             });
@@ -740,10 +713,10 @@
                             }
                         });
                         
-                        // শুধু হেডার ইনপুট আপডেট করার জন্য একটি নতুন ফাংশন
-                        const headerInput = tableHeaderRow.querySelector(`input[data-col-index="${currentColumnIndex}"]`);
-                        if(headerInput) {
-                            headerInput.value = selectedName;
+                        // Update the span element with the new name
+                        const headerSpan = tableHeaderRow.querySelector(`span[data-col-index="${currentColumnIndex}"]`);
+                        if(headerSpan) {
+                            headerSpan.textContent = selectedName;
                         }
 
                         updateTableTotals();
@@ -760,12 +733,10 @@
             });
             
             // প্লেয়ারের নাম ইনপুট ফিল্ডে ক্লিক করলে কিবোর্ড বন্ধ রাখার জন্য এই ইভেন্টটি আপডেট করা হলো।
+            // Now we listen for a click on the span instead of input focus.
             tableHeaderRow.addEventListener('click', (event) => {
-                const target = event.target.closest('input');
-                if (target && target.type === 'text' && !isLocked) {
-                    // ইনপুট ফিল্ড থেকে ফোকাস সরিয়ে নেওয়া হচ্ছে যাতে মোবাইল কিবোর্ড না আসে।
-                    target.blur();
-
+                const target = event.target.closest('span');
+                if (target && !isLocked) {
                     const colIndex = parseInt(target.dataset.colIndex, 10);
                     currentColumnIndex = colIndex;
 
