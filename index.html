@@ -34,17 +34,17 @@
             }
             .table-responsive table {
                 width: 100%;
-                min-width: 600px; /* Minimum width to prevent content from getting too squished */
+                /* Removed min-width to allow the table to shrink fully */
             }
             .table-responsive th, .table-responsive td {
-                padding-left: 0.5rem;
-                padding-right: 0.5rem;
+                padding-left: 0.25rem;
+                padding-right: 0.25rem;
                 font-size: 0.75rem; /* text-xs */
             }
             .table-responsive input {
                 width: 4rem; /* Smaller width for inputs on mobile */
             }
-            .table-responsive . Lachha-text {
+            .table-responsive .Lachha-text {
                 font-size: 0.75rem; /* text-xs */
                 width: 4rem;
             }
@@ -219,7 +219,7 @@
                 columnNames.forEach((name, index) => {
                     const td = sumRowBody.children[index];
                     td.textContent = columnSums[name].toFixed(2);
-                    td.className = `px-4 py-3 whitespace-nowrap text-sm text-center ${rankedColumnColors[name] || ''}`;
+                    td.className = `px-2 py-3 whitespace-nowrap text-sm text-center ${rankedColumnColors[name] || ''}`;
                 });
 
                 // Update Data Rows Totals
@@ -231,7 +231,7 @@
                     
                     if (totalCell) {
                         totalCell.textContent = rowTotal.toFixed(2);
-                        totalCell.className = `px-4 py-2 whitespace-nowrap text-sm font-medium text-center bg-blue-50 ${totalTextColorClass} total-cell`;
+                        totalCell.className = `px-2 py-2 whitespace-nowrap text-sm font-medium text-center bg-blue-50 ${totalTextColorClass} total-cell`;
                     }
                 });
             };
@@ -246,7 +246,7 @@
                 // Render Header Row
                 columnNames.forEach((name, index) => {
                     const th = document.createElement('th');
-                    th.className = "px-4 py-3 text-center text-xs font-medium uppercase tracking-wider";
+                    th.className = "px-2 py-3 text-center text-xs font-medium uppercase tracking-wider";
                     th.scope = "col";
                     th.innerHTML = `
                         <input
@@ -259,7 +259,7 @@
                     tableHeaderRow.appendChild(th);
                 });
                 const totalTh = document.createElement('th');
-                totalTh.className = "px-4 py-3 text-center text-xs font-medium uppercase tracking-wider";
+                totalTh.className = "px-2 py-3 text-center text-xs font-medium uppercase tracking-wider";
                 totalTh.scope = "col";
                 totalTh.textContent = "Total";
                 tableHeaderRow.appendChild(totalTh);
@@ -267,11 +267,11 @@
                 // Render Sums Row (placeholder for updateTableTotals)
                 columnNames.forEach(() => {
                     const td = document.createElement('td');
-                    td.className = "px-4 py-3 whitespace-nowrap text-sm text-center";
+                    td.className = "px-2 py-3 whitespace-nowrap text-sm text-center";
                     sumRowBody.appendChild(td);
                 });
                 const emptySumTd = document.createElement('td');
-                emptySumTd.className = "px-4 py-3 whitespace-nowrap text-sm text-center bg-blue-200";
+                emptySumTd.className = "px-2 py-3 whitespace-nowrap text-sm text-center bg-blue-200";
                 sumRowBody.appendChild(emptySumTd);
 
                 // Render Data Rows
@@ -286,7 +286,7 @@
 
                     columnNames.forEach((colName, colIndex) => {
                         const cell = document.createElement('td');
-                        cell.className = "px-4 py-2 whitespace-nowrap text-sm text-gray-900 text-center";
+                        cell.className = "px-2 py-2 whitespace-nowrap text-sm text-gray-900 text-center";
                         
                         // Check if it's one of the specific columns and the condition is met
                         if (shouldShowLachha && lachhaColumns.includes(colName) && (row[colName] === '' || row[colName] === 0 || row[colName] === '0')) {
@@ -311,7 +311,7 @@
 
                     // Render Total Cell
                     const totalCell = document.createElement('td');
-                    totalCell.className = `px-4 py-2 whitespace-nowrap text-sm font-medium text-center bg-blue-50 total-cell`;
+                    totalCell.className = `px-2 py-2 whitespace-nowrap text-sm font-medium text-center bg-blue-50 total-cell`;
                     totalCell.textContent = calculateRowTotal(row).toFixed(2);
                     rowElement.appendChild(totalCell);
 
