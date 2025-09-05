@@ -187,7 +187,7 @@
         </div>
     </div>
     
-    <!-- Dynamic Player Selection Modal for 1, 2, 3, 4 buttons -->
+    <!-- Dynamic Player Selection Modal (initially hidden) -->
     <div id="dynamicPlayerModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
         <div class="modal-content w-full max-w-xs mx-auto p-6 rounded-lg shadow-xl">
             <p class="text-lg font-semibold mb-4 text-gray-800 text-center">খেলোয়াড় নির্বাচন করুন</p>
@@ -533,6 +533,8 @@
                 }
             });
 
+            // প্লেয়ারের নাম ইনপুট ফিল্ডে টাইপ করার সময় ফোকাস যাতে না হারায়, তার জন্য এই ইভেন্ট লিসেনারটি আপডেট করা হলো।
+            // পুরো টেবিলটি পুনরায় রেন্ডার করার পরিবর্তে, এটি শুধু ডেটার কাঠামো আপডেট করবে।
             tableHeaderRow.addEventListener('input', (event) => {
                 const target = event.target;
                 if (target.tagName === 'INPUT' && target.type === 'text') {
@@ -543,15 +545,17 @@
                         const oldName = columnNames[colIndex];
                         columnNames[colIndex] = newName;
                         
-                        rowData = rowData.map(row => {
-                            const newRow = { ...row };
-                            newRow[newName] = newRow[oldName];
-                            delete newRow[oldName];
-                            return newRow;
+                        // rowData-এর অবজেক্টগুলি সরাসরি আপডেট করা হচ্ছে যাতে ফোকাস না হারায়।
+                        rowData.forEach(row => {
+                            if (typeof row[oldName] !== 'undefined') {
+                                row[newName] = row[oldName];
+                                delete row[oldName];
+                            }
                         });
-                        
-                        renderTable();
+
+                        updateTableTotals();
                         saveData();
+                        // এখানে renderTable() কল করা হচ্ছে না যাতে ফোকাস না হারায়।
                     }
                 }
             });
@@ -719,18 +723,33 @@
                 }
             });
 
+            // প্লেয়ারের নাম নির্বাচন করা হলে, এই ইভেন্টটি টেবিলের হেডার আপডেট করবে।
             dynamicPlayerList.addEventListener('click', (event) => {
                 const target = event.target.closest('div');
                 if (target && target.dataset.name) {
                     const selectedName = target.dataset.name;
                     if (currentColumnIndex !== -1 && currentColumnIndex < columnNames.length) {
+                        const oldName = columnNames[currentColumnIndex];
                         columnNames[currentColumnIndex] = selectedName;
-                        rowData = initializeRowData(); // Reset data as column names changed
-                        renderTable();
+                        
+                        // rowData-এর অবজেক্টগুলি সরাসরি আপডেট করা হচ্ছে।
+                        rowData.forEach(row => {
+                            if (typeof row[oldName] !== 'undefined') {
+                                row[selectedName] = row[oldName];
+                                delete row[oldName];
+                            }
+                        });
+                        
+                        // শুধু হেডার ইনপুট আপডেট করার জন্য একটি নতুন ফাংশন
+                        const headerInput = tableHeaderRow.querySelector(`input[data-col-index="${currentColumnIndex}"]`);
+                        if(headerInput) {
+                            headerInput.value = selectedName;
+                        }
+
+                        updateTableTotals();
                         saveData();
                     }
                     dynamicPlayerModal.classList.add('hidden');
-                    // The main menu stays open
                     currentColumnIndex = -1; // Reset index after selection
                 }
             });
@@ -740,10 +759,13 @@
                 currentColumnIndex = -1;
             });
             
-            // Event delegation for the column headers' input fields
+            // প্লেয়ারের নাম ইনপুট ফিল্ডে ক্লিক করলে কিবোর্ড বন্ধ রাখার জন্য এই ইভেন্টটি আপডেট করা হলো।
             tableHeaderRow.addEventListener('click', (event) => {
                 const target = event.target.closest('input');
                 if (target && target.type === 'text' && !isLocked) {
+                    // ইনপুট ফিল্ড থেকে ফোকাস সরিয়ে নেওয়া হচ্ছে যাতে মোবাইল কিবোর্ড না আসে।
+                    target.blur();
+
                     const colIndex = parseInt(target.dataset.colIndex, 10);
                     currentColumnIndex = colIndex;
 
