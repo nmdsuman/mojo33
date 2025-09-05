@@ -24,29 +24,21 @@
             -moz-appearance: textfield;
         }
 
-        /* Responsive table styles */
+        /* General table and cell styling for responsiveness */
+        .table-auto-layout {
+            table-layout: auto;
+        }
+        .table-cell-padding {
+            padding: 0.5rem;
+        }
+        
         @media (max-width: 640px) {
-            .table-responsive {
-                display: block;
-                width: 100%;
-                overflow-x: auto;
-                -webkit-overflow-scrolling: touch;
-            }
-            .table-responsive table {
-                width: 100%;
-                /* Removed min-width to allow the table to shrink fully */
-            }
-            .table-responsive th, .table-responsive td {
+            .table-cell-padding {
                 padding-left: 0.25rem;
                 padding-right: 0.25rem;
-                font-size: 0.75rem; /* text-xs */
             }
-            .table-responsive input {
-                width: 4rem; /* Smaller width for inputs on mobile */
-            }
-            .table-responsive .Lachha-text {
-                font-size: 0.75rem; /* text-xs */
-                width: 4rem;
+            .responsive-input {
+                width: 4.5rem; /* Smaller width for inputs on mobile */
             }
         }
     </style>
@@ -66,9 +58,9 @@
             </button>
         </div>
 
-        <!-- Main Data Table Wrapper for responsiveness -->
-        <div class="table-responsive">
-            <table class="min-w-full divide-y divide-gray-200 rounded-lg overflow-hidden border border-gray-200">
+        <!-- Main Data Table Wrapper -->
+        <div class="overflow-x-auto">
+            <table class="w-full table-auto divide-y divide-gray-200 rounded-lg overflow-hidden border border-gray-200">
                 <thead class="bg-blue-600 text-white">
                     <tr id="tableHeaderRow">
                         <!-- Headers will be dynamically rendered here -->
@@ -246,7 +238,7 @@
                 // Render Header Row
                 columnNames.forEach((name, index) => {
                     const th = document.createElement('th');
-                    th.className = "px-2 py-3 text-center text-xs font-medium uppercase tracking-wider";
+                    th.className = "table-cell-padding text-center text-xs font-medium uppercase tracking-wider";
                     th.scope = "col";
                     th.innerHTML = `
                         <input
@@ -259,7 +251,7 @@
                     tableHeaderRow.appendChild(th);
                 });
                 const totalTh = document.createElement('th');
-                totalTh.className = "px-2 py-3 text-center text-xs font-medium uppercase tracking-wider";
+                totalTh.className = "table-cell-padding text-center text-xs font-medium uppercase tracking-wider";
                 totalTh.scope = "col";
                 totalTh.textContent = "Total";
                 tableHeaderRow.appendChild(totalTh);
@@ -302,7 +294,7 @@
                                     value="${row[colName]}"
                                     data-row-index="${rowIndex}"
                                     data-col-name="${colName}"
-                                    class="w-16 sm:w-20 md:w-28 border border-gray-300 rounded-md px-1 py-0.5 text-center focus:ring-blue-500 focus:border-blue-500"
+                                    class="responsive-input w-16 sm:w-20 md:w-28 border border-gray-300 rounded-md px-1 py-0.5 text-center focus:ring-blue-500 focus:border-blue-500"
                                 />
                             `;
                         }
