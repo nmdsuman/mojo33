@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>হাতিয়াড় মেজো-৩৩</title>
-    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         /* Custom font import for consistency and style */
@@ -46,18 +45,15 @@
 <body class="bg-gray-100 flex items-center justify-center p-4 min-h-screen">
 
     <div class="bg-white p-4 rounded-lg shadow-xl w-full max-w-4xl md:p-6">
-        <!-- Application Title -->
         <h1 class="text-2xl font-bold text-center text-gray-800 mb-4 rounded-md p-2 bg-blue-50 sm:text-3xl sm:mb-6">
             হাতিয়াড় মেজো-৩৩
         </h1>
 
-        <!-- Clear Button, Toggle Switch and Player Button -->
         <div class="flex flex-col items-center mb-4 space-y-4">
             <div class="flex justify-center items-center space-x-4">
                 <button id="clearBtn" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-6 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105">
                     Clear
                 </button>
-                <!-- Edit Toggle Icon -->
                 <button id="editToggleBtn" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold p-2 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105">
                     <svg id="lockIcon" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
@@ -66,36 +62,28 @@
                         <path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                     </svg>
                 </button>
-                <!-- Player Button moved here -->
                 <button id="playerBtn" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-6 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105">
                     Player
                 </button>
             </div>
         </div>
 
-        <!-- Main Data Table Wrapper -->
         <div class="overflow-x-auto">
             <table class="w-full table-auto divide-y divide-gray-200 rounded-lg overflow-hidden border border-gray-200">
                 <thead class="bg-blue-600 text-white">
                     <tr id="tableHeaderRow">
-                        <!-- Headers will be dynamically rendered here -->
-                    </tr>
+                        </tr>
                 </thead>
-                <!-- Sums Row -->
                 <tbody id="sumRow" class="bg-blue-100 font-bold text-gray-800">
                     <tr>
-                        <!-- Sums will be dynamically rendered here -->
-                    </tr>
+                        </tr>
                 </tbody>
-                <!-- Data Rows -->
                 <tbody id="dataBody" class="bg-white divide-y divide-gray-200">
-                    <!-- Data rows will be dynamically rendered here -->
-                </tbody>
+                    </tbody>
             </table>
         </div>
     </div>
 
-    <!-- Confirmation Modal (initially hidden) -->
     <div id="clearConfirmModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
         <div class="bg-white p-6 rounded-lg shadow-xl text-center">
             <p class="text-lg font-semibold mb-4 text-gray-800">আপনি কি নিশ্চিত যে আপনি সমস্ত সংখ্যা মুছে ফেলতে চান?</p>
@@ -110,14 +98,12 @@
         </div>
     </div>
     
-    <!-- Player Selection Modal (initially hidden) -->
     <div id="playerModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
         <div class="modal-content w-full max-w-sm mx-auto p-6 rounded-lg shadow-xl">
             <p class="text-lg font-semibold mb-4 text-gray-800 text-center">খেলোয়াড় নির্বাচন করুন</p>
             <p class="text-sm text-gray-600 mb-4 text-center">সর্বোচ্চ ৪ জন খেলোয়াড় নির্বাচন করা যাবে</p>
             <div id="playerListContainer" class="max-h-60 overflow-y-auto border border-gray-300 rounded-lg p-2 mb-4 space-y-2">
-                <!-- Player names will be dynamically rendered here -->
-            </div>
+                </div>
             <div class="flex justify-center space-x-4">
                 <button id="savePlayerListBtn" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105">
                     Save
@@ -136,13 +122,11 @@
         </div>
     </div>
     
-    <!-- Dynamic Player Selection Modal (initially hidden) -->
     <div id="dynamicPlayerModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
         <div class="modal-content w-full max-w-xs mx-auto p-6 rounded-lg shadow-xl">
             <p class="text-lg font-semibold mb-4 text-gray-800 text-center">খেলোয়াড় নির্বাচন করুন</p>
             <div id="dynamicPlayerList" class="max-h-60 overflow-y-auto border border-gray-300 rounded-lg p-2 mb-4 space-y-2">
-                <!-- Player names will be dynamically rendered here -->
-            </div>
+                </div>
             <div class="flex justify-center space-x-4">
                 <button id="cancelDynamicPlayerBtn" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105">
                     বাতিল
@@ -336,11 +320,11 @@
                     th.scope = "col";
                     if(isLocked) {
                         th.innerHTML = `
-                            <span data-col-index="${index}" class="cursor-pointer bg-transparent border-b border-white focus:outline-none text-center text-white placeholder-gray-300 w-12 sm:w-16 md:w-28 rounded-sm px-1 py-0.5">${name}</span>
+                            <span data-col-index="${index}" class="cursor-pointer bg-transparent border-b border-white focus:outline-none text-center text-white placeholder-gray-300 w-24 sm:w-32 md:w-40 rounded-sm px-1 py-0.5">${name}</span>
                         `;
                     } else {
                         th.innerHTML = `
-                            <span data-col-index="${index}" class="cursor-pointer bg-transparent border-b border-white focus:outline-none text-center text-white placeholder-gray-300 w-12 sm:w-16 md:w-28 rounded-sm px-1 py-0.5">${name}</span>
+                            <span data-col-index="${index}" class="cursor-pointer bg-transparent border-b border-white focus:outline-none text-center text-white placeholder-gray-300 w-24 sm:w-32 md:w-40 rounded-sm px-1 py-0.5">${name}</span>
                         `;
                     }
                     tableHeaderRow.appendChild(th);
@@ -377,7 +361,7 @@
                         
                         if (shouldShowLachha && lachhaColumns.includes(colName) && (row[colName] === '' || row[colName] === 0 || row[colName] === '0')) {
                              cell.innerHTML = `
-                                 <span class="block w-12 sm:w-16 md:w-28 bg-red-200 text-red-800 rounded-md px-1 py-0.5 text-center font-bold Lachha-text">
+                                 <span class="block w-24 sm:w-32 md:w-40 bg-red-200 text-red-800 rounded-md px-1 py-0.5 text-center font-bold Lachha-text">
                                      😫লাচ্ছা
                                  </span>
                              `;
@@ -388,7 +372,7 @@
                                      value="${row[colName]}"
                                      data-row-index="${rowIndex}"
                                      data-col-name="${colName}"
-                                     class="responsive-input w-12 sm:w-16 md:w-28 border border-gray-300 rounded-md px-1 py-0.5 text-center focus:ring-blue-500 focus:border-blue-500"
+                                     class="responsive-input w-24 sm:w-32 md:w-40 border border-gray-300 rounded-md px-1 py-0.5 text-center focus:ring-blue-500 focus:border-blue-500"
                                  />
                              `;
                         }
@@ -458,14 +442,14 @@
                                 if (shouldShowLachha && (rowData[rowIndex][lachhaColName] === '' || rowData[rowIndex][lachhaColName] === '0')) {
                                     // Replace input with Lachha span
                                     if (cell.querySelector('input')) {
-                                        cell.innerHTML = `<span class="block w-12 sm:w-16 md:w-28 bg-red-200 text-red-800 rounded-md px-1 py-0.5 text-center font-bold Lachha-text">
+                                        cell.innerHTML = `<span class="block w-24 sm:w-32 md:w-40 bg-red-200 text-red-800 rounded-md px-1 py-0.5 text-center font-bold Lachha-text">
                                             😫লাচ্ছা
                                         </span>`;
                                     }
                                 } else {
                                     // If Lachha text is visible and condition is not met, revert to input
                                     if (cell.querySelector('.Lachha-text')) {
-                                        cell.innerHTML = `<input type="number" value="${rowData[rowIndex][lachhaColName]}" data-row-index="${rowIndex}" data-col-name="${lachhaColName}" class="responsive-input w-12 sm:w-16 md:w-28 border border-gray-300 rounded-md px-1 py-0.5 text-center focus:ring-blue-500 focus:border-blue-500" />`;
+                                        cell.innerHTML = `<input type="number" value="${rowData[rowIndex][lachhaColName]}" data-row-index="${rowIndex}" data-col-name="${lachhaColName}" class="responsive-input w-24 sm:w-32 md:w-40 border border-gray-300 rounded-md px-1 py-0.5 text-center focus:ring-blue-500 focus:border-blue-500" />`;
                                     }
                                 }
                             }
