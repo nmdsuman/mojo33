@@ -137,6 +137,16 @@
         </div>
     </div>
     
+    <!-- Incomplete Round Modal -->
+    <div id="incompleteRoundModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white p-6 rounded-lg shadow-xl text-center">
+            <p class="text-lg font-semibold mb-4 text-gray-800">দয়া করে বর্তমান রাউন্ডের সব খেলোয়াড়ের স্কোর নিশ্চিত করুন।</p>
+            <button id="closeIncompleteModalBtn" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105">
+                ঠিক আছে
+            </button>
+        </div>
+    </div>
+
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             // Player names and round data. This is our core state.
@@ -172,6 +182,9 @@
             const dynamicPlayerModal = document.getElementById('dynamicPlayerModal');
             const dynamicPlayerList = document.getElementById('dynamicPlayerList');
             const cancelDynamicPlayerBtn = document.getElementById('cancelDynamicPlayerBtn');
+            const incompleteRoundModal = document.getElementById('incompleteRoundModal');
+            const closeIncompleteModalBtn = document.getElementById('closeIncompleteModalBtn');
+
 
             // --- Data Persistence (localStorage) ---
             const saveData = () => {
@@ -241,6 +254,26 @@
                 });
                 return totalScores;
             };
+            
+            // Check if the current round is complete
+            const isCurrentRoundComplete = () => {
+                if (roundData.length === 0) return true; // Allow adding first round
+                const lastRound = roundData[roundData.length - 1];
+                return playerNames.every(name => lastRound.scores[name] !== 0);
+            };
+            
+            const updateAddRowButtonState = () => {
+                if (isCurrentRoundComplete()) {
+                    addRowBtn.disabled = false;
+                    addRowBtn.classList.remove('bg-gray-400', 'cursor-not-allowed');
+                    addRowBtn.classList.add('bg-green-500');
+                } else {
+                    addRowBtn.disabled = true;
+                    addRowBtn.classList.remove('bg-green-500');
+                    addRowBtn.classList.add('bg-gray-400', 'cursor-not-allowed');
+                }
+            };
+
 
             // --- Rendering Functions ---
             const renderTable = () => {
@@ -343,6 +376,7 @@
 
                 totalRow.appendChild(totalTr);
                 saveData();
+                updateAddRowButtonState(); // Update the button state after every score change
             };
 
             const renderPlayerList = () => {
@@ -375,6 +409,11 @@
                     const playerName = target.dataset.playerName;
                     const inputType = target.dataset.inputType;
                     const value = parseInt(target.value);
+
+                    if (rowIndex >= 0 && playerName && inputType) {
+                        roundData[rowIndex][inputType][playerName] = value;
+                        saveData();
+                    }
 
                     if (isNaN(value)) {
                         target.value = '';
@@ -474,10 +513,14 @@
                         
                         // Update round data with new name
                         roundData.forEach(round => {
-                            round.calls[selectedName] = round.calls[oldName] || '';
-                            round.scores[selectedName] = round.scores[oldName] || 0;
-                            delete round.calls[oldName];
-                            delete round.scores[oldName];
+                            if (typeof round.calls[oldName] !== 'undefined') {
+                                round.calls[selectedName] = round.calls[oldName];
+                                delete round.calls[oldName];
+                            }
+                            if (typeof round.scores[oldName] !== 'undefined') {
+                                round.scores[selectedName] = round.scores[oldName];
+                                delete round.scores[oldName];
+                            }
                         });
                         renderTable();
                         saveData();
@@ -509,16 +552,24 @@
             cancelClearBtn.addEventListener('click', () => clearConfirmModal.classList.add('hidden'));
 
             addRowBtn.addEventListener('click', () => {
-                const newRound = {
-                    calls: {},
-                    scores: {}
-                };
-                playerNames.forEach(name => {
-                    newRound.calls[name] = '';
-                    newRound.scores[name] = 0;
-                });
-                roundData.push(newRound);
-                renderTable();
+                if (isCurrentRoundComplete()) {
+                    const newRound = {
+                        calls: {},
+                        scores: {}
+                    };
+                    playerNames.forEach(name => {
+                        newRound.calls[name] = '';
+                        newRound.scores[name] = 0;
+                    });
+                    roundData.push(newRound);
+                    renderTable();
+                } else {
+                    incompleteRoundModal.classList.remove('hidden');
+                }
+            });
+            
+            closeIncompleteModalBtn.addEventListener('click', () => {
+                incompleteRoundModal.classList.add('hidden');
             });
 
             playerBtn.addEventListener('click', () => {
