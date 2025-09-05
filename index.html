@@ -23,13 +23,39 @@
         input[type="number"] {
             -moz-appearance: textfield;
         }
+
+        /* Responsive table styles */
+        @media (max-width: 640px) {
+            .table-responsive {
+                display: block;
+                width: 100%;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+            .table-responsive table {
+                width: 100%;
+                min-width: 600px; /* Minimum width to prevent content from getting too squished */
+            }
+            .table-responsive th, .table-responsive td {
+                padding-left: 0.5rem;
+                padding-right: 0.5rem;
+                font-size: 0.75rem; /* text-xs */
+            }
+            .table-responsive input {
+                width: 4rem; /* Smaller width for inputs on mobile */
+            }
+            .table-responsive . Lachha-text {
+                font-size: 0.75rem; /* text-xs */
+                width: 4rem;
+            }
+        }
     </style>
 </head>
 <body class="bg-gray-100 flex items-center justify-center p-4 min-h-screen">
 
-    <div class="bg-white p-6 rounded-lg shadow-xl w-full max-w-4xl overflow-x-auto">
+    <div class="bg-white p-4 rounded-lg shadow-xl w-full max-w-4xl overflow-x-auto md:p-6">
         <!-- Application Title -->
-        <h1 class="text-3xl font-bold text-center text-gray-800 mb-6 rounded-md p-2 bg-blue-50">
+        <h1 class="text-2xl font-bold text-center text-gray-800 mb-4 rounded-md p-2 bg-blue-50 sm:text-3xl sm:mb-6">
             হাতিয়াড় মেজো-৩৩
         </h1>
 
@@ -40,24 +66,26 @@
             </button>
         </div>
 
-        <!-- Main Data Table -->
-        <table class="min-w-full divide-y divide-gray-200 rounded-lg overflow-hidden border border-gray-200">
-            <thead class="bg-blue-600 text-white">
-                <tr id="tableHeaderRow">
-                    <!-- Headers will be dynamically rendered here -->
-                </tr>
-            </thead>
-            <!-- Sums Row -->
-            <tbody id="sumRow" class="bg-blue-100 font-bold text-gray-800">
-                <tr>
-                    <!-- Sums will be dynamically rendered here -->
-                </tr>
-            </tbody>
-            <!-- Data Rows -->
-            <tbody id="dataBody" class="bg-white divide-y divide-gray-200">
-                <!-- Data rows will be dynamically rendered here -->
-            </tbody>
-        </table>
+        <!-- Main Data Table Wrapper for responsiveness -->
+        <div class="table-responsive">
+            <table class="min-w-full divide-y divide-gray-200 rounded-lg overflow-hidden border border-gray-200">
+                <thead class="bg-blue-600 text-white">
+                    <tr id="tableHeaderRow">
+                        <!-- Headers will be dynamically rendered here -->
+                    </tr>
+                </thead>
+                <!-- Sums Row -->
+                <tbody id="sumRow" class="bg-blue-100 font-bold text-gray-800">
+                    <tr>
+                        <!-- Sums will be dynamically rendered here -->
+                    </tr>
+                </tbody>
+                <!-- Data Rows -->
+                <tbody id="dataBody" class="bg-white divide-y divide-gray-200">
+                    <!-- Data rows will be dynamically rendered here -->
+                </tbody>
+            </table>
+        </div>
     </div>
 
     <!-- Confirmation Modal (initially hidden) -->
@@ -82,7 +110,6 @@
             let columnNames = ['SUMAN', 'Rakib', 'Akij', 'Naim'];
             const numRows = 20;
             const subtractValue = 360;
-            const lachhaThreshold = 360;
 
             let rowData = [];
 
@@ -201,7 +228,7 @@
                     const rowTotal = calculateRowTotal(row);
                     const totalCell = rowElement.querySelector('.total-cell');
                     const totalTextColorClass = rowTotal > 0 ? 'text-red-600' : 'text-gray-700';
-
+                    
                     if (totalCell) {
                         totalCell.textContent = rowTotal.toFixed(2);
                         totalCell.className = `px-4 py-2 whitespace-nowrap text-sm font-medium text-center bg-blue-50 ${totalTextColorClass} total-cell`;
@@ -226,7 +253,7 @@
                             type="text"
                             value="${name}"
                             data-col-index="${index}"
-                            class="bg-transparent border-b border-white focus:outline-none text-center text-white placeholder-gray-300 w-20 sm:w-24 md:w-28 rounded-sm px-1 py-0.5"
+                            class="bg-transparent border-b border-white focus:outline-none text-center text-white placeholder-gray-300 w-16 sm:w-20 md:w-28 rounded-sm px-1 py-0.5"
                         />
                     `;
                     tableHeaderRow.appendChild(th);
@@ -253,14 +280,18 @@
                     rowElement.className = `border-b ${rowIndex % 2 === 0 ? 'bg-gray-50' : 'bg-white'}`;
                     
                     const sumOfFirstFour = calculateSumOfFirstFourColumns(row);
-                    const shouldShowLachha = sumOfFirstFour === lachhaThreshold;
+                    const shouldShowLachha = sumOfFirstFour === 360;
+                    
+                    const lachhaColumns = ['Rakib', 'Akij', 'Naim'];
 
                     columnNames.forEach((colName, colIndex) => {
                         const cell = document.createElement('td');
                         cell.className = "px-4 py-2 whitespace-nowrap text-sm text-gray-900 text-center";
-                        if (shouldShowLachha && row[colName] === '') {
+                        
+                        // Check if it's one of the specific columns and the condition is met
+                        if (shouldShowLachha && lachhaColumns.includes(colName) && (row[colName] === '' || row[colName] === 0 || row[colName] === '0')) {
                              cell.innerHTML = `
-                                <span class="block w-20 sm:w-24 md:w-28 bg-red-200 text-red-800 rounded-md px-2 py-1 text-center font-bold">
+                                <span class="block w-16 sm:w-20 md:w-28 bg-red-200 text-red-800 rounded-md px-1 py-0.5 text-center font-bold Lachha-text">
                                     😫লাচ্ছা
                                 </span>
                              `;
@@ -271,7 +302,7 @@
                                     value="${row[colName]}"
                                     data-row-index="${rowIndex}"
                                     data-col-name="${colName}"
-                                    class="w-20 sm:w-24 md:w-28 border border-gray-300 rounded-md px-2 py-1 text-center focus:ring-blue-500 focus:border-blue-500"
+                                    class="w-16 sm:w-20 md:w-28 border border-gray-300 rounded-md px-1 py-0.5 text-center focus:ring-blue-500 focus:border-blue-500"
                                 />
                             `;
                         }
@@ -281,6 +312,7 @@
                     // Render Total Cell
                     const totalCell = document.createElement('td');
                     totalCell.className = `px-4 py-2 whitespace-nowrap text-sm font-medium text-center bg-blue-50 total-cell`;
+                    totalCell.textContent = calculateRowTotal(row).toFixed(2);
                     rowElement.appendChild(totalCell);
 
                     dataBody.appendChild(rowElement);
