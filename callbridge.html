@@ -78,7 +78,8 @@
                 <tfoot id="totalRow" class="bg-blue-200 font-bold text-gray-800"></tfoot>
             </table>
         </div>
-        <div class="flex justify-center mt-4">
+        <div class="flex justify-center mt-4 items-center space-x-4">
+            <p id="totalCallsDisplay" class="text-lg font-bold text-gray-800">Calls: 0</p>
             <button id="addRowBtn" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-6 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105">
                 Add Round
             </button>
@@ -166,6 +167,7 @@
             const totalRow = document.getElementById('totalRow');
             const clearBtn = document.getElementById('clearBtn');
             const addRowBtn = document.getElementById('addRowBtn');
+            const totalCallsDisplay = document.getElementById('totalCallsDisplay');
             const playerBtn = document.getElementById('playerBtn');
             const editToggleBtn = document.getElementById('editToggleBtn');
             const lockIcon = document.getElementById('lockIcon');
@@ -253,6 +255,16 @@
                     });
                 });
                 return totalScores;
+            };
+            
+            // Calculate total calls for the current round
+            const calculateCurrentRoundCalls = () => {
+                if (roundData.length === 0) return 0;
+                const lastRound = roundData[roundData.length - 1];
+                return playerNames.reduce((sum, name) => {
+                    const callValue = parseInt(lastRound.calls[name]);
+                    return sum + (isNaN(callValue) ? 0 : callValue);
+                }, 0);
             };
             
             // Check if the current round is complete
@@ -374,9 +386,27 @@
                     totalTr.appendChild(td);
                 });
 
+                // Add a new row to show total calls of the current round
+                if (roundData.length > 0 && !isCurrentRoundComplete()) {
+                    const totalCallsRow = document.createElement('tr');
+                    const totalCallsLabelTd = document.createElement('td');
+                    totalCallsLabelTd.className = "px-4 py-2 text-center text-sm font-bold uppercase";
+                    totalCallsLabelTd.textContent = "Calls";
+                    totalCallsRow.appendChild(totalCallsLabelTd);
+                    
+                    const totalCallsValueTd = document.createElement('td');
+                    totalCallsValueTd.colSpan = playerNames.length;
+                    totalCallsValueTd.className = "px-1 py-2 whitespace-nowrap text-sm font-medium text-center";
+                    totalCallsValueTd.textContent = calculateCurrentRoundCalls();
+                    totalCallsRow.appendChild(totalCallsValueTd);
+                    
+                    totalRow.appendChild(totalCallsRow);
+                }
+
                 totalRow.appendChild(totalTr);
                 saveData();
                 updateAddRowButtonState(); // Update the button state after every score change
+                totalCallsDisplay.textContent = `Calls: ${calculateCurrentRoundCalls()}`;
             };
 
             const renderPlayerList = () => {
@@ -434,6 +464,7 @@
                             saveData();
                         }
                     }
+                    updateTotalScores();
                 }
             });
 
