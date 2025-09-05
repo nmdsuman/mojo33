@@ -425,20 +425,21 @@
             // Handle input changes for 'call'
             dataBody.addEventListener('input', (event) => {
                 const target = event.target;
-                if (target.tagName === 'INPUT' && target.type === 'number') {
+                if (target.tagName === 'INPUT' && target.type === 'number' && target.dataset.inputType === 'call') {
                     const rowIndex = parseInt(target.dataset.rowIndex);
                     const playerName = target.dataset.playerName;
-                    const inputType = target.dataset.inputType;
                     const value = parseInt(target.value);
 
-                    if (rowIndex >= 0 && playerName && inputType) {
-                        roundData[rowIndex][inputType][playerName] = value;
+                    // Check if roundData and the specific round object exist
+                    if (roundData[rowIndex] && roundData[rowIndex].calls) {
+                        roundData[rowIndex].calls[playerName] = value || '';
                         saveData();
+                        totalCallsDisplay.textContent = `Calls: ${calculateCurrentRoundCalls()}`;
                     }
-
+                    
                     if (isNaN(value)) {
                         target.value = '';
-                    } else if (inputType === 'call' && (value < 1 || value > 13)) {
+                    } else if (value < 1 || value > 13) {
                          // Use a custom modal instead of alert
                         const modal = document.createElement('div');
                         modal.className = "fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50";
@@ -449,13 +450,7 @@
                         document.body.appendChild(modal);
                         document.getElementById('closeAlertBtn').addEventListener('click', () => modal.remove());
                         target.value = '';
-                    } else {
-                        if (rowIndex >= 0 && playerName && inputType) {
-                            roundData[rowIndex][inputType][playerName] = value;
-                            saveData();
-                        }
                     }
-                    totalCallsDisplay.textContent = `Calls: ${calculateCurrentRoundCalls()}`;
                 }
             });
 
