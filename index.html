@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>হাতিয়াড় মেজো-৩৩</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom font import for consistency and style */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        /* Hiding the number input spinners for a cleaner UI */
+        input[type="number"]::-webkit-inner-spin-button,
+        input[type="number"]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        input[type="number"] {
+            -moz-appearance: textfield;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center p-4 min-h-screen">
+
+    <div class="bg-white p-6 rounded-lg shadow-xl w-full max-w-4xl overflow-x-auto">
+        <!-- Application Title -->
+        <h1 class="text-3xl font-bold text-center text-gray-800 mb-6 rounded-md p-2 bg-blue-50">
+            হাতিয়াড় মেজো-৩৩
+        </h1>
+
+        <!-- Clear Button -->
+        <div class="flex justify-center mb-4">
+            <button id="clearBtn" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-6 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105">
+                Clear
+            </button>
+        </div>
+
+        <!-- Main Data Table -->
+        <table class="min-w-full divide-y divide-gray-200 rounded-lg overflow-hidden border border-gray-200">
+            <thead class="bg-blue-600 text-white">
+                <tr id="tableHeaderRow">
+                    <!-- Headers will be dynamically rendered here -->
+                </tr>
+            </thead>
+            <!-- Sums Row -->
+            <tbody id="sumRow" class="bg-blue-100 font-bold text-gray-800">
+                <tr>
+                    <!-- Sums will be dynamically rendered here -->
+                </tr>
+            </tbody>
+            <!-- Data Rows -->
+            <tbody id="dataBody" class="bg-white divide-y divide-gray-200">
+                <!-- Data rows will be dynamically rendered here -->
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Confirmation Modal (initially hidden) -->
+    <div id="clearConfirmModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white p-6 rounded-lg shadow-xl text-center">
+            <p class="text-lg font-semibold mb-4 text-gray-800">আপনি কি নিশ্চিত যে আপনি সমস্ত সংখ্যা মুছে ফেলতে চান?</p>
+            <div class="flex justify-center space-x-4">
+                <button id="confirmClearBtn" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105">
+                    হ্যাঁ
+                </button>
+                <button id="cancelClearBtn" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105">
+                    না
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Use a single script block for all JavaScript logic.
+        document.addEventListener('DOMContentLoaded', () => {
+            // State management using plain JavaScript variables
+            let columnNames = ['SUMAN', 'Rakib', 'Akij', 'Naim'];
+            const numRows = 20;
+            const subtractValue = 360;
+            const lachhaThreshold = 360;
+
+            let rowData = [];
+            // Initialize rowData with empty strings
+            const initializeRowData = () => {
+                const initialData = [];
+                for (let i = 0; i < numRows; i++) {
+                    const row = { id: i };
+                    columnNames.forEach(name => {
+                        row[name] = ''; // Initialize with empty string for input
+                    });
+                    initialData.push(row);
+                }
+                return initialData;
+            };
+            rowData = initializeRowData();
+
+            // DOM element references
+            const tableHeaderRow = document.getElementById('tableHeaderRow');
+            const sumRowBody = document.getElementById('sumRow').querySelector('tr');
+            const dataBody = document.getElementById('dataBody');
+            const clearBtn = document.getElementById('clearBtn');
+            const clearConfirmModal = document.getElementById('clearConfirmModal');
+            const confirmClearBtn = document.getElementById('confirmClearBtn');
+            const cancelClearBtn = document.getElementById('cancelClearBtn');
+
+            // --- Calculation Functions ---
+            
+            // Calculates the sum for a single column.
+            const calculateColumnSum = (colName) => {
+                return rowData.reduce((sum, row) => {
+                    const value = parseFloat(row[colName]);
+                    return sum + (isNaN(value) ? 0 : value);
+                }, 0);
+            };
+
+            // Calculates the sum of the first four columns for a given row.
+            const calculateSumOfFirstFourColumns = (row) => {
+                const firstFourNames = columnNames.slice(0, 4);
+                return firstFourNames.reduce((sum, colName) => {
+                    const value = parseFloat(row[colName]);
+                    return sum + (isNaN(value) ? 0 : value);
+                }, 0);
+            };
+
+            // Calculates the row total by subtracting the constant value.
+            const calculateRowTotal = (row) => {
+                const sumOfFirstFour = calculateSumOfFirstFourColumns(row);
+                return sumOfFirstFour - subtractValue;
+            };
+
+            // --- Update Functions ---
+            
+            // Updates only the calculated sums and totals without re-rendering the whole table.
+            const updateTableTotals = () => {
+                // Update Sums Row
+                const columnSums = columnNames.reduce((acc, name) => {
+                    acc[name] = calculateColumnSum(name);
+                    return acc;
+                }, {});
+
+                const rankedColumnColors = {};
+                if (Object.keys(columnSums).length > 0) {
+                    const rankableSums = columnNames.slice(0, 4).map(name => ({
+                        name: name,
+                        sum: columnSums[name]
+                    }));
+                    rankableSums.sort((a, b) => b.sum - a.sum);
+
+                    if (rankableSums[0]) rankedColumnColors[rankableSums[0].name] = 'text-green-600';
+                    if (rankableSums[1]) rankedColumnColors[rankableSums[1].name] = 'text-blue-600';
+                    if (rankableSums[2]) rankedColumnColors[rankableSums[2].name] = 'text-yellow-600';
+                    if (rankableSums[3]) rankedColumnColors[rankableSums[3].name] = 'text-red-600';
+                }
+
+                columnNames.forEach((name, index) => {
+                    const td = sumRowBody.children[index];
+                    td.textContent = columnSums[name].toFixed(2);
+                    td.className = `px-4 py-3 whitespace-nowrap text-sm text-center ${rankedColumnColors[name] || ''}`;
+                });
+
+                // Update Data Rows Totals
+                dataBody.querySelectorAll('tr').forEach((rowElement, rowIndex) => {
+                    const row = rowData[rowIndex];
+                    const rowTotal = calculateRowTotal(row);
+                    const totalCell = rowElement.querySelector('.total-cell');
+                    const totalTextColorClass = rowTotal > 0 ? 'text-red-600' : 'text-gray-700';
+
+                    if (totalCell) {
+                        totalCell.textContent = rowTotal.toFixed(2);
+                        totalCell.className = `px-4 py-2 whitespace-nowrap text-sm font-medium text-center bg-blue-50 ${totalTextColorClass} total-cell`;
+                    }
+                });
+            };
+
+            // Renders the entire table from scratch. This is only called on initial load and for the clear action.
+            const renderTable = () => {
+                // Clear existing table content
+                tableHeaderRow.innerHTML = '';
+                sumRowBody.innerHTML = '';
+                dataBody.innerHTML = '';
+
+                // Render Header Row
+                columnNames.forEach((name, index) => {
+                    const th = document.createElement('th');
+                    th.className = "px-4 py-3 text-center text-xs font-medium uppercase tracking-wider";
+                    th.scope = "col";
+                    th.innerHTML = `
+                        <input
+                            type="text"
+                            value="${name}"
+                            data-col-index="${index}"
+                            class="bg-transparent border-b border-white focus:outline-none text-center text-white placeholder-gray-300 w-20 sm:w-24 md:w-28 rounded-sm px-1 py-0.5"
+                        />
+                    `;
+                    tableHeaderRow.appendChild(th);
+                });
+                const totalTh = document.createElement('th');
+                totalTh.className = "px-4 py-3 text-center text-xs font-medium uppercase tracking-wider";
+                totalTh.scope = "col";
+                totalTh.textContent = "Total";
+                tableHeaderRow.appendChild(totalTh);
+
+                // Render Sums Row (placeholder for updateTableTotals)
+                columnNames.forEach(() => {
+                    const td = document.createElement('td');
+                    td.className = "px-4 py-3 whitespace-nowrap text-sm text-center";
+                    sumRowBody.appendChild(td);
+                });
+                const emptySumTd = document.createElement('td');
+                emptySumTd.className = "px-4 py-3 whitespace-nowrap text-sm text-center bg-blue-200";
+                sumRowBody.appendChild(emptySumTd);
+
+                // Render Data Rows
+                rowData.forEach((row, rowIndex) => {
+                    const rowElement = document.createElement('tr');
+                    rowElement.className = `border-b ${rowIndex % 2 === 0 ? 'bg-gray-50' : 'bg-white'}`;
+                    
+                    const sumOfFirstFour = calculateSumOfFirstFourColumns(row);
+                    const shouldShowLachha = sumOfFirstFour === lachhaThreshold;
+
+                    columnNames.forEach((colName, colIndex) => {
+                        const cell = document.createElement('td');
+                        cell.className = "px-4 py-2 whitespace-nowrap text-sm text-gray-900 text-center";
+                        if (shouldShowLachha && row[colName] === '') {
+                             cell.innerHTML = `
+                                <span class="block w-20 sm:w-24 md:w-28 bg-red-200 text-red-800 rounded-md px-2 py-1 text-center font-bold">
+                                    😫লাচ্ছা
+                                </span>
+                             `;
+                        } else {
+                            cell.innerHTML = `
+                                <input
+                                    type="number"
+                                    value="${row[colName]}"
+                                    data-row-index="${rowIndex}"
+                                    data-col-name="${colName}"
+                                    class="w-20 sm:w-24 md:w-28 border border-gray-300 rounded-md px-2 py-1 text-center focus:ring-blue-500 focus:border-blue-500"
+                                />
+                            `;
+                        }
+                        rowElement.appendChild(cell);
+                    });
+
+                    // Render Total Cell
+                    const totalCell = document.createElement('td');
+                    totalCell.className = `px-4 py-2 whitespace-nowrap text-sm font-medium text-center bg-blue-50 total-cell`;
+                    rowElement.appendChild(totalCell);
+
+                    dataBody.appendChild(rowElement);
+                });
+
+                // Call the update function to populate the values after rendering the structure.
+                updateTableTotals();
+            };
+
+            // --- Event Handlers ---
+            
+            // Event delegation for input fields in the data rows.
+            dataBody.addEventListener('input', (event) => {
+                const target = event.target;
+                if (target.tagName === 'INPUT' && target.type === 'number') {
+                    const rowIndex = parseInt(target.dataset.rowIndex, 10);
+                    const colName = target.dataset.colName;
+                    const value = target.value;
+                    
+                    if (!isNaN(rowIndex) && colName) {
+                        rowData[rowIndex][colName] = value;
+                        updateTableTotals();
+                    }
+                }
+            });
+
+            // Event listener for header inputs.
+            tableHeaderRow.addEventListener('input', (event) => {
+                const target = event.target;
+                if (target.tagName === 'INPUT' && target.type === 'text') {
+                    const colIndex = parseInt(target.dataset.colIndex, 10);
+                    const newName = target.value;
+                    
+                    if (!isNaN(colIndex)) {
+                        const oldName = columnNames[colIndex];
+                        columnNames[colIndex] = newName;
+                        
+                        // Update rowData to use the new column name
+                        rowData = rowData.map(row => {
+                            const newRow = { ...row };
+                            newRow[newName] = newRow[oldName];
+                            delete newRow[oldName];
+                            return newRow;
+                        });
+                        
+                        renderTable();
+                    }
+                }
+            });
+
+            // "Clear" button event listener to show the modal.
+            clearBtn.addEventListener('click', () => {
+                clearConfirmModal.classList.remove('hidden');
+            });
+
+            // "Yes" button event listener to clear data and hide modal.
+            confirmClearBtn.addEventListener('click', () => {
+                rowData = initializeRowData();
+                renderTable();
+                clearConfirmModal.classList.add('hidden');
+            });
+
+            // "No" button event listener to just hide the modal.
+            cancelClearBtn.addEventListener('click', () => {
+                clearConfirmModal.classList.add('hidden');
+            });
+
+            // Initial render of the table on page load.
+            renderTable();
+        });
+    </script>
+</body>
+</html>
