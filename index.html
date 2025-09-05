@@ -23,14 +23,6 @@
         input[type="number"] {
             -moz-appearance: textfield;
         }
-
-        /* General table and cell styling for responsiveness */
-        .table-auto-layout {
-            table-layout: auto;
-        }
-        .table-cell-padding {
-            padding: 0.5rem;
-        }
         
         @media (max-width: 640px) {
             .table-cell-padding {
@@ -39,9 +31,6 @@
             }
             .responsive-input {
                 width: 4.5rem; /* Smaller width for inputs on mobile */
-            }
-            .responsive-table {
-                min-width: 580px; /* Ensures the table is wide enough to scroll on small screens */
             }
         }
     </style>
@@ -63,7 +52,7 @@
 
         <!-- Main Data Table Wrapper -->
         <div class="overflow-x-auto">
-            <table class="w-full table-auto divide-y divide-gray-200 rounded-lg overflow-hidden border border-gray-200 responsive-table">
+            <table class="w-full table-auto divide-y divide-gray-200 rounded-lg overflow-hidden border border-gray-200">
                 <thead class="bg-blue-600 text-white">
                     <tr id="tableHeaderRow">
                         <!-- Headers will be dynamically rendered here -->
