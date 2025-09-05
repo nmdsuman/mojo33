@@ -40,6 +40,9 @@
             .responsive-input {
                 width: 4.5rem; /* Smaller width for inputs on mobile */
             }
+            .responsive-table {
+                min-width: 580px; /* Ensures the table is wide enough to scroll on small screens */
+            }
         }
     </style>
 </head>
@@ -60,7 +63,7 @@
 
         <!-- Main Data Table Wrapper -->
         <div class="overflow-x-auto">
-            <table class="w-full table-auto divide-y divide-gray-200 rounded-lg overflow-hidden border border-gray-200">
+            <table class="w-full table-auto divide-y divide-gray-200 rounded-lg overflow-hidden border border-gray-200 responsive-table">
                 <thead class="bg-blue-600 text-white">
                     <tr id="tableHeaderRow">
                         <!-- Headers will be dynamically rendered here -->
