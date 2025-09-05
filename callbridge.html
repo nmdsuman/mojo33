@@ -204,9 +204,17 @@
                         const parsedData = JSON.parse(savedData);
                         playerNames = parsedData.playerNames || ['হামিম', 'সোহেল', 'চঞ্চল', 'আকিজ'];
                         roundData = parsedData.roundData || [];
-
+                        
                         // Fix: Ensure all rounds have all players from the current playerNames list
                         roundData.forEach(round => {
+                            // Robust check to ensure calls and scores are objects
+                            if (typeof round.calls !== 'object' || round.calls === null) {
+                                round.calls = {};
+                            }
+                            if (typeof round.scores !== 'object' || round.scores === null) {
+                                round.scores = {};
+                            }
+                            
                             playerNames.forEach(name => {
                                 if (typeof round.calls[name] === 'undefined') {
                                     round.calls[name] = '';
@@ -386,23 +394,6 @@
                     totalTr.appendChild(td);
                 });
 
-                // Add a new row to show total calls of the current round
-                if (roundData.length > 0 && !isCurrentRoundComplete()) {
-                    const totalCallsRow = document.createElement('tr');
-                    const totalCallsLabelTd = document.createElement('td');
-                    totalCallsLabelTd.className = "px-4 py-2 text-center text-sm font-bold uppercase";
-                    totalCallsLabelTd.textContent = "Calls";
-                    totalCallsRow.appendChild(totalCallsLabelTd);
-                    
-                    const totalCallsValueTd = document.createElement('td');
-                    totalCallsValueTd.colSpan = playerNames.length;
-                    totalCallsValueTd.className = "px-1 py-2 whitespace-nowrap text-sm font-medium text-center";
-                    totalCallsValueTd.textContent = calculateCurrentRoundCalls();
-                    totalCallsRow.appendChild(totalCallsValueTd);
-                    
-                    totalRow.appendChild(totalCallsRow);
-                }
-
                 totalRow.appendChild(totalTr);
                 saveData();
                 updateAddRowButtonState(); // Update the button state after every score change
@@ -464,7 +455,7 @@
                             saveData();
                         }
                     }
-                    updateTotalScores();
+                    totalCallsDisplay.textContent = `Calls: ${calculateCurrentRoundCalls()}`;
                 }
             });
 
