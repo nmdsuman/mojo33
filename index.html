@@ -85,19 +85,51 @@
             const lachhaThreshold = 360;
 
             let rowData = [];
-            // Initialize rowData with empty strings
+
+            // সেভ করা ডেটা লোড করার জন্য একটি ফাংশন
+            const loadData = () => {
+                const savedData = localStorage.getItem('calculatorData');
+                if (savedData) {
+                    try {
+                        rowData = JSON.parse(savedData);
+                        // Make sure the loaded data has the correct structure (e.g., if a column was added/removed)
+                        const initialData = [];
+                        for (let i = 0; i < numRows; i++) {
+                            const row = rowData[i] || { id: i };
+                            columnNames.forEach(name => {
+                                if (typeof row[name] === 'undefined') {
+                                    row[name] = '';
+                                }
+                            });
+                            initialData.push(row);
+                        }
+                        rowData = initialData;
+                    } catch (e) {
+                        console.error("Failed to parse saved data from localStorage, resetting.", e);
+                        rowData = initializeRowData();
+                    }
+                } else {
+                    rowData = initializeRowData();
+                }
+            };
+            
+            // ডেটা সেভ করার জন্য একটি ফাংশন
+            const saveData = () => {
+                localStorage.setItem('calculatorData', JSON.stringify(rowData));
+            };
+
+            // Initializing with empty strings
             const initializeRowData = () => {
                 const initialData = [];
                 for (let i = 0; i < numRows; i++) {
                     const row = { id: i };
                     columnNames.forEach(name => {
-                        row[name] = ''; // Initialize with empty string for input
+                        row[name] = '';
                     });
                     initialData.push(row);
                 }
                 return initialData;
             };
-            rowData = initializeRowData();
 
             // DOM element references
             const tableHeaderRow = document.getElementById('tableHeaderRow');
@@ -271,6 +303,7 @@
                     if (!isNaN(rowIndex) && colName) {
                         rowData[rowIndex][colName] = value;
                         updateTableTotals();
+                        saveData(); // ডেটা ইনপুট হওয়ার পর সেভ করা হচ্ছে
                     }
                 }
             });
@@ -295,6 +328,7 @@
                         });
                         
                         renderTable();
+                        saveData(); // ডেটা আপডেট হওয়ার পর সেভ করা হচ্ছে
                     }
                 }
             });
@@ -309,6 +343,7 @@
                 rowData = initializeRowData();
                 renderTable();
                 clearConfirmModal.classList.add('hidden');
+                localStorage.removeItem('calculatorData'); // localStorage থেকে ডেটা মুছে ফেলা হচ্ছে
             });
 
             // "No" button event listener to just hide the modal.
@@ -317,6 +352,7 @@
             });
 
             // Initial render of the table on page load.
+            loadData(); // পৃষ্ঠা লোড হওয়ার সাথে সাথে সেভ করা ডেটা লোড করা হচ্ছে
             renderTable();
         });
     </script>
