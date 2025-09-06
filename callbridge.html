@@ -41,6 +41,13 @@
                 font-size: 0.75rem;
             }
         }
+        .editable-score-input {
+            border: 1px solid #d1d5db;
+            border-radius: 0.25rem;
+            text-align: center;
+            padding: 0.25rem;
+            width: 4rem; /* Adjust width as needed */
+        }
     </style>
 </head>
 <body class="bg-gray-100 flex items-center justify-center p-4 min-h-screen">
@@ -324,10 +331,22 @@
                     const rowElement = document.createElement('tr');
                     rowElement.className = `border-b ${rowIndex % 2 === 0 ? 'bg-gray-50' : 'bg-white'}`;
                     rowElement.dataset.rowIndex = rowIndex;
+                    rowElement.dataset.isEditing = round.isEditing ? 'true' : 'false';
 
                     const roundTd = document.createElement('td');
-                    roundTd.className = "px-4 py-2 whitespace-nowrap text-sm text-gray-900 text-center";
-                    roundTd.textContent = rowIndex + 1;
+                    roundTd.className = "px-4 py-2 whitespace-nowrap text-sm text-gray-900 text-center flex items-center justify-between";
+                    
+                    const editButton = `
+                        <button class="edit-round-btn bg-gray-200 hover:bg-gray-300 text-gray-800 p-1 rounded-full transition duration-150" data-row-index="${rowIndex}">
+                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                            </svg>
+                        </button>
+                    `;
+                    roundTd.innerHTML = `
+                        <span>${rowIndex + 1}</span>
+                        ${editButton}
+                    `;
                     rowElement.appendChild(roundTd);
 
                     playerNames.forEach(name => {
@@ -335,17 +354,8 @@
                         td.className = "px-1 py-2 whitespace-nowrap text-sm text-gray-900 text-center";
                         
                         let cellContent = '';
-                        if (round.scores[name] !== 0) {
-                            const score = round.scores[name];
-                            const scoreText = score > 0 ? `+${score}` : `${score}`;
-                            const colorClass = score > 0 ? 'text-green-600' : 'text-red-600';
+                        if (round.isEditing || round.scores[name] === 0) {
                             cellContent = `
-                                <div class="flex flex-col items-center justify-center h-full">
-                                    <span class="text-xl font-bold ${colorClass}">${scoreText}</span>
-                                </div>
-                            `;
-                        } else {
-                             cellContent = `
                                 <div class="flex flex-col items-center">
                                     <label class="text-xs text-gray-500">Call</label>
                                     <input type="number" value="${round.calls[name] || ''}" min="1" max="13" data-player-name="${name}" data-row-index="${rowIndex}" data-input-type="call" class="responsive-input border border-gray-300 rounded-md px-1 py-0.5 text-center focus:ring-blue-500 focus:border-blue-500 mb-1" />
@@ -359,6 +369,15 @@
                                     </div>
                                 </div>
                             `;
+                        } else {
+                             const score = round.scores[name];
+                             const scoreText = score > 0 ? `+${score}` : `${score}`;
+                             const colorClass = score > 0 ? 'text-green-600' : 'text-red-600';
+                             cellContent = `
+                                 <div class="flex flex-col items-center justify-center h-full">
+                                     <span class="text-xl font-bold ${colorClass}">${scoreText}</span>
+                                 </div>
+                             `;
                         }
                         td.innerHTML = cellContent;
                         rowElement.appendChild(td);
@@ -399,6 +418,18 @@
                 updateAddRowButtonState(); // Update the button state after every score change
                 totalCallsDisplay.textContent = `Calls: ${calculateCurrentRoundCalls()}`;
             };
+            
+            // Render the editable form for a specific round
+            const renderEditableRound = (rowIndex) => {
+                const rowElement = document.querySelector(`tr[data-row-index="${rowIndex}"]`);
+                const round = roundData[rowIndex];
+
+                // Set the isEditing flag for the round
+                round.isEditing = true;
+                saveData();
+                renderTable(); // Re-render the table
+            };
+
 
             const renderPlayerList = () => {
                 playerListContainer.innerHTML = '';
@@ -483,19 +514,21 @@
                         roundData[rowIndex].scores[playerName] = -callValue;
                     }
                     
-                    // Update the cell content to show the final score
-                    const cell = target.closest('td');
-                    const score = roundData[rowIndex].scores[playerName];
-                    const scoreText = score > 0 ? `+${score}` : `${score}`;
-                    const colorClass = score > 0 ? 'text-green-600' : 'text-red-600';
-                    cell.innerHTML = `
-                        <div class="flex flex-col items-center justify-center h-full">
-                            <span class="text-xl font-bold ${colorClass}">${scoreText}</span>
-                        </div>
-                    `;
+                    // After scoring, set the isEditing flag to false and re-render the table
+                    roundData[rowIndex].isEditing = false;
 
                     updateTotalScores();
+                    renderTable();
                     saveData();
+                }
+
+                const editRoundTarget = event.target.closest('.edit-round-btn');
+                if (editRoundTarget) {
+                    const rowIndex = parseInt(editRoundTarget.dataset.rowIndex);
+                    const round = roundData[rowIndex];
+                    round.isEditing = true;
+                    saveData();
+                    renderTable();
                 }
             });
 
@@ -572,7 +605,8 @@
                 if (isCurrentRoundComplete()) {
                     const newRound = {
                         calls: {},
-                        scores: {}
+                        scores: {},
+                        isEditing: true // New rounds start in editing mode
                     };
                     playerNames.forEach(name => {
                         newRound.calls[name] = '';
