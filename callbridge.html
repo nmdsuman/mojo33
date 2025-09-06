@@ -11,6 +11,9 @@
         
         body {
             font-family: 'Inter', sans-serif;
+            /* Added styles to remove padding and margin for full width */
+            margin: 0;
+            padding: 0;
         }
 
         /* Hiding the number input spinners for a cleaner UI */
@@ -50,7 +53,7 @@
         }
     </style>
 </head>
-<body class="bg-gray-100 flex items-center justify-center p-4 min-h-screen">
+<body class="bg-gray-100 flex items-center justify-center min-h-screen">
 
     <div class="bg-white p-4 rounded-lg shadow-xl w-full max-w-4xl md:p-6">
         <h1 class="text-2xl font-bold text-center text-gray-800 mb-4 rounded-md p-2 bg-blue-50 sm:text-3xl sm:mb-6">
@@ -358,16 +361,17 @@
                     `;
                     rowElement.appendChild(roundTd);
 
-                    playerNames.forEach(name => {
+                    playerNames.forEach((name, colIndex) => {
                         const td = document.createElement('td');
                         td.className = "px-1 py-2 whitespace-nowrap text-sm text-gray-900 text-center";
                         
                         let cellContent = '';
                         if (round.isEditing || round.scores[name] === 0) {
+                            // Added inputmode="numeric" and enterkeyhint="next" for better mobile keyboard behavior
                             cellContent = `
                                 <div class="flex flex-col items-center">
                                     <label class="text-xs text-gray-500">Call</label>
-                                    <input type="number" value="${round.calls[name] || ''}" min="1" max="13" data-player-name="${name}" data-row-index="${rowIndex}" data-input-type="call" class="responsive-input border border-gray-300 rounded-md px-1 py-0.5 text-center focus:ring-blue-500 focus:border-blue-500 mb-1" />
+                                    <input type="number" value="${round.calls[name] || ''}" min="1" max="13" data-player-name="${name}" data-row-index="${rowIndex}" data-input-type="call" data-col-index="${colIndex}" class="responsive-input border border-gray-300 rounded-md px-1 py-0.5 text-center focus:ring-blue-500 focus:border-blue-500 mb-1" inputmode="numeric" enterkeyhint="next" />
                                     <div class="flex items-center justify-center space-x-1 mt-1">
                                         <button class="score-btn bg-green-500 hover:bg-green-600 text-white rounded-md p-1" data-action="increase" data-player-name="${name}" data-row-index="${rowIndex}">
                                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" /></svg>
@@ -493,6 +497,32 @@
                         document.body.appendChild(modal);
                         document.getElementById('closeAlertBtn').addEventListener('click', () => modal.remove());
                         target.value = '';
+                    }
+                }
+            });
+            
+            // Event listener for Enter/Next key to move to the next input
+            dataBody.addEventListener('keydown', (event) => {
+                if (event.key === 'Enter') {
+                    const target = event.target;
+                    if (target.tagName === 'INPUT' && target.type === 'number' && target.dataset.inputType === 'call') {
+                        event.preventDefault(); // Prevent default form submission behavior
+                        const rowIndex = parseInt(target.dataset.rowIndex);
+                        const colIndex = parseInt(target.dataset.colIndex);
+                        const nextColIndex = colIndex + 1;
+                        const nextInput = document.querySelector(`input[data-row-index="${rowIndex}"][data-col-index="${nextColIndex}"]`);
+                        if (nextInput) {
+                            nextInput.focus();
+                        } else {
+                            // If it's the last column, focus the Add Round button or the first input of the next row
+                            const nextRowIndex = rowIndex + 1;
+                            const nextRowFirstInput = document.querySelector(`input[data-row-index="${nextRowIndex}"][data-col-index="0"]`);
+                            if (nextRowFirstInput) {
+                                nextRowFirstInput.focus();
+                            } else {
+                                addRowBtn.focus();
+                            }
+                        }
                     }
                 }
             });
@@ -753,4 +783,4 @@
         });
     </script>
 </body>
-</html>
+    </html>
