@@ -4,117 +4,41 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Card Game Calculator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
         body {
-            font-family: Arial, sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            margin: 0;
-            background-color: #e8f5e9; /* Light green background */
-        }
-        .container {
-            text-align: center;
-            padding: 40px;
-            border-radius: 15px;
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
-            background-color: #fff;
-            max-width: 600px;
-            width: 90%;
-            transition: transform 0.3s ease;
-        }
-        .container:hover {
-            transform: translateY(-5px);
-        }
-        h1 {
-            color: #2e7d32; /* Dark green */
-            margin-bottom: 20px;
-            font-size: 2.5rem;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
-        }
-        p {
-            color: #555;
-            font-size: 1.1rem;
-            line-height: 1.6;
-        }
-        .card-game-section {
-            margin: 30px 0;
-            padding: 25px;
-            border: 2px solid #a5d6a7; /* Border color */
-            border-radius: 12px;
-            background-color: #f1f8e9; /* Light section background */
-            transition: box-shadow 0.3s ease;
-        }
-        .card-game-section:hover {
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-        .card-game-section h2 {
-            margin-top: 0;
-            color: #43a047; /* Section title color */
-            font-size: 2rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-        }
-        .button {
-            display: inline-block;
-            padding: 15px 30px;
-            font-size: 1.2rem;
-            color: white;
-            text-align: center;
-            border-radius: 8px;
-            text-decoration: none;
-            transition: background-color 0.3s ease, transform 0.2s ease;
-            margin: 10px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-        .button:hover {
-            transform: translateY(-2px);
-        }
-        .callbridge-btn {
-            background-color: #1976d2; /* Blue */
-        }
-        .callbridge-btn:hover {
-            background-color: #1565c0;
-        }
-        .hazari-btn {
-            background-color: #4caf50; /* Green */
-        }
-        .hazari-btn:hover {
-            background-color: #43a047;
-        }
-        img {
-            max-width: 100%;
-            height: auto;
-            margin-top: 20px;
-            border-radius: 10px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+            background-image: url('https://www.transparenttextures.com/patterns/playing-cards.png');
+            background-size: 200px;
+            background-repeat: repeat;
         }
     </style>
 </head>
-<body>
-    <div class="container">
-        <!-- Main heading of the page -->
-        <h1>🃏 কার্ড গেম ক্যালকুলেটর</h1>
-        <p>আপনার প্রিয় কার্ড গেমের হিসাব সহজে করুন।</p>
+<body class="flex items-center justify-center min-h-screen p-4">
+    <div class="container bg-white p-8 rounded-2xl shadow-xl w-full max-w-xl text-center transition-transform duration-300 hover:scale-105">
+        <h1 class="text-3xl sm:text-4xl font-bold text-gray-800 mb-6">🃏 কার্ড গেম ক্যালকুলেটর</h1>
+        <p class="text-gray-600 mb-8 text-lg">আপনার প্রিয় কার্ড গেমের হিসাব সহজে করুন।</p>
         
-        <!-- Section for Callbridge Calculator -->
-        <div class="card-game-section">
-            <h2>🌉 কলব্রিজ ক্যালকুলেটর</h2>
-            <p>কলব্রিজ খেলার হিসাব করার জন্য নিচের বাটনে ক্লিক করুন।</p>
-            <a href="callbridge.html" class="button callbridge-btn">কলব্রিজ ক্যালকুলেটরে যান</a>
-            <img src="https://i.ibb.co/6c125qN/callbridge.png" alt="Callbridge playing cards">
-        </div>
-
-        <!-- Section for Hazar Calculator -->
-        <div class="card-game-section">
-            <h2>🎲 হাজারি ক্যালকুলেটর</h2>
-            <p>হাজারি খেলার হিসাব করার জন্য নিচের বাটনে ক্লিক করুন।</p>
-            <a href="hazari.html" class="button hazari-btn">হাজারি ক্যালকুলেটরে যান</a>
-            <img src="https://i.ibb.co/6c125qN/hazari.png" alt="Hazar playing cards">
+        <div class="flex flex-col sm:flex-row gap-6">
+            <!-- Callbridge Card -->
+            <a href="callbridge.html" class="flex-1 block bg-white p-6 rounded-2xl border-2 border-blue-500 shadow-md transform transition-all duration-300 hover:scale-105 hover:bg-blue-50">
+                <div class="flex flex-col items-center">
+                    <span class="text-5xl mb-4">🌉</span>
+                    <h2 class="text-xl sm:text-2xl font-semibold text-blue-600 mb-2">কলব্রিজ</h2>
+                    <p class="text-gray-500 text-sm">কলব্রিজ খেলার হিসাব করার জন্য এখানে ক্লিক করুন।</p>
+                </div>
+            </a>
+            
+            <!-- Hazar Card -->
+            <a href="hazari.html" class="flex-1 block bg-white p-6 rounded-2xl border-2 border-green-500 shadow-md transform transition-all duration-300 hover:scale-105 hover:bg-green-50">
+                <div class="flex flex-col items-center">
+                    <span class="text-5xl mb-4">🎲</span>
+                    <h2 class="text-xl sm:text-2xl font-semibold text-green-600 mb-2">হাজারি</h2>
+                    <p class="text-gray-500 text-sm">হাজারি খেলার হিসাব করার জন্য এখানে ক্লিক করুন।</p>
+                </div>
+            </a>
         </div>
     </div>
 </body>
