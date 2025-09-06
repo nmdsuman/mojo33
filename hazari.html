@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>হাতিয়াড় মেজো-৩৩</title>
-    <!-- Tailwind CSS CDN -->
+    <title>কল ব্রিজ স্কোর</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         /* Custom font import for consistency and style */
@@ -16,7 +15,7 @@
 
         /* Hiding the number input spinners for a cleaner UI */
         input[type="number"]::-webkit-inner-spin-button,
-        input[type="number"]::-webkit-outer-spin-button {
+        inpinpinpututinputut[type="number"]::-webkit-outer-spin-button {
             -webkit-appearance: none;
             margin: 0;
         }
@@ -38,26 +37,31 @@
                 padding-right: 0.25rem;
             }
             .responsive-input {
-                width: 4rem;
+                width: 3rem;
+                font-size: 0.75rem;
             }
+        }
+        .editable-score-input {
+            border: 1px solid #d1d5db;
+            border-radius: 0.25rem;
+            text-align: center;
+            padding: 0.25rem;
+            width: 4rem; /* Adjust width as needed */
         }
     </style>
 </head>
 <body class="bg-gray-100 flex items-center justify-center p-4 min-h-screen">
 
     <div class="bg-white p-4 rounded-lg shadow-xl w-full max-w-4xl md:p-6">
-        <!-- Application Title -->
         <h1 class="text-2xl font-bold text-center text-gray-800 mb-4 rounded-md p-2 bg-blue-50 sm:text-3xl sm:mb-6">
-            হাতিয়াড় মেজো-৩৩
+            কল ব্রিজ স্কোর
         </h1>
 
-        <!-- Clear Button, Toggle Switch and Player Button -->
         <div class="flex flex-col items-center mb-4 space-y-4">
             <div class="flex justify-center items-center space-x-4">
                 <button id="clearBtn" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-6 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105">
                     Clear
                 </button>
-                <!-- Edit Toggle Icon -->
                 <button id="editToggleBtn" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold p-2 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105">
                     <svg id="lockIcon" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
@@ -66,39 +70,33 @@
                         <path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                     </svg>
                 </button>
-                <!-- Player Button moved here -->
-                <button id="playerBtn" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-6 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105">
+                <button id="playerBtn" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105">
                     Player
                 </button>
             </div>
         </div>
 
-        <!-- Main Data Table Wrapper -->
         <div class="overflow-x-auto">
             <table class="w-full table-auto divide-y divide-gray-200 rounded-lg overflow-hidden border border-gray-200">
                 <thead class="bg-blue-600 text-white">
-                    <tr id="tableHeaderRow">
-                        <!-- Headers will be dynamically rendered here -->
-                    </tr>
+                    <tr id="tableHeaderRow"></tr>
                 </thead>
-                <!-- Sums Row -->
-                <tbody id="sumRow" class="bg-blue-100 font-bold text-gray-800">
-                    <tr>
-                        <!-- Sums will be dynamically rendered here -->
-                    </tr>
-                </tbody>
-                <!-- Data Rows -->
-                <tbody id="dataBody" class="bg-white divide-y divide-gray-200">
-                    <!-- Data rows will be dynamically rendered here -->
-                </tbody>
+                <tbody id="dataBody" class="bg-white divide-y divide-gray-200"></tbody>
+                <tfoot id="totalRow" class="bg-blue-200 font-bold text-gray-800"></tfoot>
             </table>
+        </div>
+        <div class="flex justify-center mt-4 items-center space-x-4">
+            <p id="totalCallsDisplay" class="text-lg font-bold text-gray-800">Calls: 0</p>
+            <button id="addRowBtn" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-6 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105">
+                Add Round
+            </button>
         </div>
     </div>
 
-    <!-- Confirmation Modal (initially hidden) -->
+    <!-- Clear Confirmation Modal -->
     <div id="clearConfirmModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
         <div class="bg-white p-6 rounded-lg shadow-xl text-center">
-            <p class="text-lg font-semibold mb-4 text-gray-800">আপনি কি নিশ্চিত যে আপনি সমস্ত সংখ্যা মুছে ফেলতে চান?</p>
+            <p class="text-lg font-semibold mb-4 text-gray-800">আপনি কি নিশ্চিত যে আপনি সমস্ত ডেটা মুছে ফেলতে চান?</p>
             <div class="flex justify-center space-x-4">
                 <button id="confirmClearBtn" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105">
                     হ্যাঁ
@@ -110,14 +108,12 @@
         </div>
     </div>
     
-    <!-- Player Selection Modal (initially hidden) -->
+    <!-- Player Selection Modal -->
     <div id="playerModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
         <div class="modal-content w-full max-w-sm mx-auto p-6 rounded-lg shadow-xl">
             <p class="text-lg font-semibold mb-4 text-gray-800 text-center">খেলোয়াড় নির্বাচন করুন</p>
             <p class="text-sm text-gray-600 mb-4 text-center">সর্বোচ্চ ৪ জন খেলোয়াড় নির্বাচন করা যাবে</p>
-            <div id="playerListContainer" class="max-h-60 overflow-y-auto border border-gray-300 rounded-lg p-2 mb-4 space-y-2">
-                <!-- Player names will be dynamically rendered here -->
-            </div>
+            <div id="playerListContainer" class="max-h-60 overflow-y-auto border border-gray-300 rounded-lg p-2 mb-4 space-y-2"></div>
             <div class="flex justify-center space-x-4">
                 <button id="savePlayerListBtn" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105">
                     Save
@@ -135,14 +131,12 @@
             </div>
         </div>
     </div>
-    
-    <!-- Dynamic Player Selection Modal (initially hidden) -->
+
+    <!-- Player Name Change Modal -->
     <div id="dynamicPlayerModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
         <div class="modal-content w-full max-w-xs mx-auto p-6 rounded-lg shadow-xl">
             <p class="text-lg font-semibold mb-4 text-gray-800 text-center">খেলোয়াড় নির্বাচন করুন</p>
-            <div id="dynamicPlayerList" class="max-h-60 overflow-y-auto border border-gray-300 rounded-lg p-2 mb-4 space-y-2">
-                <!-- Player names will be dynamically rendered here -->
-            </div>
+            <div id="dynamicPlayerList" class="max-h-60 overflow-y-auto border border-gray-300 rounded-lg p-2 mb-4 space-y-2"></div>
             <div class="flex justify-center space-x-4">
                 <button id="cancelDynamicPlayerBtn" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105">
                     বাতিল
@@ -150,98 +144,44 @@
             </div>
         </div>
     </div>
+    
+    <!-- Incomplete Round Modal -->
+    <div id="incompleteRoundModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white p-6 rounded-lg shadow-xl text-center">
+            <p class="text-lg font-semibold mb-4 text-gray-800">দয়া করে বর্তমান রাউন্ডের সব খেলোয়াড়ের স্কোর নিশ্চিত করুন।</p>
+            <button id="closeIncompleteModalBtn" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105">
+                ঠিক আছে
+            </button>
+        </div>
+    </div>
 
     <script>
-        // Use a single script block for all JavaScript logic.
         document.addEventListener('DOMContentLoaded', () => {
-            // State management using plain JavaScript variables
-            let columnNames = ['হামিম', 'সোহেল', 'চঞ্চল', 'আকিজ'];
-            const numRows = 20;
-            const subtractValue = 360;
-            let isLocked = true; // Default state is locked
+            // Player names and round data. This is our core state.
+            let playerNames = ['হামিম', 'সোহেল', 'চঞ্চল', 'আকিজ'];
+            let roundData = [];
+            let isLocked = true;
             
-            let presetPlayers = [
-                'হামিম', 'সোহেল', 'চঞ্চল', 'আকিজ', 'সুমন', 'ফয়ছাল', 'নাঈম', 'মওলা', 'পলাশ', 'ইমরান', 'জসিম'
-            ];
+            // Preset list of players for the Player modal.
+            let presetPlayers = ['হামিম', 'সোহেল', 'চঞ্চল', 'আকিজ', 'সুমন', 'ফয়ছাল', 'নাঈম', 'মওলা', 'পলাশ', 'ইমরান', 'জসিম'];
             
-            let rowData = [];
-            let currentColumnIndex = -1; // To track which column is being edited
+            // To track which column is being edited for a name change.
+            let currentColumnIndex = -1;
 
-            // সেভ করা ডেটা লোড করার জন্য একটি ফাংশন
-            const loadData = () => {
-                const savedData = localStorage.getItem('calculatorData');
-                const savedPlayers = localStorage.getItem('playerNames');
-                const savedLockState = localStorage.getItem('isLocked');
-                
-                if (savedPlayers) {
-                    try {
-                        presetPlayers = JSON.parse(savedPlayers);
-                    } catch (e) {
-                        console.error("Failed to parse saved player names.", e);
-                    }
-                }
-
-                if (savedData) {
-                    try {
-                        const parsedData = JSON.parse(savedData);
-                        columnNames = parsedData.columnNames || ['হামিম', 'সোহেল', 'চঞ্চল', 'আকিজ'];
-                        rowData = parsedData.rowData;
-                        const initialData = [];
-                        for (let i = 0; i < numRows; i++) {
-                            const row = rowData[i] || { id: i };
-                            columnNames.forEach(name => {
-                                if (typeof row[name] === 'undefined') {
-                                    row[name] = '';
-                                }
-                            });
-                            initialData.push(row);
-                        }
-                        rowData = initialData;
-                    } catch (e) {
-                        console.error("Failed to parse saved data from localStorage, resetting.", e);
-                        rowData = initializeRowData();
-                    }
-                } else {
-                    rowData = initializeRowData();
-                }
-
-                if (savedLockState !== null) {
-                    isLocked = JSON.parse(savedLockState);
-                }
-            };
-            
-            // ডেটা সেভ করার জন্য একটি ফাংশন
-            const saveData = () => {
-                localStorage.setItem('calculatorData', JSON.stringify({ columnNames, rowData }));
-                localStorage.setItem('playerNames', JSON.stringify(presetPlayers));
-                localStorage.setItem('isLocked', JSON.stringify(isLocked));
-            };
-
-            // Initializing with empty strings
-            const initializeRowData = () => {
-                const initialData = [];
-                for (let i = 0; i < numRows; i++) {
-                    const row = { id: i };
-                    columnNames.forEach(name => {
-                        row[name] = '';
-                    });
-                    initialData.push(row);
-                }
-                return initialData;
-            };
-
-            // DOM element references
+            // --- DOM Element References ---
             const tableHeaderRow = document.getElementById('tableHeaderRow');
-            const sumRowBody = document.getElementById('sumRow').querySelector('tr');
             const dataBody = document.getElementById('dataBody');
+            const totalRow = document.getElementById('totalRow');
             const clearBtn = document.getElementById('clearBtn');
+            const addRowBtn = document.getElementById('addRowBtn');
+            const totalCallsDisplay = document.getElementById('totalCallsDisplay');
+            const playerBtn = document.getElementById('playerBtn');
             const editToggleBtn = document.getElementById('editToggleBtn');
             const lockIcon = document.getElementById('lockIcon');
             const editIcon = document.getElementById('editIcon');
             const clearConfirmModal = document.getElementById('clearConfirmModal');
             const confirmClearBtn = document.getElementById('confirmClearBtn');
             const cancelClearBtn = document.getElementById('cancelClearBtn');
-            const playerBtn = document.getElementById('playerBtn'); // Direct reference to the player button
             const playerModal = document.getElementById('playerModal');
             const playerListContainer = document.getElementById('playerListContainer');
             const savePlayerListBtn = document.getElementById('savePlayerListBtn');
@@ -251,163 +191,246 @@
             const dynamicPlayerModal = document.getElementById('dynamicPlayerModal');
             const dynamicPlayerList = document.getElementById('dynamicPlayerList');
             const cancelDynamicPlayerBtn = document.getElementById('cancelDynamicPlayerBtn');
+            const incompleteRoundModal = document.getElementById('incompleteRoundModal');
+            const closeIncompleteModalBtn = document.getElementById('closeIncompleteModalBtn');
 
 
-            // --- Calculation Functions ---
+            // --- Data Persistence (localStorage) ---
+            const saveData = () => {
+                localStorage.setItem('callBridgeData', JSON.stringify({ playerNames, roundData }));
+                localStorage.setItem('presetPlayers', JSON.stringify(presetPlayers));
+                localStorage.setItem('isLocked', JSON.stringify(isLocked));
+            };
+
+            const loadData = () => {
+                const savedData = localStorage.getItem('callBridgeData');
+                const savedPresets = localStorage.getItem('presetPlayers');
+                const savedLockState = localStorage.getItem('isLocked');
+                if (savedData) {
+                    try {
+                        const parsedData = JSON.parse(savedData);
+                        playerNames = parsedData.playerNames || ['হামিম', 'সোহেল', 'চঞ্চল', 'আকিজ'];
+                        roundData = parsedData.roundData || [];
+                        
+                        // Fix: Ensure all rounds have all players from the current playerNames list
+                        roundData.forEach(round => {
+                            // Robust check to ensure calls and scores are objects
+                            if (typeof round.calls !== 'object' || round.calls === null) {
+                                round.calls = {};
+                            }
+                            if (typeof round.scores !== 'object' || round.scores === null) {
+                                round.scores = {};
+                            }
+                            
+                            playerNames.forEach(name => {
+                                if (typeof round.calls[name] === 'undefined') {
+                                    round.calls[name] = '';
+                                }
+                                if (typeof round.scores[name] === 'undefined') {
+                                    round.scores[name] = 0;
+                                }
+                            });
+                        });
+                    } catch (e) {
+                        console.error("Failed to parse saved data, resetting.", e);
+                        playerNames = ['হামিম', 'সোহেল', 'চঞ্চল', 'আকিজ'];
+                        roundData = [];
+                    }
+                }
+                if (savedPresets) {
+                    try {
+                        presetPlayers = JSON.parse(savedPresets);
+                    } catch (e) {
+                        console.error("Failed to parse preset players, resetting.", e);
+                        presetPlayers = ['হামিম', 'সোহেল', 'চঞ্চল', 'আকিজ', 'সুমন', 'ফয়ছাল', 'নাঈম', 'মওলা', 'পলাশ', 'ইমরান', 'জসিম'];
+                    }
+                }
+                 if (savedLockState !== null) {
+                    isLocked = JSON.parse(savedLockState);
+                }
+            };
             
-            // Calculates the sum for a single column.
-            const calculateColumnSum = (colName) => {
-                return rowData.reduce((sum, row) => {
-                    const value = parseFloat(row[colName]);
-                    return sum + (isNaN(value) ? 0 : value);
-                }, 0);
+            // --- UI Update Functions ---
+            const updateLockUI = () => {
+                lockIcon.classList.toggle('hidden', !isLocked);
+                editIcon.classList.toggle('hidden', isLocked);
+                playerBtn.classList.toggle('hidden', isLocked);
             };
 
-            // Calculates the sum of the first four columns for a given row.
-            const calculateSumOfFirstFourColumns = (row) => {
-                const firstFourNames = columnNames.slice(0, 4);
-                return firstFourNames.reduce((sum, colName) => {
-                    const value = parseFloat(row[colName]);
-                    return sum + (isNaN(value) ? 0 : value);
-                }, 0);
-            };
-
-            // Calculates the row total by subtracting the constant value.
-            const calculateRowTotal = (row) => {
-                const sumOfFirstFour = calculateSumOfFirstFourColumns(row);
-                return sumOfFirstFour - subtractValue;
-            };
-
-            // --- Update Functions ---
-            
-            // Updates only the calculated sums and totals without re-rendering the whole table.
-            const updateTableTotals = () => {
-                // Update Sums Row
-                const columnSums = columnNames.reduce((acc, name) => {
-                    acc[name] = calculateColumnSum(name);
+            // --- Calculation Logic ---
+            const calculateAllScores = () => {
+                const totalScores = playerNames.reduce((acc, name) => {
+                    acc[name] = 0;
                     return acc;
                 }, {});
 
-                const rankedColumnColors = {};
-                if (Object.keys(columnSums).length > 0) {
-                    const rankableSums = columnNames.slice(0, 4).map(name => ({
-                        name: name,
-                        sum: columnSums[name]
-                    }));
-                    rankableSums.sort((a, b) => b.sum - a.sum);
-
-                    if (rankableSums[0]) rankedColumnColors[rankableSums[0].name] = 'text-green-600';
-                    if (rankableSums[1]) rankedColumnColors[rankableSums[1].name] = 'text-blue-600';
-                    if (rankableSums[2]) rankedColumnColors[rankableSums[2].name] = 'text-yellow-600';
-                    if (rankableSums[3]) rankedColumnColors[rankableSums[3].name] = 'text-red-600';
-                }
-
-                columnNames.forEach((name, index) => {
-                    const td = sumRowBody.children[index];
-                    td.textContent = columnSums[name].toFixed(2);
-                    td.className = `px-1 py-1 sm:px-2 sm:py-3 whitespace-nowrap text-sm text-center ${rankedColumnColors[name] || ''}`;
-                });
-
-                // Update Data Rows Totals
-                dataBody.querySelectorAll('tr').forEach((rowElement, rowIndex) => {
-                    const row = rowData[rowIndex];
-                    const rowTotal = calculateRowTotal(row);
-                    const totalCell = rowElement.querySelector('.total-cell');
-                    const totalTextColorClass = rowTotal > 0 ? 'text-red-600' : 'text-gray-700';
-                    
-                    if (totalCell) {
-                        totalCell.textContent = rowTotal.toFixed(2);
-                        totalCell.className = `px-1 py-1 sm:px-2 sm:py-2 whitespace-nowrap text-sm font-medium text-center bg-blue-50 ${totalTextColorClass} total-cell`;
-                    }
-                });
-            };
-
-            // Renders the entire table from scratch. This is only called on initial load and for the clear action.
-            const renderTable = () => {
-                // Clear existing table content
-                tableHeaderRow.innerHTML = '';
-                sumRowBody.innerHTML = '';
-                dataBody.innerHTML = '';
-
-                // Render Header Row
-                columnNames.forEach((name, index) => {
-                    const th = document.createElement('th');
-                    th.className = "table-cell-padding text-center text-xs font-medium uppercase tracking-wider";
-                    th.scope = "col";
-                    if(isLocked) {
-                        th.innerHTML = `
-                            <span data-col-index="${index}" class="cursor-pointer bg-transparent border-b border-white focus:outline-none text-center text-white placeholder-gray-300 w-12 sm:w-16 md:w-28 rounded-sm px-1 py-0.5">${name}</span>
-                        `;
-                    } else {
-                        th.innerHTML = `
-                            <span data-col-index="${index}" class="cursor-pointer bg-transparent border-b border-white focus:outline-none text-center text-white placeholder-gray-300 w-12 sm:w-16 md:w-28 rounded-sm px-1 py-0.5">${name}</span>
-                        `;
-                    }
-                    tableHeaderRow.appendChild(th);
-                });
-                const totalTh = document.createElement('th');
-                totalTh.className = "table-cell-padding text-center text-xs font-medium uppercase tracking-wider";
-                totalTh.scope = "col";
-                totalTh.textContent = "Total";
-                tableHeaderRow.appendChild(totalTh);
-
-                // Render Sums Row (placeholder for updateTableTotals)
-                columnNames.forEach(() => {
-                    const td = document.createElement('td');
-                    td.className = "px-1 py-1 sm:px-2 sm:py-3 whitespace-nowrap text-sm text-center";
-                    sumRowBody.appendChild(td);
-                });
-                const emptySumTd = document.createElement('td');
-                emptySumTd.className = "px-1 py-1 sm:px-2 sm:py-3 whitespace-nowrap text-sm text-center bg-blue-200";
-                sumRowBody.appendChild(emptySumTd);
-
-                // Render Data Rows
-                rowData.forEach((row, rowIndex) => {
-                    const rowElement = document.createElement('tr');
-                    rowElement.className = `border-b ${rowIndex % 2 === 0 ? 'bg-gray-50' : 'bg-white'}`;
-                    
-                    const sumOfFirstFour = calculateSumOfFirstFourColumns(row);
-                    const shouldShowLachha = sumOfFirstFour === 360;
-                    
-                    const lachhaColumns = ['আকিজ'];
-
-                    columnNames.forEach((colName, colIndex) => {
-                        const cell = document.createElement('td');
-                        cell.className = "px-1 py-1 sm:px-2 sm:py-2 whitespace-nowrap text-sm text-gray-900 text-center";
-                        
-                        if (shouldShowLachha && lachhaColumns.includes(colName) && (row[colName] === '' || row[colName] === 0 || row[colName] === '0')) {
-                             cell.innerHTML = `
-                                 <span class="block w-12 sm:w-16 md:w-28 bg-red-200 text-red-800 rounded-md px-1 py-0.5 text-center font-bold Lachha-text">
-                                     😫লাচ্ছা
-                                 </span>
-                             `;
-                        } else {
-                            cell.innerHTML = `
-                                 <input
-                                     type="number"
-                                     value="${row[colName]}"
-                                     data-row-index="${rowIndex}"
-                                     data-col-name="${colName}"
-                                     class="responsive-input w-12 sm:w-16 md:w-28 border border-gray-300 rounded-md px-1 py-0.5 text-center focus:ring-blue-500 focus:border-blue-500"
-                                 />
-                             `;
-                        }
-                        rowElement.appendChild(cell);
+                roundData.forEach(round => {
+                    playerNames.forEach(name => {
+                        totalScores[name] += round.scores[name] || 0;
                     });
-
-                    // Render Total Cell
-                    const totalCell = document.createElement('td');
-                    totalCell.className = `px-1 py-1 sm:px-2 sm:py-2 whitespace-nowrap text-sm font-medium text-center bg-blue-50 total-cell`;
-                    totalCell.textContent = calculateRowTotal(row).toFixed(2);
-                    rowElement.appendChild(totalCell);
-
-                    dataBody.appendChild(rowElement);
                 });
-
-                updateTableTotals();
+                return totalScores;
             };
             
-            // Render player list in the modal
+            // Calculate total calls for the current round
+            const calculateCurrentRoundCalls = () => {
+                if (roundData.length === 0) return 0;
+                const lastRound = roundData[roundData.length - 1];
+                return playerNames.reduce((sum, name) => {
+                    const callValue = parseInt(lastRound.calls[name]);
+                    return sum + (isNaN(callValue) ? 0 : callValue);
+                }, 0);
+            };
+            
+            // Check if the current round is complete
+            const isCurrentRoundComplete = () => {
+                if (roundData.length === 0) return true; // Allow adding first round
+                const lastRound = roundData[roundData.length - 1];
+                return playerNames.every(name => lastRound.scores[name] !== 0);
+            };
+            
+            const updateAddRowButtonState = () => {
+                if (isCurrentRoundComplete()) {
+                    addRowBtn.disabled = false;
+                    addRowBtn.classList.remove('bg-gray-400', 'cursor-not-allowed');
+                    addRowBtn.classList.add('bg-green-500');
+                } else {
+                    addRowBtn.disabled = true;
+                    addRowBtn.classList.remove('bg-green-500');
+                    addRowBtn.classList.add('bg-gray-400', 'cursor-not-allowed');
+                }
+            };
+
+
+            // --- Rendering Functions ---
+            const renderTable = () => {
+                // Clear existing content
+                tableHeaderRow.innerHTML = '';
+                dataBody.innerHTML = '';
+                totalRow.innerHTML = '';
+                
+                // Render Header Row
+                const headerContent = document.createDocumentFragment();
+                const roundTh = document.createElement('th');
+                roundTh.className = "px-4 py-2 text-center text-xs font-medium uppercase tracking-wider";
+                roundTh.textContent = "Round";
+                headerContent.appendChild(roundTh);
+
+                playerNames.forEach((name, index) => {
+                    const th = document.createElement('th');
+                    th.className = "px-1 py-2 text-center text-xs font-medium uppercase tracking-wider";
+                    th.scope = "col";
+                    const cursorClass = isLocked ? '' : 'cursor-pointer';
+                    th.innerHTML = `<span data-col-index="${index}" class="${cursorClass} bg-transparent border-b border-white focus:outline-none text-center text-white placeholder-gray-300 w-24 sm:w-32 md:w-40 rounded-sm px-1 py-0.5">${name}</span>`;
+                    headerContent.appendChild(th);
+                });
+                tableHeaderRow.appendChild(headerContent);
+                
+                // Render Data Rows (Rounds)
+                roundData.forEach((round, rowIndex) => {
+                    const rowElement = document.createElement('tr');
+                    rowElement.className = `border-b ${rowIndex % 2 === 0 ? 'bg-gray-50' : 'bg-white'}`;
+                    rowElement.dataset.rowIndex = rowIndex;
+                    rowElement.dataset.isEditing = round.isEditing ? 'true' : 'false';
+
+                    const roundTd = document.createElement('td');
+                    roundTd.className = "px-4 py-2 whitespace-nowrap text-sm text-gray-900 text-center flex items-center justify-between";
+                    
+                    const editButton = `
+                        <button class="edit-round-btn bg-gray-200 hover:bg-gray-300 text-gray-800 p-1 rounded-full transition duration-150" data-row-index="${rowIndex}">
+                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                            </svg>
+                        </button>
+                    `;
+                    roundTd.innerHTML = `
+                        <span>${rowIndex + 1}</span>
+                        ${editButton}
+                    `;
+                    rowElement.appendChild(roundTd);
+
+                    playerNames.forEach(name => {
+                        const td = document.createElement('td');
+                        td.className = "px-1 py-2 whitespace-nowrap text-sm text-gray-900 text-center";
+                        
+                        let cellContent = '';
+                        if (round.isEditing || round.scores[name] === 0) {
+                            cellContent = `
+                                <div class="flex flex-col items-center">
+                                    <label class="text-xs text-gray-500">Call</label>
+                                    <input type="number" value="${round.calls[name] || ''}" min="1" max="13" data-player-name="${name}" data-row-index="${rowIndex}" data-input-type="call" class="responsive-input border border-gray-300 rounded-md px-1 py-0.5 text-center focus:ring-blue-500 focus:border-blue-500 mb-1" />
+                                    <div class="flex items-center justify-center space-x-1 mt-1">
+                                        <button class="score-btn bg-green-500 hover:bg-green-600 text-white rounded-md p-1" data-action="increase" data-player-name="${name}" data-row-index="${rowIndex}">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" /></svg>
+                                        </button>
+                                        <button class="score-btn bg-red-500 hover:bg-red-600 text-white rounded-md p-1" data-action="decrease" data-player-name="${name}" data-row-index="${rowIndex}">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M20 12H4" /></svg>
+                                        </button>
+                                    </div>
+                                </div>
+                            `;
+                        } else {
+                             const score = round.scores[name];
+                             const scoreText = score > 0 ? `+${score}` : `${score}`;
+                             const colorClass = score > 0 ? 'text-green-600' : 'text-red-600';
+                             cellContent = `
+                                 <div class="flex flex-col items-center justify-center h-full">
+                                     <span class="text-xl font-bold ${colorClass}">${scoreText}</span>
+                                 </div>
+                             `;
+                        }
+                        td.innerHTML = cellContent;
+                        rowElement.appendChild(td);
+                    });
+                    dataBody.appendChild(rowElement);
+                });
+                
+                updateTotalScores();
+            };
+            
+            const updateTotalScores = () => {
+                const totalScores = calculateAllScores();
+                totalRow.innerHTML = ''; // Clear previous footer row
+                const totalTr = document.createElement('tr');
+
+                const totalLabelTd = document.createElement('td');
+                totalLabelTd.className = "px-4 py-2 text-center text-sm font-bold uppercase";
+                totalLabelTd.textContent = "মোট";
+                totalTr.appendChild(totalLabelTd);
+
+                let sortedPlayers = Object.keys(totalScores).sort((a, b) => totalScores[b] - totalScores[a]);
+                const rankedColors = {
+                    [sortedPlayers[0]]: 'text-green-600',
+                    [sortedPlayers[1]]: 'text-blue-600',
+                    [sortedPlayers[2]]: 'text-yellow-600',
+                    [sortedPlayers[3]]: 'text-red-600'
+                };
+                
+                playerNames.forEach(name => {
+                    const td = document.createElement('td');
+                    td.className = `px-1 py-2 whitespace-nowrap text-sm font-medium text-center ${rankedColors[name] || ''}`;
+                    td.textContent = totalScores[name];
+                    totalTr.appendChild(td);
+                });
+
+                totalRow.appendChild(totalTr);
+                saveData();
+                updateAddRowButtonState(); // Update the button state after every score change
+                totalCallsDisplay.textContent = `Calls: ${calculateCurrentRoundCalls()}`;
+            };
+            
+            // Render the editable form for a specific round
+            const renderEditableRound = (rowIndex) => {
+                const rowElement = document.querySelector(`tr[data-row-index="${rowIndex}"]`);
+                const round = roundData[rowIndex];
+
+                // Set the isEditing flag for the round
+                round.isEditing = true;
+                saveData();
+                renderTable(); // Re-render the table
+            };
+
+
             const renderPlayerList = () => {
                 playerListContainer.innerHTML = '';
                 presetPlayers.forEach((player, index) => {
@@ -417,100 +440,196 @@
                         <span class="text-sm font-medium text-gray-700 flex-grow">${player}</span>
                         <div class="flex space-x-2">
                             <button class="edit-player-btn bg-yellow-400 text-white p-1 rounded-full hover:bg-yellow-500 transition duration-150" data-index="${index}">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                                    <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
-                                </svg>
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" /></svg>
                             </button>
                             <button class="delete-player-btn bg-red-500 text-white p-1 rounded-full hover:bg-red-600 transition duration-150" data-index="${index}">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                                     <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
-                                </svg>
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" /></svg>
                             </button>
                         </div>
                     `;
                     playerListContainer.appendChild(playerItem);
                 });
             };
-            
+
             // --- Event Handlers ---
             
+            // Handle input changes for 'call'
             dataBody.addEventListener('input', (event) => {
                 const target = event.target;
-                if (target.tagName === 'INPUT' && target.type === 'number') {
-                    const rowIndex = parseInt(target.dataset.rowIndex, 10);
-                    const colName = target.dataset.colName;
-                    const value = target.value;
-                    
-                    if (!isNaN(rowIndex) && colName) {
-                        rowData[rowIndex][colName] = value;
-                        saveData();
-                        
-                        // Dynamically update the Lachha text without re-rendering the whole table
-                        const rowElement = dataBody.children[rowIndex];
-                        const sumOfFirstFour = calculateSumOfFirstFourColumns(rowData[rowIndex]);
-                        const shouldShowLachha = sumOfFirstFour === 360;
-                        const lachhaColumns = ['আকিজ'];
+                if (target.tagName === 'INPUT' && target.type === 'number' && target.dataset.inputType === 'call') {
+                    const rowIndex = parseInt(target.dataset.rowIndex);
+                    const playerName = target.dataset.playerName;
+                    const value = parseInt(target.value);
 
-                        lachhaColumns.forEach(lachhaColName => {
-                            const lachhaColIndex = columnNames.indexOf(lachhaColName);
-                            if (lachhaColIndex !== -1) {
-                                const cell = rowElement.children[lachhaColIndex];
-                                if (shouldShowLachha && (rowData[rowIndex][lachhaColName] === '' || rowData[rowIndex][lachhaColName] === '0')) {
-                                    // Replace input with Lachha span
-                                    if (cell.querySelector('input')) {
-                                        cell.innerHTML = `<span class="block w-12 sm:w-16 md:w-28 bg-red-200 text-red-800 rounded-md px-1 py-0.5 text-center font-bold Lachha-text">
-                                            😫লাচ্ছা
-                                        </span>`;
-                                    }
-                                } else {
-                                    // If Lachha text is visible and condition is not met, revert to input
-                                    if (cell.querySelector('.Lachha-text')) {
-                                        cell.innerHTML = `<input type="number" value="${rowData[rowIndex][lachhaColName]}" data-row-index="${rowIndex}" data-col-name="${lachhaColName}" class="responsive-input w-12 sm:w-16 md:w-28 border border-gray-300 rounded-md px-1 py-0.5 text-center focus:ring-blue-500 focus:border-blue-500" />`;
-                                    }
-                                }
-                            }
-                        });
-                        
-                        // Update sums and totals after all data and display logic is handled
-                        updateTableTotals();
+                    // Check if roundData and the specific round object exist
+                    if (roundData[rowIndex] && roundData[rowIndex].calls) {
+                        roundData[rowIndex].calls[playerName] = value || '';
+                        saveData();
+                        totalCallsDisplay.textContent = `Calls: ${calculateCurrentRoundCalls()}`;
+                    }
+                    
+                    if (isNaN(value)) {
+                        target.value = '';
+                    } else if (value < 1 || value > 13) {
+                         // Use a custom modal instead of alert
+                        const modal = document.createElement('div');
+                        modal.className = "fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50";
+                        modal.innerHTML = `<div class="bg-white p-6 rounded-lg shadow-xl text-center">
+                            <p class="text-lg font-semibold mb-4 text-gray-800">কল অবশ্যই 1 থেকে 13 এর মধ্যে হতে হবে।</p>
+                            <button id="closeAlertBtn" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg shadow-md">ঠিক আছে</button>
+                        </div>`;
+                        document.body.appendChild(modal);
+                        document.getElementById('closeAlertBtn').addEventListener('click', () => modal.remove());
+                        target.value = '';
                     }
                 }
             });
-            
-            clearBtn.addEventListener('click', () => {
-                clearConfirmModal.classList.remove('hidden');
+
+            // Handle plus/minus button clicks for score
+            dataBody.addEventListener('click', (event) => {
+                const target = event.target.closest('.score-btn');
+                if (target) {
+                    const action = target.dataset.action;
+                    const rowIndex = parseInt(target.dataset.rowIndex);
+                    const playerName = target.dataset.playerName;
+                    
+                    const callInput = target.closest('td').querySelector('input[data-input-type="call"]');
+                    const callValue = parseInt(callInput.value);
+
+                    if (isNaN(callValue)) {
+                        const modal = document.createElement('div');
+                        modal.className = "fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50";
+                        modal.innerHTML = `<div class="bg-white p-6 rounded-lg shadow-xl text-center">
+                            <p class="text-lg font-semibold mb-4 text-gray-800">স্কোর যোগ বা বিয়োগ করার আগে অবশ্যই কল দিতে হবে।</p>
+                            <button id="closeAlertBtn" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg shadow-md">ঠিক আছে</button>
+                        </div>`;
+                        document.body.appendChild(modal);
+                        document.getElementById('closeAlertBtn').addEventListener('click', () => modal.remove());
+                        return;
+                    }
+
+                    if (action === 'increase') {
+                        roundData[rowIndex].scores[playerName] = callValue;
+                    } else if (action === 'decrease') {
+                        roundData[rowIndex].scores[playerName] = -callValue;
+                    }
+                    
+                    // After scoring, set the isEditing flag to false and re-render the table
+                    roundData[rowIndex].isEditing = false;
+
+                    updateTotalScores();
+                    renderTable();
+                    saveData();
+                }
+
+                const editRoundTarget = event.target.closest('.edit-round-btn');
+                if (editRoundTarget) {
+                    const rowIndex = parseInt(editRoundTarget.dataset.rowIndex);
+                    const round = roundData[rowIndex];
+                    round.isEditing = true;
+                    saveData();
+                    renderTable();
+                }
             });
 
-            confirmClearBtn.addEventListener('click', () => {
-                rowData = initializeRowData();
-                renderTable();
-                clearConfirmModal.classList.add('hidden');
-                localStorage.removeItem('calculatorData');
-            });
+            // Handle player name changes from the modal
+            tableHeaderRow.addEventListener('click', (event) => {
+                if(isLocked) return;
 
-            cancelClearBtn.addEventListener('click', () => {
-                clearConfirmModal.classList.add('hidden');
+                const target = event.target.closest('span');
+                if (target) {
+                    const colIndex = parseInt(target.dataset.colIndex, 10);
+                    currentColumnIndex = colIndex;
+
+                    dynamicPlayerList.innerHTML = '';
+                    presetPlayers.forEach(player => {
+                        const playerItem = document.createElement('div');
+                        playerItem.className = "cursor-pointer p-2 rounded-lg hover:bg-gray-100 transition duration-150";
+                        playerItem.textContent = player;
+                        playerItem.dataset.name = player;
+                        dynamicPlayerList.appendChild(playerItem);
+                    });
+                    dynamicPlayerModal.classList.remove('hidden');
+                }
             });
             
+            dynamicPlayerList.addEventListener('click', (event) => {
+                const target = event.target.closest('div');
+                if (target && target.dataset.name) {
+                    const selectedName = target.dataset.name;
+                    if (currentColumnIndex !== -1 && currentColumnIndex < playerNames.length) {
+                        const oldName = playerNames[currentColumnIndex];
+                        playerNames[currentColumnIndex] = selectedName;
+                        
+                        // Update round data with new name
+                        roundData.forEach(round => {
+                            if (typeof round.calls[oldName] !== 'undefined') {
+                                round.calls[selectedName] = round.calls[oldName];
+                                delete round.calls[oldName];
+                            }
+                            if (typeof round.scores[oldName] !== 'undefined') {
+                                round.scores[selectedName] = round.scores[oldName];
+                                delete round.scores[oldName];
+                            }
+                        });
+                        renderTable();
+                        saveData();
+                    }
+                    dynamicPlayerModal.classList.add('hidden');
+                    currentColumnIndex = -1;
+                }
+            });
+            
+            cancelDynamicPlayerBtn.addEventListener('click', () => {
+                dynamicPlayerModal.classList.add('hidden');
+                currentColumnIndex = -1;
+            });
+
             editToggleBtn.addEventListener('click', () => {
                 isLocked = !isLocked;
-                lockIcon.classList.toggle('hidden', !isLocked);
-                editIcon.classList.toggle('hidden', isLocked);
-                playerBtn.classList.toggle('hidden', isLocked); // This line now controls the player button
-                renderTable();
+                updateLockUI();
+                renderTable(); // Re-render to enable/disable inputs
                 saveData();
+            });
+            
+            clearBtn.addEventListener('click', () => clearConfirmModal.classList.remove('hidden'));
+            confirmClearBtn.addEventListener('click', () => {
+                roundData = [];
+                renderTable();
+                clearConfirmModal.classList.add('hidden');
+                saveData();
+            });
+            cancelClearBtn.addEventListener('click', () => clearConfirmModal.classList.add('hidden'));
+
+            addRowBtn.addEventListener('click', () => {
+                if (isCurrentRoundComplete()) {
+                    const newRound = {
+                        calls: {},
+                        scores: {},
+                        isEditing: true // New rounds start in editing mode
+                    };
+                    playerNames.forEach(name => {
+                        newRound.calls[name] = '';
+                        newRound.scores[name] = 0;
+                    });
+                    roundData.push(newRound);
+                    renderTable();
+                } else {
+                    incompleteRoundModal.classList.remove('hidden');
+                }
+            });
+            
+            closeIncompleteModalBtn.addEventListener('click', () => {
+                incompleteRoundModal.classList.add('hidden');
             });
 
             playerBtn.addEventListener('click', () => {
                 renderPlayerList();
                 playerModal.classList.remove('hidden');
-                document.getElementById('addPlayerInput').value = '';
-                addPlayerBtn.textContent = 'যোগ করুন';
+                addPlayerInput.value = '';
             });
 
-            cancelPlayerBtn.addEventListener('click', () => {
-                playerModal.classList.add('hidden');
-            });
+            cancelPlayerBtn.addEventListener('click', () => playerModal.classList.add('hidden'));
 
             playerListContainer.addEventListener('click', (event) => {
                 const target = event.target.closest('.edit-player-btn');
@@ -521,16 +640,12 @@
                     const nameSpan = playerItem.querySelector('span');
 
                     nameSpan.style.display = 'none';
-                    playerItem.querySelector('.flex-grow').innerHTML = `
-                        <input type="text" value="${playerName}" class="edit-player-input w-full px-2 py-1 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    `;
+                    playerItem.querySelector('.flex-grow').innerHTML = `<input type="text" value="${playerName}" class="edit-player-input w-full px-2 py-1 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">`;
                     playerItem.querySelector('.edit-player-input').focus();
                     target.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" /></svg>`;
                     target.classList.remove('bg-yellow-400');
-                    target.classList.add('bg-green-500');
+                    target.classList.add('bg-green-500', 'save-player-btn');
                     target.classList.remove('edit-player-btn');
-                    target.classList.add('save-player-btn');
-
                     const deleteBtn = playerItem.querySelector('.delete-player-btn');
                     deleteBtn.style.display = 'none';
                     return;
@@ -539,31 +654,24 @@
                 const deleteTarget = event.target.closest('.delete-player-btn');
                 if (deleteTarget) {
                     const index = parseInt(deleteTarget.dataset.index, 10);
-                    // Use a custom modal instead of alert
                     const modal = document.createElement('div');
                     modal.id = "deleteConfirmModal";
                     modal.className = "fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50";
-                    modal.innerHTML = `
-                      <div class="bg-white p-6 rounded-lg shadow-xl text-center">
+                    modal.innerHTML = `<div class="bg-white p-6 rounded-lg shadow-xl text-center">
                         <p class="text-lg font-semibold mb-4 text-gray-800">আপনি কি নিশ্চিত যে আপনি এই খেলোয়াড়কে মুছে ফেলতে চান?</p>
                         <div class="flex justify-center space-x-4">
-                          <button id="confirmDeleteBtn" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg shadow-md">হ্যাঁ</button>
-                          <button id="cancelDeleteBtn" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-lg shadow-md">না</button>
+                            <button id="confirmDeleteBtn" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg shadow-md">হ্যাঁ</button>
+                            <button id="cancelDeleteBtn" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-lg shadow-md">না</button>
                         </div>
-                      </div>
-                    `;
+                    </div>`;
                     document.body.appendChild(modal);
-
                     document.getElementById('confirmDeleteBtn').addEventListener('click', () => {
-                      presetPlayers.splice(index, 1);
-                      saveData();
-                      renderPlayerList();
-                      modal.remove();
+                        presetPlayers.splice(index, 1);
+                        saveData();
+                        renderPlayerList();
+                        modal.remove();
                     });
-
-                    document.getElementById('cancelDeleteBtn').addEventListener('click', () => {
-                      modal.remove();
-                    });
+                    document.getElementById('cancelDeleteBtn').addEventListener('click', () => modal.remove());
                     return;
                 }
                 
@@ -588,89 +696,31 @@
                     saveData();
                     renderPlayerList();
                 } else if (newName) {
-                    // Use a custom modal for alert
                     const modal = document.createElement('div');
                     modal.className = "fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50";
-                    modal.innerHTML = `
-                      <div class="bg-white p-6 rounded-lg shadow-xl text-center">
+                    modal.innerHTML = `<div class="bg-white p-6 rounded-lg shadow-xl text-center">
                         <p class="text-lg font-semibold mb-4 text-gray-800">এই নামটি ইতিমধ্যে তালিকায় আছে।</p>
                         <button id="closeAlertBtn" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg shadow-md">ঠিক আছে</button>
-                      </div>
-                    `;
+                    </div>`;
                     document.body.appendChild(modal);
-                    document.getElementById('closeAlertBtn').addEventListener('click', () => {
-                      modal.remove();
-                    });
+                    document.getElementById('closeAlertBtn').addEventListener('click', () => modal.remove());
                 }
             });
 
             savePlayerListBtn.addEventListener('click', () => {
                 playerModal.classList.add('hidden');
-                saveData(); // Save the updated list when the modal is closed
+                saveData();
             });
-            
-            // প্লেয়ারের নাম নির্বাচন করা হলে, এই ইভেন্টটি টেবিলের হেডার আপডেট করবে।
-            dynamicPlayerList.addEventListener('click', (event) => {
-                const target = event.target.closest('div');
-                if (target && target.dataset.name) {
-                    const selectedName = target.dataset.name;
-                    if (currentColumnIndex !== -1 && currentColumnIndex < columnNames.length) {
-                        const oldName = columnNames[currentColumnIndex];
-                        columnNames[currentColumnIndex] = selectedName;
-                        
-                        // rowData-এর অবজেক্টগুলি সরাসরি আপডেট করা হচ্ছে।
-                        rowData.forEach(row => {
-                            if (typeof row[oldName] !== 'undefined') {
-                                row[selectedName] = row[oldName];
-                                delete row[oldName];
-                            }
-                        });
-                        
-                        // Update the span element with the new name
-                        const headerSpan = tableHeaderRow.querySelector(`span[data-col-index="${currentColumnIndex}"]`);
-                        if(headerSpan) {
-                            headerSpan.textContent = selectedName;
-                        }
 
-                        updateTableTotals();
-                        saveData();
-                    }
-                    dynamicPlayerModal.classList.add('hidden');
-                    currentColumnIndex = -1; // Reset index after selection
-                }
-            });
-            
-            cancelDynamicPlayerBtn.addEventListener('click', () => {
-                dynamicPlayerModal.classList.add('hidden');
-                currentColumnIndex = -1;
-            });
-            
-            // প্লেয়ারের নাম ইনপুট ফিল্ডে ক্লিক করলে কিবোর্ড বন্ধ রাখার জন্য এই ইভেন্টটি আপডেট করা হলো।
-            // Now we listen for a click on the span instead of input focus.
-            tableHeaderRow.addEventListener('click', (event) => {
-                const target = event.target.closest('span');
-                if (target && !isLocked) {
-                    const colIndex = parseInt(target.dataset.colIndex, 10);
-                    currentColumnIndex = colIndex;
-
-                    dynamicPlayerList.innerHTML = '';
-                    presetPlayers.forEach(player => {
-                        const playerItem = document.createElement('div');
-                        playerItem.className = "cursor-pointer p-2 rounded-lg hover:bg-gray-100 transition duration-150";
-                        playerItem.textContent = player;
-                        playerItem.dataset.name = player;
-                        dynamicPlayerList.appendChild(playerItem);
-                    });
-                    dynamicPlayerModal.classList.remove('hidden');
-                }
-            });
-            
             // Initial render
             loadData();
-            lockIcon.classList.toggle('hidden', !isLocked);
-            editIcon.classList.toggle('hidden', isLocked);
-            playerBtn.classList.toggle('hidden', isLocked);
+            updateLockUI();
             renderTable();
+            
+            // Add initial empty round if the table is empty
+            if (roundData.length === 0) {
+                addRowBtn.click();
+            }
         });
     </script>
 </body>
