@@ -95,6 +95,54 @@
     .paste-button:hover {
         background: #d1d5db;
     }
+    /* Modal styles */
+    .modal {
+        position: fixed;
+        z-index: 100;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgba(0,0,0,0.4);
+        display: none;
+        align-items: center;
+        justify-content: center;
+    }
+    .modal-content {
+        background-color: #fefefe;
+        margin: auto;
+        padding: 2rem;
+        border-radius: 12px;
+        width: 90%;
+        max-width: 600px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        position: relative;
+    }
+    .close-button {
+        color: #aaa;
+        position: absolute;
+        top: 10px;
+        right: 15px;
+        font-size: 28px;
+        font-weight: bold;
+    }
+    .close-button:hover,
+    .close-button:focus {
+        color: black;
+        text-decoration: none;
+        cursor: pointer;
+    }
+    .invoice-list-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px;
+        border-bottom: 1px solid #e5e7eb;
+    }
+    .invoice-list-item:last-child {
+        border-bottom: none;
+    }
   </style>
 </head>
 <body class="bg-gray-50 p-6">
@@ -213,7 +261,6 @@
                 <select id="social-media-select" class="w-2/5 md:w-1/3 border rounded-md px-2 py-1 bg-white">
                   <option value="website">ওয়েবসাইট</option>
                   <option value="facebook">ফেসবুক</option>
-                  <option value="whatsapp">হোয়াটসঅ্যাপ</option>
                 </select>
                 <div class="input-group w-full">
                     <input type="text" id="social-media-link-input" placeholder="লিংক/ব্যবহারকারীর নাম" value="www.apnarshop.com" class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500">
@@ -233,9 +280,12 @@
         </div>
       </div>
       
-      <!-- Save Button -->
+      <!-- Save and Print Buttons -->
       <div class="no-print mt-6 text-center">
-        <button id="save-invoice-button" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded-lg flex items-center justify-center gap-2">
+        <button id="show-saved-invoices-button" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-6 rounded-lg flex items-center justify-center gap-2">
+          📁 সংরক্ষিত ইনভয়েস দেখুন
+        </button>
+        <button id="save-invoice-button" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded-lg flex items-center justify-center gap-2 mt-2">
           ✅ ইনভয়েস সেভ করুন
         </button>
         <button onclick="window.print()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg flex items-center justify-center gap-2 mt-2">
@@ -308,23 +358,30 @@
     </div>
   </div>
 
+  <!-- Modal for Saved Invoices -->
+  <div id="saved-invoices-modal" class="modal">
+    <div class="modal-content">
+      <span class="close-button" id="close-modal-button">&times;</span>
+      <h2 class="text-2xl font-bold mb-4">সংরক্ষিত ইনভয়েস</h2>
+      <div id="invoice-list-container" class="max-h-96 overflow-y-auto">
+        <!-- Invoices will be populated here -->
+      </div>
+      <p id="empty-list-message" class="text-gray-500 mt-4" style="display: none;">কোনো ইনভয়েস সেভ করা নেই।</p>
+      <div id="loading-message" class="text-blue-500 mt-4 text-center" style="display: none;">ইনভয়েস লোড হচ্ছে...</div>
+    </div>
+  </div>
+
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-    import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-    import { getFirestore, addDoc, collection, setDoc, doc, getDoc, getDocs, onSnapshot, query, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+    import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getFirestore, addDoc, collection, doc, getDocs, deleteDoc, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
     setLogLevel('debug'); // Enable Firestore logging
-
-    // আপনার দেওয়া Firebase কনফিগারেশন
-    const firebaseConfig = {
-      apiKey: "AIzaSyACr4tymiTKrtPltKbAlLulsdG3efoDowQ",
-      authDomain: "facebook-c7ea6.firebaseapp.com",
-      projectId: "facebook-c7ea6",
-      storageBucket: "facebook-c7ea6.firebasestorage.app",
-      messagingSenderId: "28858429763",
-      appId: "1:28858429763:web:6ddbe43ea94a4bfaf4bff6",
-      measurementId: "G-M3VEVHMDH1"
-    };
+    
+    // Canvas environment variables
+    const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+    const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+    const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
 
     let app;
     let db;
@@ -333,7 +390,7 @@
     let firebaseInitialized = false;
 
     // Firebase ইনিশিয়ালাইজেশন
-    const initializeFirebase = () => {
+    const initializeFirebase = async () => {
         try {
             if (app) {
                 return;
@@ -343,17 +400,21 @@
             auth = getAuth(app);
             firebaseInitialized = true;
 
-            // Anonymously sign in
             const signIn = async () => {
                 try {
-                    await signInAnonymously(auth);
+                    if (initialAuthToken) {
+                        await signInWithCustomToken(auth, initialAuthToken);
+                    } else {
+                        await signInAnonymously(auth);
+                    }
                     userId = auth.currentUser?.uid || crypto.randomUUID();
+                    console.log("Authentication successful, userId:", userId);
                 } catch (error) {
                     console.error("Firebase Auth Error:", error);
-                    // Handle the auth error gracefully, perhaps by continuing without auth
+                    showMessage("প্রমাণীকরণে ত্রুটি হয়েছে।", 'bg-red-200 text-red-800');
                 }
             };
-            signIn();
+            await signIn();
             console.log("Firebase initialized successfully.");
         } catch (e) {
             console.error("Error initializing Firebase:", e);
@@ -396,7 +457,14 @@
       const socialMediaLinkInput = document.getElementById('social-media-link-input');
       const footerPhoneInput = document.getElementById('footer-phone-input');
       const saveInvoiceButton = document.getElementById('save-invoice-button');
+      const showSavedInvoicesButton = document.getElementById('show-saved-invoices-button');
       const messageBox = document.getElementById('message-box');
+      const savedInvoicesModal = document.getElementById('saved-invoices-modal');
+      const closeModalButton = document.getElementById('close-modal-button');
+      const invoiceListContainer = document.getElementById('invoice-list-container');
+      const emptyListMessage = document.getElementById('empty-list-message');
+      const loadingMessage = document.getElementById('loading-message');
+
 
       // Display elements
       const companyNameDisplay = document.getElementById('company-name-display');
@@ -441,8 +509,7 @@
       // Social media SVG icons
       const icons = {
         website: `<svg class="icon-small" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm0 18c-4.411 0-8-3.589-8-8s3.589-8 8-8 8 3.589 8 8-3.589 8-8 8zm-1-14v2.09c.358-.063.722-.09 1.09-.09 1.942 0 3.518 1.407 3.924 3.238L16 11.238V9h-2v3.086c-.34-.131-.692-.224-1.056-.282L12 12H9v-2h2v-2zM9 13v2h2v-2H9zm4 0v2h2v-2h-2zM12 7v2h2V7h-2zm-3 4v2h2v-2H9z"/></svg>`,
-        facebook: `<svg class="icon-small" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm3.176 8.52h-2.164v8.138h-3.172v-8.138H8.761V7.99h1.999V6.372c0-2.28 1.408-3.484 3.587-3.484h2.245v2.793h-1.666c-.662 0-.82.235-.82.812v1.5H16.143L15.65 10.52z"/></svg>`,
-        whatsapp: `<svg class="icon-small" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm3.842 14.18c-.46.362-1.258.74-2.18.74-1.265 0-2.155-.91-2.155-2.062 0-.91.432-1.46 1.135-2.185.703-.726 1.76-1.558 1.76-1.558s-.012-.46-.012-.66c0-.202.138-.475.405-.615.267-.14.654-.265 1.054-.265.25 0 .5.053.72.152.22.1.4.24.52.427.12.188.188.423.188.694 0 .14-.02.268-.06.388-.04.12-.1.222-.18.307-.08.086-.17.155-.27.218-.1.063-.207.108-.32.137-.08.02-.15.035-.2.046l-.018.007c-.1.018-.21.025-.33.025-.213 0-.32-.127-.417-.253-.097-.126-.145-.302-.145-.527 0-.39.19-.748.57-1.07.38-.322.95-.58 1.71-.58.32 0 .61.07.87.215.26.145.47.33.62.55.15.22.25.46.3.72.05.26.08.528.08.798 0 .822-.61 1.737-1.84 2.748-1.232 1.01-3.07 1.71-3.07 1.71s-.418.23-.418.38c0 .15.115.305.34.465.225.16.51.275.855.342.345.068.707.098 1.085.098.398 0 .783-.042 1.155-.125.37-.08.71-.2.99-.36.28-.16.51-.38.69-.64.18-.26.31-.56.39-.89.08-.33.12-.67.12-1.01 0-.17-.008-.33-.024-.488a.63.63 0 01.127-.428c.11-.18.26-.3.45-.36.19-.06.39-.077.6-.05.15.015.3.05.42.098.12.048.22.115.3.2.08.084.14.18.18.29.04.11.06.225.06.345 0 .19-.02.37-.06.55-.04.18-.1.35-.16.51-.07.16-.16.3-.27.42-.11.12-.23.218-.36.29-.14.06-.29.128-.4.17-.14.04-.27.065-.4.07-.13.007-.25.01-.36.01-.39 0-.74-.065-1.04-.195-.3-.13-.53-.3-.69-.51-.16-.21-.24-.44-.24-.69 0-.27.09-.5.27-.69.18-.19.46-.28.84-.28.18 0 .33.02.45.055.12.035.22.085.3.15.08.068.14.15.18.245.04.094.06.19.06.288 0 .17-.02.33-.06.48-.04.15-.09.28-.17.4-.08.12-.16.22-.26.3-.1.08-.2.14-.3.19-.1.05-.2.08-.28.1-.08.02-.17.025-.26.015-.24-.025-.45-.09-.64-.2-.19-.11-.34-.26-.45-.45-.11-.19-.16-.4-.16-.62 0-.25.09-.48.27-.69.18-.21.46-.31.84-.31.18 0 .34.02.47.05.13.03.24.08.33.14.09.06.16.16.22.26.06.1.1.21.12.33.02.12.03.25.03.38 0 .4-.07.78-.22 1.14-.15.36-.36.66-.63.9-.27.24-.59.41-.95.5-.36.09-.75.13-1.17.13-.28 0-.54-.04-.79-.1s-.48-.13-.69-.25-.39-.28-.53-.44-.25-.35-.32-.54c-.07-.19-.11-.4-.11-.63 0-.17.02-.34.06-.5s.1-.3.18-.44.18-.23.29-.33.22-.18.34-.25.24-.13.36-.18.24-.06.36-.07.24-.01.37-.01c.2 0 .38.01.54.04.16.03.3.08.4.14.1.06.19.14.25.22.06.08.11.17.14.27.03.1.05.21.05.32 0 .23-.04.45-.11.66-.07.21-.17.4-.3.57-.13.17-.28.31-.46.42-.18.11-.38.19-.6.23-.22.04-.45.06-.68.06-1.57 0-3.03-.49-4.38-1.48-1.35-.99-2.02-2.36-2.02-4.11 0-.75.25-1.52.75-2.31.5-.79 1.25-1.4 2.25-1.83.47-.2.98-.3 1.53-.3.4 0 .8.08 1.18.25.38.17.7.4.96.7.26.3.46.66.6.99.14.33.2.68.2 1.05 0 .19-.02.38-.06.56-.04.18-.1.34-.18.5-.08.16-.18.29-.3.4-.12.11-.25.2-.39.26-.14.06-.29.1-.45.1-.21 0-.4-.03-.57-.09s-.32-.14-.43-.24-.19-.22-.24-.36-.08-.3-.08-.46c0-.21.05-.4.15-.56.1-.16.22-.28.36-.38.14-.1.3-.15.48-.15.16 0 .3.03.4.09s.18.14.25.24c.07.1.1.2.1.3s-.015.2-.045.3c-.03.1-.06.18-.1.25-.04.07-.08.13-.14.18-.06.05-.12.08-.18.1-.06.02-.12.03-.18.03z"/></svg>`
+        facebook: `<svg class="icon-small" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm3.176 8.52h-2.164v8.138h-3.172v-8.138H8.761V7.99h1.999V6.372c0-2.28 1.408-3.484 3.587-3.484h2.245v2.793h-1.666c-.662 0-.82.235-.82.812v1.5H16.143L15.65 10.52z"/></svg>`
       };
 
       // Set initial invoice details
@@ -492,14 +559,13 @@
 
       // Function to save data to Firestore
       const saveInvoice = async () => {
-          if (!firebaseInitialized || !db) {
+          if (!firebaseInitialized || !db || !userId) {
               showMessage("Firebase সঠিকভাবে কনফিগার করা হয়নি।", 'bg-red-200 text-red-800');
               return;
           }
-
           const invoiceData = collectData();
           try {
-              const invoicesCollection = collection(db, `invoices`);
+              const invoicesCollection = collection(db, `artifacts/${appId}/users/${userId}/invoices`);
               await addDoc(invoicesCollection, invoiceData);
               showMessage("ইনভয়েস সফলভাবে সেভ করা হয়েছে!", 'bg-green-200 text-green-800');
           } catch (e) {
@@ -553,7 +619,119 @@
         inputItemsContainer.appendChild(newItemRow);
         updateInvoicePreview();
       };
+
+      // Function to load a saved invoice into the form
+      const loadInvoiceData = (invoiceData) => {
+        // Populate client info
+        clientNameInput.value = invoiceData.client.name;
+        clientMobileInput.value = invoiceData.client.mobile;
+        clientAddressInput.value = invoiceData.client.address;
+        statfastCodeInput.value = invoiceData.client.statfastCode;
+
+        // Populate items
+        inputItemsContainer.innerHTML = '';
+        invoiceData.items.forEach(item => {
+          addItemRow(item);
+        });
+
+        // Populate other fields
+        deliveryChargeInput.value = invoiceData.deliveryCharge;
+        paymentMethodInput.value = invoiceData.paymentMethod;
+
+        // You may want to update the invoice number and date to the loaded one,
+        // or generate a new one for a fresh invoice based on the template.
+        // For now, let's generate a new one.
+        invoiceNumberDisplay.textContent = generateInvoiceNumber();
+        invoiceDateDisplay.textContent = getFormattedDate();
+
+        // Close the modal and show a message
+        savedInvoicesModal.style.display = 'none';
+        showMessage("ইনভয়েস সফলভাবে লোড করা হয়েছে!", 'bg-blue-200 text-blue-800');
+        updateInvoicePreview();
+        activateTab('client');
+      };
       
+      // Function to delete an invoice from Firestore
+      const deleteInvoice = async (docId) => {
+        if (!firebaseInitialized || !db || !userId) {
+              showMessage("Firebase সঠিকভাবে কনফিগার করা হয়নি।", 'bg-red-200 text-red-800');
+              return;
+        }
+        try {
+          await deleteDoc(doc(db, `artifacts/${appId}/users/${userId}/invoices`, docId));
+          showMessage("ইনভয়েস সফলভাবে মুছে ফেলা হয়েছে!", 'bg-green-200 text-green-800');
+          // Refresh the list after deletion
+          loadSavedInvoices();
+        } catch (e) {
+          console.error("ইনভয়েস মোছার সময় ত্রুটি হয়েছে: ", e);
+          showMessage("ইনভয়েস মোছার সময় একটি ত্রুটি হয়েছে।", 'bg-red-200 text-red-800');
+        }
+      };
+
+      // Function to render the list of saved invoices in the modal
+      const renderSavedInvoicesList = (invoices) => {
+        invoiceListContainer.innerHTML = '';
+        emptyListMessage.style.display = 'none';
+        
+        if (invoices.length === 0) {
+            emptyListMessage.style.display = 'block';
+            return;
+        }
+
+        invoices.forEach(invoice => {
+          const listItem = document.createElement('div');
+          listItem.className = 'invoice-list-item';
+          listItem.innerHTML = `
+            <div>
+              <p class="font-bold">${invoice.client.name}</p>
+              <p class="text-sm text-gray-600">${invoice.invoiceNumber}</p>
+            </div>
+            <div class="space-x-2">
+              <button class="bg-blue-500 text-white text-xs px-3 py-1 rounded-full hover:bg-blue-600 load-invoice-btn" data-doc-id="${invoice.id}">লোড</button>
+              <button class="bg-red-500 text-white text-xs px-3 py-1 rounded-full hover:bg-red-600 delete-invoice-btn" data-doc-id="${invoice.id}">মুছুন</button>
+            </div>
+          `;
+          invoiceListContainer.appendChild(listItem);
+        });
+
+        // Attach event listeners to the new buttons
+        invoiceListContainer.querySelectorAll('.load-invoice-btn').forEach(btn => {
+            const invoice = invoices.find(inv => inv.id === btn.dataset.docId);
+            btn.addEventListener('click', () => loadInvoiceData(invoice));
+        });
+
+        invoiceListContainer.querySelectorAll('.delete-invoice-btn').forEach(btn => {
+            btn.addEventListener('click', () => deleteInvoice(btn.dataset.docId));
+        });
+      };
+
+      // Function to load all saved invoices from Firestore
+      const loadSavedInvoices = async () => {
+          if (!firebaseInitialized || !db || !userId) {
+              showMessage("Firebase সঠিকভাবে কনফিগার করা হয়নি।", 'bg-red-200 text-red-800');
+              return;
+          }
+          savedInvoicesModal.style.display = 'flex';
+          loadingMessage.style.display = 'block';
+          invoiceListContainer.innerHTML = '';
+          emptyListMessage.style.display = 'none';
+
+          try {
+              const invoicesCollectionRef = collection(db, `artifacts/${appId}/users/${userId}/invoices`);
+              const querySnapshot = await getDocs(invoicesCollectionRef);
+              const invoices = [];
+              querySnapshot.forEach((doc) => {
+                  invoices.push({ id: doc.id, ...doc.data() });
+              });
+              renderSavedInvoicesList(invoices);
+          } catch (e) {
+              console.error("ইনভয়েস লোড করার সময় ত্রুটি হয়েছে: ", e);
+              showMessage("ইনভয়েস লোড করার সময় একটি ত্রুটি হয়েছে।", 'bg-red-200 text-red-800');
+          } finally {
+              loadingMessage.style.display = 'none';
+          }
+      };
+
       // Function to load data (now from a default state)
       const loadData = () => {
         companyNameInput.value = 'ফুডি হাট';
@@ -652,6 +830,12 @@
 
       // Save invoice to Firestore
       saveInvoiceButton.addEventListener('click', saveInvoice);
+
+      // Show and load saved invoices
+      showSavedInvoicesButton.addEventListener('click', loadSavedInvoices);
+      closeModalButton.addEventListener('click', () => {
+        savedInvoicesModal.style.display = 'none';
+      });
 
       // Initial load of data when the page loads
       loadData();
