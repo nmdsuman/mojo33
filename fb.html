@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ইনভয়েস জেনারেটর</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+    .invoice-box table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .invoice-box table tr.heading td {
+      background: #2563eb; /* blue-600 */
+      color: white;
+      font-weight: bold;
+      text-align: center;
+      padding: 8px;
+    }
+    .invoice-box table tr.item td {
+      border-bottom: 1px solid #e5e7eb;
+      padding: 6px;
+    }
+    .invoice-box table tr.item:nth-child(even) td {
+      background: #f9fafb;
+    }
+    .invoice-box table tr.total td {
+      font-weight: bold;
+      padding: 6px;
+    }
+    .invoice-footer {
+      margin-top: 2rem;
+      text-align: center;
+      font-size: 0.9rem;
+      color: #6b7280;
+    }
+    .icon-small {
+      width: 1rem;
+      height: 1rem;
+      display: inline-block;
+      fill: currentColor;
+    }
+    @media print {
+      .no-print { display: none; }
+      body { background: white; }
+      .invoice-container {
+        display: block !important;
+        margin: 0;
+      }
+      #input-panel {
+        display: none;
+      }
+      .invoice-box {
+        box-shadow: none;
+      }
+    }
+  </style>
+</head>
+<body class="bg-gray-50 p-6">
+
+  <!-- Main container for the split view -->
+  <div class="invoice-container grid grid-cols-1 lg:grid-cols-2 gap-8 w-full max-w-7xl mx-auto">
+    <!-- Left Panel: Input Forms -->
+    <div id="input-panel" class="no-print bg-white rounded-xl shadow-2xl p-6 md:p-10">
+      <h1 class="text-3xl font-bold text-gray-800 mb-6">ইনপুট ফর্ম</h1>
+      
+      <!-- Company Info Input -->
+      <div class="mb-8 border-b pb-8">
+        <h3 class="font-semibold text-lg text-gray-800 mb-2">প্রতিষ্ঠানের তথ্য</h3>
+        <input type="text" id="company-name-input" placeholder="প্রতিষ্ঠানের নাম" class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 mb-2">
+        <input type="text" id="company-address-input" placeholder="প্রতিষ্ঠানের ঠিকানা" class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 mb-2">
+        <input type="text" id="company-mobile-input" placeholder="মোবাইল নাম্বার" class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500">
+      </div>
+
+      <!-- Client Info Input -->
+      <div class="mb-8 border-b pb-8">
+        <h3 class="font-semibold text-lg text-gray-800 mb-2">গ্রাহকের তথ্য</h3>
+        <input type="text" id="client-name-input" placeholder="গ্রাহকের নাম" class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 mb-2">
+        <input type="text" id="client-mobile-input" placeholder="গ্রাহকের ফোন নাম্বার" class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 mb-2">
+        <input type="text" id="client-address-input" placeholder="গ্রাহকের ঠিকানা" class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500">
+      </div>
+
+      <!-- Items Input -->
+      <div class="mb-6">
+        <h3 class="font-semibold text-lg text-gray-800 mb-4">পণ্যের বিবরণ</h3>
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4 font-semibold text-gray-700">
+          <div class="md:col-span-2">পণ্যের নাম</div>
+          <div>পরিমাণ</div>
+          <div>মূল্য (৳)</div>
+          <div>মোট</div>
+        </div>
+        <div id="input-items-container">
+          <!-- Item rows will be added dynamically -->
+        </div>
+        <button id="add-item" class="mt-4 bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg transition duration-300 ease-in-out">
+          + আরও পণ্য যোগ করুন
+        </button>
+      </div>
+
+      <!-- Delivery Charge & Payment Method Input -->
+      <div class="flex flex-col md:flex-row justify-end mt-8">
+        <div class="w-full md:w-1/2 lg:w-1/3 space-y-2">
+          <div class="flex justify-between items-center text-gray-700">
+            <span class="font-medium">ডেলিভারি চার্জ:</span>
+            <input type="number" id="delivery-charge-input" value="0" min="0" class="w-24 text-right border rounded-md px-2 py-1">
+          </div>
+          <div class="flex justify-between items-center text-gray-700">
+            <span class="font-medium">পেমেন্ট মেথড:</span>
+            <select id="payment-method-input" class="w-24 border rounded-md px-2 py-1 bg-white">
+              <option value="ক্যাশ অন ডেলিভারি (COD)">ক্যাশ অন ডেলিভারি (COD)</option>
+              <option value="বিকাশ (bKash)">বিকাশ (bKash)</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Footer Info Input -->
+      <div class="mt-8 border-t pt-8">
+        <h3 class="font-semibold text-lg text-gray-800 mb-2">ফুটারে তথ্য</h3>
+        <textarea id="footer-message-input" placeholder="ধন্যবাদ বার্তা" rows="2" class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 mb-2">ধন্যবাদ আমাদের থেকে কেনাকাটার জন্য ❤️</textarea>
+        
+        <div class="flex items-center gap-2 mb-2">
+          <select id="social-media-select" class="w-2/5 md:w-1/3 border rounded-md px-2 py-1 bg-white">
+            <option value="website">ওয়েবসাইট</option>
+            <option value="facebook">ফেসবুক</option>
+            <option value="whatsapp">হোয়াটসঅ্যাপ</option>
+          </select>
+          <input type="text" id="social-media-link-input" placeholder="লিংক/ব্যবহারকারীর নাম" value="www.apnarshop.com" class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500">
+        </div>
+        
+        <input type="text" id="footer-phone-input" placeholder="মোবাইল নাম্বার" value="018XXXXXXXX" class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500">
+      </div>
+
+      <!-- Print Button -->
+      <div class="no-print mt-6 text-center">
+        <button onclick="window.print()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg flex items-center justify-center gap-2">
+          🖨️ প্রিন্ট করুন
+        </button>
+      </div>
+    </div>
+
+    <!-- Right Panel: Live Preview -->
+    <div class="max-w-3xl mx-auto bg-white p-8 rounded-xl shadow-lg invoice-box">
+      <!-- Header -->
+      <div class="flex justify-between items-center border-b pb-4 mb-6">
+        <div>
+          <h1 class="text-2xl font-bold text-gray-800" id="company-name-display">🛍️ প্রতিষ্ঠানের নাম</h1>
+          <p class="text-gray-600 text-sm"><span class="font-bold">ঠিকানা:</span> <span id="company-address-display">ঢাকা, বাংলাদেশ</span></p>
+          <p class="text-gray-600 text-sm"><span class="font-bold">মোবাইল:</span> <span id="company-mobile-display">018XXXXXXXX</span></p>
+        </div>
+        <div class="text-right">
+          <p class="text-sm"><span class="font-bold">ইনভয়েস নং:</span> <span id="invoice-number-display">INV-10001</span></p>
+          <p class="text-sm"><span class="font-bold">তারিখ:</span> <span id="invoice-date-display">08 সেপ্টেম্বর 2025</span></p>
+        </div>
+      </div>
+
+      <!-- Customer Info -->
+      <div class="mb-6">
+        <h2 class="font-semibold text-gray-700 mb-2">গ্রাহকের তথ্য</h2>
+        <p><span class="font-bold">নাম:</span> <span id="client-name-display">জনাব রাহাত হোসেন</span></p>
+        <p><span class="font-bold">ফোন:</span> <span id="client-mobile-display">017XXXXXXXX</span></p>
+        <p><span class="font-bold">ঠিকানা:</span> <span id="client-address-display">চট্টগ্রাম, বাংলাদেশ</span></p>
+      </div>
+
+      <!-- Items Table -->
+      <table class="w-full mb-6">
+        <tr class="heading">
+          <td>পণ্যের নাম</td>
+          <td>পরিমাণ</td>
+          <td>মূল্য (৳)</td>
+          <td>মোট (৳)</td>
+        </tr>
+        <tbody id="invoice-items-display">
+          <!-- Items will be populated dynamically -->
+        </tbody>
+        <tr class="total">
+          <td colspan="3" class="text-right">সর্বমোট:</td>
+          <td id="sub-total">0</td>
+        </tr>
+        <tr class="total">
+          <td colspan="3" class="text-right">ডেলিভারি চার্জ:</td>
+          <td id="delivery-charge-display">0</td>
+        </tr>
+        <tr class="total">
+          <td colspan="3" class="text-right text-blue-600">মোট:</td>
+          <td class="text-blue-600" id="grand-total">0</td>
+        </tr>
+      </table>
+
+      <!-- Footer -->
+      <div class="invoice-footer">
+        <span id="footer-message-display">ধন্যবাদ আমাদের থেকে কেনাকাটার জন্য ❤️</span> <br>
+        <div class="flex justify-center items-center mt-2">
+          <span id="social-media-icon-display" class="inline-block mr-2"></span>
+          <span id="social-media-link-display" class="text-blue-600"></span>
+          <span id="footer-phone-display" class="ml-4"></span>
+        </div>
+        <br>
+        <p id="payment-method-display"><span class="font-bold">পেমেন্ট মেথড:</span> ক্যাশ অন ডেলিভারি (COD)</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // Input elements
+      const companyNameInput = document.getElementById('company-name-input');
+      const companyAddressInput = document.getElementById('company-address-input');
+      const companyMobileInput = document.getElementById('company-mobile-input');
+      const clientNameInput = document.getElementById('client-name-input');
+      const clientMobileInput = document.getElementById('client-mobile-input');
+      const clientAddressInput = document.getElementById('client-address-input');
+      const inputItemsContainer = document.getElementById('input-items-container');
+      const addItemButton = document.getElementById('add-item');
+      const deliveryChargeInput = document.getElementById('delivery-charge-input');
+      const paymentMethodInput = document.getElementById('payment-method-input');
+      const footerMessageInput = document.getElementById('footer-message-input');
+      const socialMediaSelect = document.getElementById('social-media-select');
+      const socialMediaLinkInput = document.getElementById('social-media-link-input');
+      const footerPhoneInput = document.getElementById('footer-phone-input');
+
+      // Display elements
+      const companyNameDisplay = document.getElementById('company-name-display');
+      const companyAddressDisplay = document.getElementById('company-address-display');
+      const companyMobileDisplay = document.getElementById('company-mobile-display');
+      const clientNameDisplay = document.getElementById('client-name-display');
+      const clientMobileDisplay = document.getElementById('client-mobile-display');
+      const clientAddressDisplay = document.getElementById('client-address-display');
+      const invoiceItemsDisplay = document.getElementById('invoice-items-display');
+      const subTotalDisplay = document.getElementById('sub-total');
+      const grandTotalDisplay = document.getElementById('grand-total');
+      const deliveryChargeDisplay = document.getElementById('delivery-charge-display');
+      const invoiceNumberDisplay = document.getElementById('invoice-number-display');
+      const invoiceDateDisplay = document.getElementById('invoice-date-display');
+      const paymentMethodDisplay = document.getElementById('payment-method-display');
+      const footerMessageDisplay = document.getElementById('footer-message-display');
+      const socialMediaIconDisplay = document.getElementById('social-media-icon-display');
+      const socialMediaLinkDisplay = document.getElementById('social-media-link-display');
+      const footerPhoneDisplay = document.getElementById('footer-phone-display');
+
+      // Function to generate a random invoice number
+      const generateInvoiceNumber = () => {
+        return `INV-${Math.floor(10000 + Math.random() * 90000)}`;
+      };
+
+      // Function to get current date in Bengali
+      const getFormattedDate = () => {
+        const date = new Date();
+        const options = { day: 'numeric', month: 'long', year: 'numeric' };
+        return date.toLocaleDateString('bn-BD', options);
+      };
+
+      // Social media SVG icons
+      const icons = {
+        website: `<svg class="icon-small" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm0 18c-4.411 0-8-3.589-8-8s3.589-8 8-8 8 3.589 8 8-3.589 8-8 8zm-1-14v2.09c.358-.063.722-.09 1.09-.09 1.942 0 3.518 1.407 3.924 3.238L16 11.238V9h-2v3.086c-.34-.131-.692-.224-1.056-.282L12 12H9v-2h2v-2zM9 13v2h2v-2H9zm4 0v2h2v-2h-2zM12 7v2h2V7h-2zm-3 4v2h2v-2H9z"/></svg>`,
+        facebook: `<svg class="icon-small" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm3.176 8.52h-2.164v8.138h-3.172v-8.138H8.761V7.99h1.999V6.372c0-2.28 1.408-3.484 3.587-3.484h2.245v2.793h-1.666c-.662 0-.82.235-.82.812v1.5H16.143L15.65 10.52z"/></svg>`,
+        whatsapp: `<svg class="icon-small" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm3.842 14.18c-.46.362-1.258.74-2.18.74-1.265 0-2.155-.91-2.155-2.062 0-.91.432-1.46 1.135-2.185.703-.726 1.76-1.558 1.76-1.558s-.012-.46-.012-.66c0-.202.138-.475.405-.615.267-.14.654-.265 1.054-.265.25 0 .5.053.72.152.22.1.4.24.52.427.12.188.188.423.188.694 0 .14-.02.268-.06.388-.04.12-.1.222-.18.307-.08.086-.17.155-.27.218-.1.063-.207.108-.32.137-.08.02-.15.035-.2.046l-.018.007c-.1.018-.21.025-.33.025-.213 0-.32-.127-.417-.253-.097-.126-.145-.302-.145-.527 0-.39.19-.748.57-1.07.38-.322.95-.58 1.71-.58.32 0 .61.07.87.215.26.145.47.33.62.55.15.22.25.46.3.72.05.26.08.528.08.798 0 .822-.61 1.737-1.84 2.748-1.232 1.01-3.07 1.71-3.07 1.71s-.418.23-.418.38c0 .15.115.305.34.465.225.16.51.275.855.342.345.068.707.098 1.085.098.398 0 .783-.042 1.155-.125.37-.08.71-.2.99-.36.28-.16.51-.38.69-.64.18-.26.31-.56.39-.89.08-.33.12-.67.12-1.01 0-.17-.008-.33-.024-.488a.63.63 0 01.127-.428c.11-.18.26-.3.45-.36.19-.06.39-.077.6-.05.15.015.3.05.42.098.12.048.22.115.3.2.08.084.14.18.18.29.04.11.06.225.06.345 0 .19-.02.37-.06.55-.04.18-.09.35-.16.51-.07.16-.16.3-.27.42-.11.12-.23.218-.36.29-.13.07-.26.128-.4.17-.14.04-.27.065-.4.07-.13.007-.25.01-.36.01-.39 0-.74-.065-1.04-.195-.3-.13-.53-.3-.69-.51-.16-.21-.24-.44-.24-.69 0-.27.09-.5.27-.69.18-.19.46-.28.84-.28.18 0 .33.02.45.055.12.035.22.085.3.15.08.068.14.15.18.245.04.094.06.19.06.288 0 .17-.02.33-.06.48-.04.15-.09.28-.17.4-.08.12-.16.22-.26.3-.1.08-.2.14-.3.19-.1.05-.2.08-.28.1-.08.02-.17.025-.26.015-.24-.025-.45-.09-.64-.2-.19-.11-.34-.26-.45-.45-.11-.19-.16-.4-.16-.62 0-.25.09-.48.27-.69.18-.21.46-.31.84-.31.18 0 .34.02.47.05.13.03.24.08.33.14.09.06.16.16.22.26.06.1.1.21.12.33.02.12.03.25.03.38 0 .4-.07.78-.22 1.14-.15.36-.36.66-.63.9-.27.24-.59.41-.95.5-.36.09-.75.13-1.17.13-.28 0-.54-.04-.79-.1s-.48-.13-.69-.25-.39-.28-.53-.44-.25-.35-.32-.54c-.07-.19-.11-.4-.11-.63 0-.17.02-.34.06-.5s.1-.3.18-.44.17-.22.28-.32.22-.17.34-.25.24-.13.36-.18.24-.06.36-.07.24-.01.37-.01c.2 0 .38.01.54.04.16.03.3.08.4.14.1.06.19.14.25.22.06.08.11.17.14.27.03.1.05.21.05.32 0 .23-.04.45-.11.66-.07.21-.17.4-.3.57-.13.17-.28.31-.46.42-.18.11-.38.19-.6.23-.22.04-.45.06-.68.06-1.57 0-3.03-.49-4.38-1.48-1.35-.99-2.02-2.36-2.02-4.11 0-.75.25-1.52.75-2.31.5-.79 1.25-1.4 2.25-1.83.47-.2.98-.3 1.53-.3.4 0 .8.08 1.18.25.38.17.7.4.96.7.26.3.46.66.6.99.14.33.2.68.2 1.05 0 .19-.02.38-.06.56-.04.18-.1.34-.18.5-.08.16-.18.29-.3.4-.12.11-.25.2-.39.26-.14.06-.29.1-.45.1-.21 0-.4-.03-.57-.09s-.32-.14-.43-.24-.19-.22-.24-.36-.08-.3-.08-.46c0-.21.05-.4.15-.56.1-.16.22-.28.36-.38.14-.1.3-.15.48-.15.16 0 .3.03.4.09s.18.14.25.24c.07.1.1.2.1.3s-.015.2-.045.3c-.03.1-.06.18-.1.25-.04.07-.08.13-.14.18-.06.05-.12.08-.18.1-.06.02-.12.03-.18.03-.18 0-.34-.05-.49-.15s-.26-.22-.35-.38-.13-.34-.13-.53c0-.18.03-.34.09-.49s.14-.28.24-.38.2-.18.3-.24.22-.1.35-.13s.25-.04.38-.04.25.01.37.04c.12.03.24.08.35.14.11.06.2.14.29.23.09.09.16.19.22.3.06.11.1.22.12.34.02.12.03.25.03.38 0 .4-.08.78-.24 1.14-.16.36-.38.66-.66.9-.28.24-.62.41-1.01.5-.39.09-.81.13-1.25.13-.3 0-.58-.04-.84-.1s-.5-.13-.7-.25-.38-.28-.52-.44-.24-.35-.3-.54c-.06-.19-.09-.4-.09-.63 0-.17.02-.34.06-.5s.1-.3.18-.44.18-.23.29-.33.22-.18.34-.25.24-.13.36-.18.24-.06.36-.07.24-.01.37-.01c.2 0 .38.01.54.04.16.03.3.08.4.14.1.06.19.14.25.22.06.08.11.17.14.27.03.1.05.21.05.32 0 .23-.04.45-.11.66-.07.21-.17.4-.3.57-.13.17-.28.31-.46.42-.18.11-.38.19-.6.23-.22.04-.45.06-.68.06-1.57 0-3.03-.49-4.38-1.48-1.35-.99-2.02-2.36-2.02-4.11 0-.75.25-1.52.75-2.31.5-.79 1.25-1.4 2.25-1.83.47-.2.98-.3 1.53-.3.4 0 .8.08 1.18.25.38.17.7.4.96.7.26.3.46.66.6.99.14.33.2.68.2 1.05 0 .19-.02.38-.06.56-.04.18-.1.34-.18.5-.08.16-.18.29-.3.4-.12.11-.25.2-.39.26-.14.06-.29.1-.45.1-.21 0-.4-.03-.57-.09s-.32-.14-.43-.24-.19-.22-.24-.36-.08-.3-.08-.46c0-.21.05-.4.15-.56.1-.16.22-.28.36-.38.14-.1.3-.15.48-.15.16 0 .3.03.4.09s.18.14.25.24c.07.1.1.2.1.3s-.015.2-.045.3c-.03.1-.06.18-.1.25-.04.07-.08.13-.14.18-.06.05-.12.08-.18.1-.06.02-.12.03-.18.03z"/></svg>`
+      };
+
+      // Set initial invoice details
+      invoiceNumberDisplay.textContent = generateInvoiceNumber();
+      invoiceDateDisplay.textContent = getFormattedDate();
+
+      // Function to get data from all input fields
+      const collectData = () => {
+        const items = [];
+        document.querySelectorAll('#input-items-container .grid').forEach(row => {
+          items.push({
+            name: row.querySelector('.item-name-input').value,
+            quantity: row.querySelector('.item-quantity-input').value,
+            price: row.querySelector('.item-price-input').value
+          });
+        });
+
+        return {
+          companyName: companyNameInput.value,
+          companyAddress: companyAddressInput.value,
+          companyMobile: companyMobileInput.value,
+          clientName: clientNameInput.value,
+          clientMobile: clientMobileInput.value,
+          clientAddress: clientAddressInput.value,
+          items: items,
+          deliveryCharge: deliveryChargeInput.value,
+          paymentMethod: paymentMethodInput.value,
+          footerMessage: footerMessageInput.value,
+          socialMediaSelect: socialMediaSelect.value,
+          socialMediaLink: socialMediaLinkInput.value,
+          footerPhone: footerPhoneInput.value,
+        };
+      };
+
+      // Function to save data to localStorage
+      const saveData = () => {
+        const data = collectData();
+        localStorage.setItem('invoiceData', JSON.stringify(data));
+      };
+      
+      // Function to add a new item row
+      const addItemRow = (item = {}) => {
+        const newItemRow = document.createElement('div');
+        newItemRow.className = 'grid grid-cols-1 md:grid-cols-4 gap-4 items-center mb-4';
+        newItemRow.innerHTML = `
+          <input type="text" placeholder="পণ্যের নাম" value="${item.name || ''}" class="item-name-input md:col-span-2 px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500">
+          <input type="number" placeholder="পরিমাণ" value="${item.quantity || 1}" min="1" class="item-quantity-input px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 text-right">
+          <input type="number" placeholder="মূল্য" value="${item.price || 0}" min="0" class="item-price-input px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 text-right">
+          <p class="text-right text-sm">৳ 0</p>
+        `;
+        inputItemsContainer.appendChild(newItemRow);
+        updateInvoicePreview();
+      };
+      
+      // Function to load data from localStorage
+      const loadData = () => {
+        const savedData = localStorage.getItem('invoiceData');
+        if (savedData) {
+          const data = JSON.parse(savedData);
+
+          companyNameInput.value = data.companyName || '';
+          companyAddressInput.value = data.companyAddress || '';
+          companyMobileInput.value = data.companyMobile || '';
+          clientNameInput.value = data.clientName || '';
+          clientMobileInput.value = data.clientMobile || '';
+          clientAddressInput.value = data.clientAddress || '';
+          deliveryChargeInput.value = data.deliveryCharge || '0';
+          paymentMethodInput.value = data.paymentMethod || 'ক্যাশ অন ডেলিভারি (COD)';
+          footerMessageInput.value = data.footerMessage || '';
+          socialMediaSelect.value = data.socialMediaSelect || 'website';
+          socialMediaLinkInput.value = data.socialMediaLink || '';
+          footerPhoneInput.value = data.footerPhone || '';
+          
+          inputItemsContainer.innerHTML = '';
+          if (data.items && data.items.length > 0) {
+            data.items.forEach(item => addItemRow(item));
+          } else {
+            addItemRow();
+          }
+
+          updateInvoicePreview();
+        } else {
+          addItemRow();
+        }
+      };
+
+      // Function to update the entire invoice preview
+      const updateInvoicePreview = () => {
+        // Update company and client info
+        companyNameDisplay.textContent = companyNameInput.value || 'প্রতিষ্ঠানের নাম';
+        companyAddressDisplay.textContent = companyAddressInput.value || 'ঢাকা, বাংলাদেশ';
+        companyMobileDisplay.textContent = companyMobileInput.value || '018XXXXXXXX';
+        
+        clientNameDisplay.textContent = clientNameInput.value || 'জনাব রাহাত হোসেন';
+        clientMobileDisplay.textContent = clientMobileInput.value || '017XXXXXXXX';
+        clientAddressDisplay.textContent = clientAddressInput.value || 'চট্টগ্রাম, বাংলাদেশ';
+
+        // Update items table
+        invoiceItemsDisplay.innerHTML = '';
+        let subTotal = 0;
+        
+        const itemRows = document.querySelectorAll('#input-items-container .grid');
+        itemRows.forEach((row) => {
+          const itemNameInput = row.querySelector('.item-name-input');
+          const itemQuantityInput = row.querySelector('.item-quantity-input');
+          const itemPriceInput = row.querySelector('.item-price-input');
+          
+          const itemName = itemNameInput.value;
+          const quantity = parseFloat(itemQuantityInput.value) || 0;
+          const price = parseFloat(itemPriceInput.value) || 0;
+          const itemTotal = quantity * price;
+          
+          row.querySelector('p').textContent = `৳ ${itemTotal.toFixed(2)}`;
+
+          subTotal += itemTotal;
+
+          const displayRow = document.createElement('tr');
+          displayRow.className = 'item';
+          displayRow.innerHTML = `
+            <td>${itemName || 'পণ্যের নাম'}</td>
+            <td class="text-center">${quantity}</td>
+            <td class="text-center">${price.toFixed(2)}</td>
+            <td class="text-center">${itemTotal.toFixed(2)}</td>
+          `;
+          invoiceItemsDisplay.appendChild(displayRow);
+        });
+
+        // Update totals
+        const deliveryCharge = parseFloat(deliveryChargeInput.value) || 0;
+        const grandTotal = subTotal + deliveryCharge;
+
+        subTotalDisplay.textContent = subTotal.toFixed(2);
+        deliveryChargeDisplay.textContent = deliveryCharge.toFixed(2);
+        grandTotalDisplay.textContent = grandTotal.toFixed(2);
+
+        // Update payment method display
+        paymentMethodDisplay.innerHTML = `<span class="font-bold">পেমেন্ট মেথড:</span> ${paymentMethodInput.value}`;
+
+        // Update footer display
+        footerMessageDisplay.textContent = footerMessageInput.value || 'ধন্যবাদ আমাদের থেকে কেনাকাটার জন্য ❤️';
+        footerPhoneDisplay.textContent = `📞 ${footerPhoneInput.value || '018XXXXXXXX'}`;
+        
+        // Update social media icon and link
+        const selectedIcon = socialMediaSelect.value;
+        const socialLink = socialMediaLinkInput.value;
+        socialMediaIconDisplay.innerHTML = icons[selectedIcon] || '';
+        socialMediaLinkDisplay.innerHTML = `<a href="http://${socialLink}" target="_blank" class="text-blue-600">${socialLink}</a>`;
+      };
+      
+      // Event listeners for saving and updating
+      document.getElementById('input-panel').addEventListener('input', () => {
+        updateInvoicePreview();
+        saveData();
+      });
+      
+      // Add new item row
+      addItemButton.addEventListener('click', () => {
+        addItemRow();
+        saveData();
+      });
+
+      // Initial load of data when the page loads
+      loadData();
+    });
+  </script>
+
+</body>
+</html>
