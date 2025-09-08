@@ -71,9 +71,9 @@
       <!-- Company Info Input -->
       <div class="mb-8 border-b pb-8">
         <h3 class="font-semibold text-lg text-gray-800 mb-2">প্রতিষ্ঠানের তথ্য</h3>
-        <input type="text" id="company-name-input" placeholder="প্রতিষ্ঠানের নাম" class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 mb-2">
-        <input type="text" id="company-address-input" placeholder="প্রতিষ্ঠানের ঠিকানা" class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 mb-2">
-        <input type="text" id="company-mobile-input" placeholder="মোবাইল নাম্বার" class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500">
+        <input type="text" id="company-name-input" placeholder="প্রতিষ্ঠানের নাম" value="ফুডি হাট" class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 mb-2">
+        <input type="text" id="company-address-input" placeholder="প্রতিষ্ঠানের ঠিকানা" value="হাতিয়াড়া, কাশিয়ানী, গোপালগঞ্জ" class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 mb-2">
+        <input type="text" id="company-mobile-input" placeholder="মোবাইল নাম্বার" value="01796548423" class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500">
       </div>
 
       <!-- Client Info Input -->
@@ -82,6 +82,7 @@
         <input type="text" id="client-name-input" placeholder="গ্রাহকের নাম" class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 mb-2">
         <input type="text" id="client-mobile-input" placeholder="গ্রাহকের ফোন নাম্বার" class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 mb-2">
         <input type="text" id="client-address-input" placeholder="গ্রাহকের ঠিকানা" class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500">
+        <input type="text" id="statfast-code-input" placeholder="ডেলিভারি কোড" class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 mt-2">
       </div>
 
       <!-- Items Input -->
@@ -132,7 +133,7 @@
           <input type="text" id="social-media-link-input" placeholder="লিংক/ব্যবহারকারীর নাম" value="www.apnarshop.com" class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500">
         </div>
         
-        <input type="text" id="footer-phone-input" placeholder="মোবাইল নাম্বার" value="018XXXXXXXX" class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500">
+        <input type="text" id="footer-phone-input" placeholder="মোবাইল নাম্বার" value="01796548423" class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500">
       </div>
 
       <!-- Print Button -->
@@ -148,9 +149,9 @@
       <!-- Header -->
       <div class="flex justify-between items-center border-b pb-4 mb-6">
         <div>
-          <h1 class="text-2xl font-bold text-gray-800" id="company-name-display">🛍️ প্রতিষ্ঠানের নাম</h1>
-          <p class="text-gray-600 text-sm"><span class="font-bold">ঠিকানা:</span> <span id="company-address-display">ঢাকা, বাংলাদেশ</span></p>
-          <p class="text-gray-600 text-sm"><span class="font-bold">মোবাইল:</span> <span id="company-mobile-display">018XXXXXXXX</span></p>
+          <h1 class="text-2xl font-bold text-gray-800" id="company-name-display">🛍️ ফুডি হাট</h1>
+          <p class="text-gray-600 text-sm"><span class="font-bold">ঠিকানা:</span> <span id="company-address-display">হাতিয়াড়া, কাশিয়ানী, গোপালগঞ্জ</span></p>
+          <p class="text-gray-600 text-sm"><span class="font-bold">মোবাইল:</span> <span id="company-mobile-display">01796548423</span></p>
         </div>
         <div class="text-right">
           <p class="text-sm"><span class="font-bold">ইনভয়েস নং:</span> <span id="invoice-number-display">INV-10001</span></p>
@@ -164,6 +165,7 @@
         <p><span class="font-bold">নাম:</span> <span id="client-name-display">জনাব রাহাত হোসেন</span></p>
         <p><span class="font-bold">ফোন:</span> <span id="client-mobile-display">017XXXXXXXX</span></p>
         <p><span class="font-bold">ঠিকানা:</span> <span id="client-address-display">চট্টগ্রাম, বাংলাদেশ</span></p>
+        <p><span class="font-bold">ডেলিভারি কোড:</span> <span id="statfast-code-display"></span></p>
       </div>
 
       <!-- Items Table -->
@@ -214,6 +216,7 @@
       const clientNameInput = document.getElementById('client-name-input');
       const clientMobileInput = document.getElementById('client-mobile-input');
       const clientAddressInput = document.getElementById('client-address-input');
+      const statfastCodeInput = document.getElementById('statfast-code-input');
       const inputItemsContainer = document.getElementById('input-items-container');
       const addItemButton = document.getElementById('add-item');
       const deliveryChargeInput = document.getElementById('delivery-charge-input');
@@ -230,6 +233,7 @@
       const clientNameDisplay = document.getElementById('client-name-display');
       const clientMobileDisplay = document.getElementById('client-mobile-display');
       const clientAddressDisplay = document.getElementById('client-address-display');
+      const statfastCodeDisplay = document.getElementById('statfast-code-display');
       const invoiceItemsDisplay = document.getElementById('invoice-items-display');
       const subTotalDisplay = document.getElementById('sub-total');
       const grandTotalDisplay = document.getElementById('grand-total');
@@ -258,7 +262,7 @@
       const icons = {
         website: `<svg class="icon-small" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm0 18c-4.411 0-8-3.589-8-8s3.589-8 8-8 8 3.589 8 8-3.589 8-8 8zm-1-14v2.09c.358-.063.722-.09 1.09-.09 1.942 0 3.518 1.407 3.924 3.238L16 11.238V9h-2v3.086c-.34-.131-.692-.224-1.056-.282L12 12H9v-2h2v-2zM9 13v2h2v-2H9zm4 0v2h2v-2h-2zM12 7v2h2V7h-2zm-3 4v2h2v-2H9z"/></svg>`,
         facebook: `<svg class="icon-small" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm3.176 8.52h-2.164v8.138h-3.172v-8.138H8.761V7.99h1.999V6.372c0-2.28 1.408-3.484 3.587-3.484h2.245v2.793h-1.666c-.662 0-.82.235-.82.812v1.5H16.143L15.65 10.52z"/></svg>`,
-        whatsapp: `<svg class="icon-small" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm3.842 14.18c-.46.362-1.258.74-2.18.74-1.265 0-2.155-.91-2.155-2.062 0-.91.432-1.46 1.135-2.185.703-.726 1.76-1.558 1.76-1.558s-.012-.46-.012-.66c0-.202.138-.475.405-.615.267-.14.654-.265 1.054-.265.25 0 .5.053.72.152.22.1.4.24.52.427.12.188.188.423.188.694 0 .14-.02.268-.06.388-.04.12-.1.222-.18.307-.08.086-.17.155-.27.218-.1.063-.207.108-.32.137-.08.02-.15.035-.2.046l-.018.007c-.1.018-.21.025-.33.025-.213 0-.32-.127-.417-.253-.097-.126-.145-.302-.145-.527 0-.39.19-.748.57-1.07.38-.322.95-.58 1.71-.58.32 0 .61.07.87.215.26.145.47.33.62.55.15.22.25.46.3.72.05.26.08.528.08.798 0 .822-.61 1.737-1.84 2.748-1.232 1.01-3.07 1.71-3.07 1.71s-.418.23-.418.38c0 .15.115.305.34.465.225.16.51.275.855.342.345.068.707.098 1.085.098.398 0 .783-.042 1.155-.125.37-.08.71-.2.99-.36.28-.16.51-.38.69-.64.18-.26.31-.56.39-.89.08-.33.12-.67.12-1.01 0-.17-.008-.33-.024-.488a.63.63 0 01.127-.428c.11-.18.26-.3.45-.36.19-.06.39-.077.6-.05.15.015.3.05.42.098.12.048.22.115.3.2.08.084.14.18.18.29.04.11.06.225.06.345 0 .19-.02.37-.06.55-.04.18-.09.35-.16.51-.07.16-.16.3-.27.42-.11.12-.23.218-.36.29-.13.07-.26.128-.4.17-.14.04-.27.065-.4.07-.13.007-.25.01-.36.01-.39 0-.74-.065-1.04-.195-.3-.13-.53-.3-.69-.51-.16-.21-.24-.44-.24-.69 0-.27.09-.5.27-.69.18-.19.46-.28.84-.28.18 0 .33.02.45.055.12.035.22.085.3.15.08.068.14.15.18.245.04.094.06.19.06.288 0 .17-.02.33-.06.48-.04.15-.09.28-.17.4-.08.12-.16.22-.26.3-.1.08-.2.14-.3.19-.1.05-.2.08-.28.1-.08.02-.17.025-.26.015-.24-.025-.45-.09-.64-.2-.19-.11-.34-.26-.45-.45-.11-.19-.16-.4-.16-.62 0-.25.09-.48.27-.69.18-.21.46-.31.84-.31.18 0 .34.02.47.05.13.03.24.08.33.14.09.06.16.16.22.26.06.1.1.21.12.33.02.12.03.25.03.38 0 .4-.07.78-.22 1.14-.15.36-.36.66-.63.9-.27.24-.59.41-.95.5-.36.09-.75.13-1.17.13-.28 0-.54-.04-.79-.1s-.48-.13-.69-.25-.39-.28-.53-.44-.25-.35-.32-.54c-.07-.19-.11-.4-.11-.63 0-.17.02-.34.06-.5s.1-.3.18-.44.17-.22.28-.32.22-.17.34-.25.24-.13.36-.18.24-.06.36-.07.24-.01.37-.01c.2 0 .38.01.54.04.16.03.3.08.4.14.1.06.19.14.25.22.06.08.11.17.14.27.03.1.05.21.05.32 0 .23-.04.45-.11.66-.07.21-.17.4-.3.57-.13.17-.28.31-.46.42-.18.11-.38.19-.6.23-.22.04-.45.06-.68.06-1.57 0-3.03-.49-4.38-1.48-1.35-.99-2.02-2.36-2.02-4.11 0-.75.25-1.52.75-2.31.5-.79 1.25-1.4 2.25-1.83.47-.2.98-.3 1.53-.3.4 0 .8.08 1.18.25.38.17.7.4.96.7.26.3.46.66.6.99.14.33.2.68.2 1.05 0 .19-.02.38-.06.56-.04.18-.1.34-.18.5-.08.16-.18.29-.3.4-.12.11-.25.2-.39.26-.14.06-.29.1-.45.1-.21 0-.4-.03-.57-.09s-.32-.14-.43-.24-.19-.22-.24-.36-.08-.3-.08-.46c0-.21.05-.4.15-.56.1-.16.22-.28.36-.38.14-.1.3-.15.48-.15.16 0 .3.03.4.09s.18.14.25.24c.07.1.1.2.1.3s-.015.2-.045.3c-.03.1-.06.18-.1.25-.04.07-.08.13-.14.18-.06.05-.12.08-.18.1-.06.02-.12.03-.18.03-.18 0-.34-.05-.49-.15s-.26-.22-.35-.38-.13-.34-.13-.53c0-.18.03-.34.09-.49s.14-.28.24-.38.2-.18.3-.24.22-.1.35-.13s.25-.04.38-.04.25.01.37.04c.12.03.24.08.35.14.11.06.2.14.29.23.09.09.16.19.22.3.06.11.1.22.12.34.02.12.03.25.03.38 0 .4-.08.78-.24 1.14-.16.36-.38.66-.66.9-.28.24-.62.41-1.01.5-.39.09-.81.13-1.25.13-.3 0-.58-.04-.84-.1s-.5-.13-.7-.25-.38-.28-.52-.44-.24-.35-.3-.54c-.06-.19-.09-.4-.09-.63 0-.17.02-.34.06-.5s.1-.3.18-.44.18-.23.29-.33.22-.18.34-.25.24-.13.36-.18.24-.06.36-.07.24-.01.37-.01c.2 0 .38.01.54.04.16.03.3.08.4.14.1.06.19.14.25.22.06.08.11.17.14.27.03.1.05.21.05.32 0 .23-.04.45-.11.66-.07.21-.17.4-.3.57-.13.17-.28.31-.46.42-.18.11-.38.19-.6.23-.22.04-.45.06-.68.06-1.57 0-3.03-.49-4.38-1.48-1.35-.99-2.02-2.36-2.02-4.11 0-.75.25-1.52.75-2.31.5-.79 1.25-1.4 2.25-1.83.47-.2.98-.3 1.53-.3.4 0 .8.08 1.18.25.38.17.7.4.96.7.26.3.46.66.6.99.14.33.2.68.2 1.05 0 .19-.02.38-.06.56-.04.18-.1.34-.18.5-.08.16-.18.29-.3.4-.12.11-.25.2-.39.26-.14.06-.29.1-.45.1-.21 0-.4-.03-.57-.09s-.32-.14-.43-.24-.19-.22-.24-.36-.08-.3-.08-.46c0-.21.05-.4.15-.56.1-.16.22-.28.36-.38.14-.1.3-.15.48-.15.16 0 .3.03.4.09s.18.14.25.24c.07.1.1.2.1.3s-.015.2-.045.3c-.03.1-.06.18-.1.25-.04.07-.08.13-.14.18-.06.05-.12.08-.18.1-.06.02-.12.03-.18.03z"/></svg>`
+        whatsapp: `<svg class="icon-small" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm3.842 14.18c-.46.362-1.258.74-2.18.74-1.265 0-2.155-.91-2.155-2.062 0-.91.432-1.46 1.135-2.185.703-.726 1.76-1.558 1.76-1.558s-.012-.46-.012-.66c0-.202.138-.475.405-.615.267-.14.654-.265 1.054-.265.25 0 .5.053.72.152.22.1.4.24.52.427.12.188.188.423.188.694 0 .14-.02.268-.06.388-.04.12-.1.222-.18.307-.08.086-.17.155-.27.218-.1.063-.207.108-.32.137-.08.02-.15.035-.2.046l-.018.007c-.1.018-.21.025-.33.025-.213 0-.32-.127-.417-.253-.097-.126-.145-.302-.145-.527 0-.39.19-.748.57-1.07.38-.322.95-.58 1.71-.58.32 0 .61.07.87.215.26.145.47.33.62.55.15.22.25.46.3.72.05.26.08.528.08.798 0 .822-.61 1.737-1.84 2.748-1.232 1.01-3.07 1.71-3.07 1.71s-.418.23-.418.38c0 .15.115.305.34.465.225.16.51.275.855.342.345.068.707.098 1.085.098.398 0 .783-.042 1.155-.125.37-.08.71-.2.99-.36.28-.16.51-.38.69-.64.18-.26.31-.56.39-.89.08-.33.12-.67.12-1.01 0-.17-.008-.33-.024-.488a.63.63 0 01.127-.428c.11-.18.26-.3.45-.36.19-.06.39-.077.6-.05.15.015.3.05.42.098.12.048.22.115.3.2.08.084.14.18.18.29.04.11.06.225.06.345 0 .19-.02.37-.06.55-.04.18-.09.35-.16.51-.07.16-.16.3-.27.42-.11.12-.23.218-.36.29-.14.07-.29.128-.4.17-.14.04-.27.065-.4.07-.13.007-.25.01-.36.01-.39 0-.74-.065-1.04-.195-.3-.13-.53-.3-.69-.51-.16-.21-.24-.44-.24-.69 0-.27.09-.5.27-.69.18-.19.46-.28.84-.28.18 0 .33.02.45.055.12.035.22.085.3.15.08.068.14.15.18.245.04.094.06.19.06.288 0 .17-.02.33-.06.48-.04.15-.09.28-.17.4-.08.12-.16.22-.26.3-.1.08-.2.14-.3.19-.1.05-.2.08-.28.1-.08.02-.17.025-.26.015-.24-.025-.45-.09-.64-.2-.19-.11-.34-.26-.45-.45-.11-.19-.16-.4-.16-.62 0-.25.09-.48.27-.69.18-.21.46-.31.84-.31.18 0 .34.02.47.05.13.03.24.08.33.14.09.06.16.16.22.26.06.1.1.21.12.33.02.12.03.25.03.38 0 .4-.07.78-.22 1.14-.15.36-.36.66-.63.9-.27.24-.59.41-.95.5-.36.09-.75.13-1.17.13-.28 0-.54-.04-.79-.1s-.48-.13-.69-.25-.39-.28-.53-.44-.25-.35-.32-.54c-.07-.19-.11-.4-.11-.63 0-.17.02-.34.06-.5s.1-.3.18-.44.18-.23.29-.33.22-.18.34-.25.24-.13.36-.18.24-.06.36-.07.24-.01.37-.01c.2 0 .38.01.54.04.16.03.3.08.4.14.1.06.19.14.25.22.06.08.11.17.14.27.03.1.05.21.05.32 0 .23-.04.45-.11.66-.07.21-.17.4-.3.57-.13.17-.28.31-.46.42-.18.11-.38.19-.6.23-.22.04-.45.06-.68.06-1.57 0-3.03-.49-4.38-1.48-1.35-.99-2.02-2.36-2.02-4.11 0-.75.25-1.52.75-2.31.5-.79 1.25-1.4 2.25-1.83.47-.2.98-.3 1.53-.3.4 0 .8.08 1.18.25.38.17.7.4.96.7.26.3.46.66.6.99.14.33.2.68.2 1.05 0 .19-.02.38-.06.56-.04.18-.1.34-.18.5-.08.16-.18.29-.3.4-.12.11-.25.2-.39.26-.14.06-.29.1-.45.1-.21 0-.4-.03-.57-.09s-.32-.14-.43-.24-.19-.22-.24-.36-.08-.3-.08-.46c0-.21.05-.4.15-.56.1-.16.22-.28.36-.38.14-.1.3-.15.48-.15.16 0 .3.03.4.09s.18.14.25.24c.07.1.1.2.1.3s-.015.2-.045.3c-.03.1-.06.18-.1.25-.04.07-.08.13-.14.18-.06.05-.12.08-.18.1-.06.02-.12.03-.18.03z"/></svg>`
       };
 
       // Set initial invoice details
@@ -283,6 +287,7 @@
           clientName: clientNameInput.value,
           clientMobile: clientMobileInput.value,
           clientAddress: clientAddressInput.value,
+          statfastCode: statfastCodeInput.value,
           items: items,
           deliveryCharge: deliveryChargeInput.value,
           paymentMethod: paymentMethodInput.value,
@@ -319,18 +324,19 @@
         if (savedData) {
           const data = JSON.parse(savedData);
 
-          companyNameInput.value = data.companyName || '';
-          companyAddressInput.value = data.companyAddress || '';
-          companyMobileInput.value = data.companyMobile || '';
+          companyNameInput.value = data.companyName || 'ফুডি হাট';
+          companyAddressInput.value = data.companyAddress || 'হাতিয়াড়া, কাশিয়ানী, গোপালগঞ্জ';
+          companyMobileInput.value = data.companyMobile || '01796548423';
           clientNameInput.value = data.clientName || '';
           clientMobileInput.value = data.clientMobile || '';
           clientAddressInput.value = data.clientAddress || '';
+          statfastCodeInput.value = data.statfastCode || '';
           deliveryChargeInput.value = data.deliveryCharge || '0';
           paymentMethodInput.value = data.paymentMethod || 'ক্যাশ অন ডেলিভারি (COD)';
           footerMessageInput.value = data.footerMessage || '';
           socialMediaSelect.value = data.socialMediaSelect || 'website';
           socialMediaLinkInput.value = data.socialMediaLink || '';
-          footerPhoneInput.value = data.footerPhone || '';
+          footerPhoneInput.value = data.footerPhone || '01796548423';
           
           inputItemsContainer.innerHTML = '';
           if (data.items && data.items.length > 0) {
@@ -341,6 +347,9 @@
 
           updateInvoicePreview();
         } else {
+          companyNameInput.value = 'ফুডি হাট';
+          companyAddressInput.value = 'হাতিয়াড়া, কাশিয়ানী, গোপালগঞ্জ';
+          companyMobileInput.value = '01796548423';
           addItemRow();
         }
       };
@@ -352,9 +361,10 @@
         companyAddressDisplay.textContent = companyAddressInput.value || 'ঢাকা, বাংলাদেশ';
         companyMobileDisplay.textContent = companyMobileInput.value || '018XXXXXXXX';
         
-        clientNameDisplay.textContent = clientNameInput.value || 'জনাব রাহাত হোসেন';
+        clientNameDisplay.textContent = clientNameInput.value || ' জনাব রাহাত হোসেন';
         clientMobileDisplay.textContent = clientMobileInput.value || '017XXXXXXXX';
         clientAddressDisplay.textContent = clientAddressInput.value || 'চট্টগ্রাম, বাংলাদেশ';
+        statfastCodeDisplay.textContent = statfastCodeInput.value || '';
 
         // Update items table
         invoiceItemsDisplay.innerHTML = '';
@@ -399,7 +409,7 @@
 
         // Update footer display
         footerMessageDisplay.textContent = footerMessageInput.value || 'ধন্যবাদ আমাদের থেকে কেনাকাটার জন্য ❤️';
-        footerPhoneDisplay.textContent = `📞 ${footerPhoneInput.value || '018XXXXXXXX'}`;
+        footerPhoneDisplay.textContent = `📞 ${footerPhoneInput.value || '01796548423'}`;
         
         // Update social media icon and link
         const selectedIcon = socialMediaSelect.value;
