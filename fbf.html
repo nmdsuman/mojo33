@@ -225,8 +225,6 @@
 
         <!-- Settings Tab -->
         <div id="content-settings" class="tab-content mb-8 border-b pb-8">
-            <h3 class="font-semibold text-lg text-gray-800 mb-4">সেটিংস</h3>
-
             <h3 class="font-semibold text-lg text-gray-800 mb-4">প্রতিষ্ঠানের তথ্য</h3>
             <div class="input-group mb-2">
                 <input type="text" id="company-name-input" placeholder="প্রতিষ্ঠানের নাম" value="ফুডি হাট" class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500">
@@ -373,21 +371,15 @@
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-    import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-    import { getFirestore, addDoc, collection, doc, getDocs, deleteDoc, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+    import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getFirestore, addDoc, collection, getDocs, doc, deleteDoc, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
     setLogLevel('debug'); // Enable Firestore logging
 
-    // আপনার দেওয়া Firebase কনফিগারেশন
-    const firebaseConfig = {
-      apiKey: "AIzaSyACr4tymiTKrtPltKbAlLulsdG3efoDowQ",
-      authDomain: "facebook-c7ea6.firebaseapp.com",
-      projectId: "facebook-c7ea6",
-      storageBucket: "facebook-c7ea6.firebasestorage.app",
-      messagingSenderId: "28858429763",
-      appId: "1:28858429763:web:6ddbe43ea94a4bfaf4bff6",
-      measurementId: "G-M3VEVHMDH1"
-    };
+    // Canvas environment variables (DO NOT MODIFY)
+    const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+    const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+    const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
 
     let app;
     let db;
@@ -395,8 +387,8 @@
     let userId;
     let firebaseInitialized = false;
 
-    // Firebase ইনিশিয়ালাইজেশন
-    const initializeFirebase = () => {
+    // Firebase initialization
+    const initializeFirebase = async () => {
         try {
             if (app) {
                 return;
@@ -406,18 +398,13 @@
             auth = getAuth(app);
             firebaseInitialized = true;
 
-            // Anonymously sign in
-            const signIn = async () => {
-                try {
-                    await signInAnonymously(auth);
-                    userId = auth.currentUser?.uid || crypto.randomUUID();
-                } catch (error) {
-                    console.error("Firebase Auth Error:", error);
-                    // Handle the auth error gracefully, perhaps by continuing without auth
-                }
-            };
-            signIn();
-            console.log("Firebase initialized successfully.");
+            if (initialAuthToken) {
+                await signInWithCustomToken(auth, initialAuthToken);
+            } else {
+                await signInAnonymously(auth);
+            }
+            userId = auth.currentUser?.uid || crypto.randomUUID();
+            console.log("Firebase initialized successfully. User ID:", userId);
         } catch (e) {
             console.error("Error initializing Firebase:", e);
             showMessage("Firebase কনফিগারেশন ত্রুটিপূর্ণ।", 'bg-red-200 text-red-800');
@@ -556,6 +543,7 @@
           },
           invoiceNumber: invoiceNumberDisplay.textContent,
           invoiceDate: invoiceDateDisplay.textContent,
+          timestamp: new Date().toISOString()
         };
       };
 
@@ -568,8 +556,8 @@
 
           const invoiceData = collectData();
           try {
-              const invoicesCollection = collection(db, `invoices`);
-              await addDoc(invoicesCollection, invoiceData);
+              const invoicesCollectionPath = `/artifacts/${appId}/users/${userId}/invoices`;
+              await addDoc(collection(db, invoicesCollectionPath), invoiceData);
               showMessage("ইনভয়েস সফলভাবে সেভ করা হয়েছে!", 'bg-green-200 text-green-800');
           } catch (e) {
               console.error("ইনভয়েস সেভ করার সময় ত্রুটি হয়েছে: ", e);
@@ -626,26 +614,29 @@
       // Function to load a saved invoice into the form
       const loadInvoiceData = (invoiceData) => {
         // Populate client info
-        clientNameInput.value = invoiceData.client.name;
-        clientMobileInput.value = invoiceData.client.mobile;
-        clientAddressInput.value = invoiceData.client.address;
-        statfastCodeInput.value = invoiceData.client.statfastCode;
+        clientNameInput.value = invoiceData.client.name || '';
+        clientMobileInput.value = invoiceData.client.mobile || '';
+        clientAddressInput.value = invoiceData.client.address || '';
+        statfastCodeInput.value = invoiceData.client.statfastCode || '';
+        companyNameInput.value = invoiceData.company.name || '';
+        companyAddressInput.value = invoiceData.company.address || '';
+        companyMobileInput.value = invoiceData.company.mobile || '';
+        footerMessageInput.value = invoiceData.footer.message || '';
+        socialMediaSelect.value = invoiceData.footer.socialMedia || 'website';
+        socialMediaLinkInput.value = invoiceData.footer.socialMediaLink || '';
+        footerPhoneInput.value = invoiceData.footer.phone || '';
+        deliveryChargeInput.value = invoiceData.deliveryCharge || 0;
+        paymentMethodInput.value = invoiceData.paymentMethod || 'ক্যাশ অন ডেলিভারি (COD)';
 
         // Populate items
         inputItemsContainer.innerHTML = '';
-        invoiceData.items.forEach(item => {
-          addItemRow(item);
-        });
-
-        // Populate other fields
-        deliveryChargeInput.value = invoiceData.deliveryCharge;
-        paymentMethodInput.value = invoiceData.paymentMethod;
-
-        // You may want to update the invoice number and date to the loaded one,
-        // or generate a new one for a fresh invoice based on the template.
-        // For now, let's generate a new one.
-        invoiceNumberDisplay.textContent = generateInvoiceNumber();
-        invoiceDateDisplay.textContent = getFormattedDate();
+        if (invoiceData.items && invoiceData.items.length > 0) {
+            invoiceData.items.forEach(item => {
+                addItemRow(item);
+            });
+        } else {
+            addItemRow();
+        }
 
         // Close the modal and show a message
         savedInvoicesModal.style.display = 'none';
@@ -661,7 +652,8 @@
               return;
         }
         try {
-          await deleteDoc(doc(db, "invoices", docId));
+          const invoicesCollectionPath = `/artifacts/${appId}/users/${userId}/invoices`;
+          await deleteDoc(doc(db, invoicesCollectionPath, docId));
           showMessage("ইনভয়েস সফলভাবে মুছে ফেলা হয়েছে!", 'bg-green-200 text-green-800');
           // Refresh the list after deletion
           loadSavedInvoices();
@@ -687,10 +679,11 @@
           listItem.innerHTML = `
             <div>
               <p class="font-bold">${invoice.client.name}</p>
-              <p class="text-sm text-gray-600">${invoice.invoiceNumber}</p>
+              <p class="text-sm text-gray-600">ইনভয়েস নং: ${invoice.invoiceNumber}</p>
+              <p class="text-sm text-gray-600">তারিখ: ${invoice.invoiceDate}</p>
             </div>
-            <div class="space-x-2">
-              <button class="bg-blue-500 text-white text-xs px-3 py-1 rounded-full hover:bg-blue-600 load-invoice-btn" data-doc-id="${invoice.id}">লোড</button>
+            <div class="space-x-2 flex">
+              <button class="bg-blue-500 text-white text-xs px-3 py-1 rounded-full hover:bg-blue-600 load-invoice-btn" data-doc-id="${invoice.id}">লোড করুন</button>
               <button class="bg-red-500 text-white text-xs px-3 py-1 rounded-full hover:bg-red-600 delete-invoice-btn" data-doc-id="${invoice.id}">মুছুন</button>
             </div>
           `;
@@ -720,11 +713,14 @@
           emptyListMessage.style.display = 'none';
 
           try {
-              const querySnapshot = await getDocs(collection(db, "invoices"));
+              const invoicesCollectionPath = `/artifacts/${appId}/users/${userId}/invoices`;
+              const querySnapshot = await getDocs(collection(db, invoicesCollectionPath));
               const invoices = [];
               querySnapshot.forEach((doc) => {
                   invoices.push({ id: doc.id, ...doc.data() });
               });
+              // Sort invoices by timestamp to show the latest first
+              invoices.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
               renderSavedInvoicesList(invoices);
           } catch (e) {
               console.error("ইনভয়েস লোড করার সময় ত্রুটি হয়েছে: ", e);
