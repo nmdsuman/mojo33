@@ -261,7 +261,7 @@
                   <option value="facebook">ফেসবুক</option>
                 </select>
                 <div class="input-group w-full">
-                    <input type="text" id="social-media-link-input" placeholder="লিংক/ব্যবহারকারীর নাম" value="www.apnarshop.com" class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500">
+                    <input type="text" id="social-media-link-input" placeholder="লিংক/ব্যবহারকারীর নাম" value="https://www.apnarshop.com" class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500">
                     <button class="paste-button" onclick="pasteFromClipboard('social-media-link-input')">
                         📋
                     </button>
@@ -383,7 +383,7 @@
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-    import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getAuth } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
     import { getFirestore, addDoc, collection, getDocs, doc, deleteDoc, setLogLevel, query, where, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
     setLogLevel('debug'); // Enable Firestore logging
@@ -399,34 +399,40 @@
       appId: "1:28858429763:web:6ddbe43ea94a4bfaf4bff6",
       measurementId: "G-M3VEVHMDH1"
     };
-    const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
 
     let app;
     let db;
-    let auth;
-    let userId;
     let firebaseInitialized = false;
     let isSaving = false; // New variable to track saving state
     let docToUpdateId = null; // Store the document ID to update
 
     // A function to show messages to the user
     const showMessage = (msg, className) => {
-        messageBox.textContent = msg;
-        messageBox.className = `${className} mt-4 p-4 rounded-lg text-center`;
-        messageBox.style.display = 'block';
-        setTimeout(() => {
-            messageBox.style.display = 'none';
-        }, 3000);
+        const messageBox = document.getElementById('message-box');
+        if (messageBox) {
+            messageBox.textContent = msg;
+            messageBox.className = `${className} mt-4 p-4 rounded-lg text-center`;
+            messageBox.style.display = 'block';
+            setTimeout(() => {
+                messageBox.style.display = 'none';
+            }, 3000);
+        }
     };
     
     // Function to show the confirmation modal
     const showConfirmationModal = () => {
-        confirmationModal.style.display = 'flex';
+        const confirmationModal = document.getElementById('confirmation-modal');
+        if (confirmationModal) {
+            confirmationModal.style.display = 'flex';
+        }
     };
 
     // Function to hide the confirmation modal
     const hideConfirmationModal = () => {
-        confirmationModal.style.display = 'none';
+        const confirmationModal = document.getElementById('confirmation-modal');
+        if (confirmationModal) {
+            confirmationModal.style.display = 'none';
+        }
     };
 
 
@@ -438,19 +444,11 @@
             }
             app = initializeApp(firebaseConfig);
             db = getFirestore(app);
-            auth = getAuth(app);
             firebaseInitialized = true;
-
-            if (initialAuthToken) {
-                await signInWithCustomToken(auth, initialAuthToken);
-            } else {
-                await signInAnonymously(auth);
-            }
-            userId = auth.currentUser?.uid || crypto.randomUUID();
-            console.log("Firebase initialized successfully. User ID:", userId);
+            console.log("Firebase initialized successfully.");
         } catch (e) {
             console.error("Error initializing Firebase:", e);
-            showMessage("Firebase কনফিগারেশন ত্রুটিপূর্ণ।", 'bg-red-200 text-red-800');
+            showMessage("ফায়ারবেজ কনফিগারেশন ত্রুটিপূর্ণ।", 'bg-red-200 text-red-800');
             firebaseInitialized = false;
         }
     };
@@ -490,7 +488,6 @@
       const footerPhoneInput = document.getElementById('footer-phone-input');
       const saveInvoiceButton = document.getElementById('save-invoice-button');
       const showSavedInvoicesButton = document.getElementById('show-saved-invoices-button');
-      const messageBox = document.getElementById('message-box');
       const savedInvoicesModal = document.getElementById('saved-invoices-modal');
       const closeModalButton = document.getElementById('close-modal-button');
       const invoiceListContainer = document.getElementById('invoice-list-container');
@@ -601,13 +598,14 @@
           saveInvoiceButton.textContent = "সেভ হচ্ছে...";
 
           try {
+              const invoicesCollectionRef = collection(db, 'invoices');
               if (docToUpdateId) {
                   // Update the existing document
-                  await setDoc(doc(db, "invoices", docToUpdateId), invoiceData);
+                  await setDoc(doc(invoicesCollectionRef, docToUpdateId), invoiceData);
                   showMessage("✅ ইনভয়েস সফলভাবে আপডেট করা হয়েছে!", 'bg-blue-200 text-blue-800');
               } else {
                   // Add a new document
-                  await addDoc(collection(db, "invoices"), invoiceData);
+                  await addDoc(invoicesCollectionRef, invoiceData);
                   showMessage("✅ ইনভয়েস সফলভাবে সেভ করা হয়েছে!", 'bg-green-200 text-green-800');
               }
           } catch (e) {
@@ -632,7 +630,7 @@
           }
 
           const invoiceNumber = invoiceNumberDisplay.textContent;
-          const invoicesCollectionRef = collection(db, `invoices`);
+          const invoicesCollectionRef = collection(db, 'invoices');
           const q = query(invoicesCollectionRef, where("invoiceNumber", "==", invoiceNumber));
           
           try {
@@ -732,7 +730,8 @@
               return;
         }
         try {
-          await deleteDoc(doc(db, "invoices", docId));
+          const invoicesCollectionRef = collection(db, 'invoices');
+          await deleteDoc(doc(invoicesCollectionRef, docId));
           showMessage("ইনভয়েস সফলভাবে মুছে ফেলা হয়েছে!", 'bg-green-200 text-green-800');
           // Refresh the list after deletion
           loadSavedInvoices();
@@ -744,6 +743,8 @@
 
       // Function to render the list of saved invoices in the modal
       const renderSavedInvoicesList = (invoices) => {
+        const invoiceListContainer = document.getElementById('invoice-list-container');
+        const emptyListMessage = document.getElementById('empty-list-message');
         invoiceListContainer.innerHTML = '';
         emptyListMessage.style.display = 'none';
         
@@ -786,13 +787,19 @@
               showMessage("Firebase সঠিকভাবে কনফিগার করা হয়নি।", 'bg-red-200 text-red-800');
               return;
           }
+          const savedInvoicesModal = document.getElementById('saved-invoices-modal');
+          const invoiceListContainer = document.getElementById('invoice-list-container');
+          const emptyListMessage = document.getElementById('empty-list-message');
+          const loadingMessage = document.getElementById('loading-message');
+          
           savedInvoicesModal.style.display = 'flex';
           loadingMessage.style.display = 'block';
           invoiceListContainer.innerHTML = '';
           emptyListMessage.style.display = 'none';
 
           try {
-              const querySnapshot = await getDocs(collection(db, "invoices"));
+              const invoicesCollectionRef = collection(db, 'invoices');
+              const querySnapshot = await getDocs(invoicesCollectionRef);
               const invoices = [];
               querySnapshot.forEach((doc) => {
                   invoices.push({ id: doc.id, ...doc.data() });
@@ -814,7 +821,7 @@
         companyAddressInput.value = 'হাতিয়াড়া, কাশিয়ানী, গোপালগঞ্জ';
         companyMobileInput.value = '01796548423';
         footerMessageInput.value = 'ধন্যবাদ আমাদের থেকে কেনাকাটার জন্য ❤️';
-        socialMediaLinkInput.value = 'www.apnarshop.com';
+        socialMediaLinkInput.value = 'https://www.apnarshop.com';
         footerPhoneInput.value = '01796548423';
         addItemRow();
         activateTab('client');
