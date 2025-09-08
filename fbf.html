@@ -5,49 +5,379 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ইনভয়েস জেনারেটর</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+    .invoice-box table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .invoice-box table tr.heading td {
+      background: #2563eb; /* blue-600 */
+      color: white;
+      font-weight: bold;
+      text-align: center;
+      padding: 8px;
+    }
+    .invoice-box table tr.item td {
+      border-bottom: 1px solid #e5e7eb;
+      padding: 6px;
+    }
+    .invoice-box table tr.item:nth-child(even) td {
+      background: #f9fafb;
+    }
+    .invoice-box table tr.total td {
+      font-weight: bold;
+      padding: 6px;
+    }
+    .invoice-footer {
+      margin-top: 2rem;
+      text-align: center;
+      font-size: 0.9rem;
+      color: #6b7280;
+    }
+    .icon-small {
+      width: 1rem;
+      height: 1rem;
+      display: inline-block;
+      fill: currentColor;
+    }
+    @media print {
+      .no-print { display: none; }
+      body { background: white; }
+      .invoice-container {
+        display: block !important;
+        margin: 0;
+      }
+      #input-panel {
+        display: none;
+      }
+      .invoice-box {
+        box-shadow: none;
+      }
+    }
+    .tab-button {
+        padding: 10px 15px;
+        background-color: #e5e7eb;
+        color: #4b5563;
+        font-weight: 600;
+        border-radius: 8px 8px 0 0;
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
+    .tab-button.active {
+        background-color: #2563eb;
+        color: white;
+    }
+    .tab-content {
+        display: none;
+    }
+    .tab-content.active {
+        display: block;
+    }
+    .input-group {
+        position: relative;
+    }
+    .paste-button {
+        position: absolute;
+        right: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: #e5e7eb;
+        border: none;
+        padding: 4px 8px;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
+    .paste-button:hover {
+        background: #d1d5db;
+    }
+    /* Modal styles */
+    .modal {
+        position: fixed;
+        z-index: 100;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgba(0,0,0,0.4);
+        display: none;
+        align-items: center;
+        justify-content: center;
+    }
+    .modal-content {
+        background-color: #fefefe;
+        margin: auto;
+        padding: 2rem;
+        border-radius: 12px;
+        width: 90%;
+        max-width: 600px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        position: relative;
+    }
+    .close-button {
+        color: #aaa;
+        position: absolute;
+        top: 10px;
+        right: 15px;
+        font-size: 28px;
+        font-weight: bold;
+    }
+    .close-button:hover,
+    .close-button:focus {
+        color: black;
+        text-decoration: none;
+        cursor: pointer;
+    }
+    .invoice-list-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px;
+        border-bottom: 1px solid #e5e7eb;
+    }
+    .invoice-list-item:last-child {
+        border-bottom: none;
+    }
+  </style>
 </head>
-<body class="bg-gray-100 min-h-screen flex items-center justify-center">
-  <div class="bg-white shadow-lg rounded-2xl p-6 w-full max-w-2xl">
-    <h1 class="text-2xl font-bold text-center mb-4">ইনভয়েস জেনারেটর</h1>
+<body class="bg-gray-50 p-6">
 
-    <!-- ইনপুট ফিল্ড -->
-    <div class="mb-4">
-      <label class="block mb-1 font-semibold">ক্লায়েন্টের নাম</label>
-      <input id="client-name" type="text" class="w-full border rounded-lg p-2" placeholder="নাম লিখুন">
+  <!-- Main container for the split view -->
+  <div class="invoice-container grid grid-cols-1 lg:grid-cols-2 gap-8 w-full max-w-7xl mx-auto">
+    <!-- Left Panel: Input Forms -->
+    <div id="input-panel" class="no-print bg-white rounded-xl shadow-2xl p-6 md:p-10">
+      <h1 class="text-3xl font-bold text-gray-800 mb-6">ইনপুট ফর্ম</h1>
+      
+      <!-- Tab Buttons -->
+      <div class="flex space-x-2 mb-4">
+          <button id="tab-client" class="tab-button active">গ্রাহকের তথ্য</button>
+          <button id="tab-items" class="tab-button">পণ্যের বিবরণ</button>
+          <button id="tab-settings" class="tab-button">সেটিংস</button>
+      </div>
+      
+      <!-- Tab Contents -->
+      <div id="tab-content-container">
+        <!-- Client Info Tab -->
+        <div id="content-client" class="tab-content active mb-8 border-b pb-8">
+            <h3 class="font-semibold text-lg text-gray-800 mb-4">গ্রাহকের তথ্য</h3>
+            <div class="input-group mb-2">
+                <input type="text" id="client-name-input" placeholder="গ্রাহকের নাম" class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500">
+                <button class="paste-button" onclick="pasteFromClipboard('client-name-input')">
+                    📋
+                </button>
+            </div>
+            <div class="input-group mb-2">
+                <input type="text" id="client-mobile-input" placeholder="গ্রাহকের ফোন নাম্বার" class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500">
+                <button class="paste-button" onclick="pasteFromClipboard('client-mobile-input')">
+                    📋
+                </button>
+            </div>
+            <div class="input-group">
+                <input type="text" id="client-address-input" placeholder="গ্রাহকের ঠিকানা" class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500">
+                <button class="paste-button" onclick="pasteFromClipboard('client-address-input')">
+                    📋
+                </button>
+            </div>
+            <div class="input-group mt-2">
+                <input type="text" id="statfast-code-input" placeholder="ডেলিভারি কোড" class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500">
+                <button class="paste-button" onclick="pasteFromClipboard('statfast-code-input')">
+                    📋
+                </button>
+            </div>
+        </div>
+        
+        <!-- Items Tab -->
+        <div id="content-items" class="tab-content mb-6">
+            <h3 class="font-semibold text-lg text-gray-800 mb-4">পণ্যের বিবরণ</h3>
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4 font-semibold text-gray-700">
+                <div class="md:col-span-2">পণ্যের নাম</div>
+                <div>পরিমাণ</div>
+                <div>মূল্য (৳)</div>
+                <div>মোট</div>
+            </div>
+            <div id="input-items-container">
+                <!-- Item rows will be added dynamically -->
+            </div>
+            <button id="add-item" class="mt-4 bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg transition duration-300 ease-in-out">
+                + আরও পণ্য যোগ করুন
+            </button>
+            <div class="flex flex-col md:flex-row justify-end mt-8">
+              <div class="w-full md:w-1/2 lg:w-1/3 space-y-2">
+                <div class="flex justify-between items-center text-gray-700">
+                  <span class="font-medium">ডেলিভারি চার্জ:</span>
+                  <input type="number" id="delivery-charge-input" value="0" min="0" class="w-24 text-right border rounded-md px-2 py-1">
+                </div>
+                <div class="flex justify-between items-center text-gray-700">
+                  <span class="font-medium">পেমেন্ট মেথড:</span>
+                  <select id="payment-method-input" class="w-24 border rounded-md px-2 py-1 bg-white">
+                    <option value="ক্যাশ অন ডেলিভারি (COD)">ক্যাশ অন ডেলিভারি (COD)</option>
+                    <option value="বিকাশ (bKash)">বিকাশ (bKash)</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+        </div>
+
+        <!-- Settings Tab -->
+        <div id="content-settings" class="tab-content mb-8 border-b pb-8">
+            <h3 class="font-semibold text-lg text-gray-800 mb-4">প্রতিষ্ঠানের তথ্য</h3>
+            <div class="input-group mb-2">
+                <input type="text" id="company-name-input" placeholder="প্রতিষ্ঠানের নাম" value="ফুডি হাট" class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500">
+                <button class="paste-button" onclick="pasteFromClipboard('company-name-input')">
+                    📋
+                </button>
+            </div>
+            <div class="input-group mb-2">
+                <input type="text" id="company-address-input" placeholder="প্রতিষ্ঠানের ঠিকানা" value="হাতিয়াড়া, কাশিয়ানী, গোপালগঞ্জ" class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500">
+                <button class="paste-button" onclick="pasteFromClipboard('company-address-input')">
+                    📋
+                </button>
+            </div>
+            <div class="input-group">
+                <input type="text" id="company-mobile-input" placeholder="মোবাইল নাম্বার" value="01796548423" class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500">
+                <button class="paste-button" onclick="pasteFromClipboard('company-mobile-input')">
+                    📋
+                </button>
+            </div>
+
+            <!-- Footer Info Input moved here -->
+            <div class="mt-8 border-t pt-8">
+              <h3 class="font-semibold text-lg text-gray-800 mb-2">ফুটারে তথ্য</h3>
+              <div class="input-group mb-2">
+                  <textarea id="footer-message-input" placeholder="ধন্যবাদ বার্তা" rows="2" class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500">ধন্যবাদ আমাদের থেকে কেনাকাটার জন্য ❤️</textarea>
+                  <button class="paste-button" onclick="pasteFromClipboard('footer-message-input')">
+                      📋
+                  </button>
+              </div>
+              
+              <div class="flex items-center gap-2 mb-2">
+                <select id="social-media-select" class="w-2/5 md:w-1/3 border rounded-md px-2 py-1 bg-white">
+                  <option value="website">ওয়েবসাইট</option>
+                  <option value="facebook">ফেসবুক</option>
+                </select>
+                <div class="input-group w-full">
+                    <input type="text" id="social-media-link-input" placeholder="লিংক/ব্যবহারকারীর নাম" value="www.apnarshop.com" class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500">
+                    <button class="paste-button" onclick="pasteFromClipboard('social-media-link-input')">
+                        📋
+                    </button>
+                </div>
+              </div>
+              
+              <div class="input-group">
+                  <input type="text" id="footer-phone-input" placeholder="মোবাইল নাম্বার" value="01796548423" class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500">
+                  <button class="paste-button" onclick="pasteFromClipboard('footer-phone-input')">
+                        📋
+                  </button>
+              </div>
+            </div>
+        </div>
+      </div>
+      
+      <!-- Save and Print Buttons -->
+      <div class="no-print mt-6 text-center">
+        <button id="show-saved-invoices-button" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-6 rounded-lg flex items-center justify-center gap-2">
+          📁 সংরক্ষিত ইনভয়েস দেখুন
+        </button>
+        <button id="save-invoice-button" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded-lg flex items-center justify-center gap-2 mt-2">
+          ✅ ইনভয়েস সেভ করুন
+        </button>
+        <button onclick="window.print()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg flex items-center justify-center gap-2 mt-2">
+          🖨️ প্রিন্ট করুন
+        </button>
+      </div>
+      <div id="message-box" class="mt-4 p-4 rounded-lg text-center" style="display: none;"></div>
     </div>
 
-    <div class="mb-4">
-      <label class="block mb-1 font-semibold">ইনভয়েস নং</label>
-      <input id="invoice-number" type="text" class="w-full border rounded-lg p-2" placeholder="12345">
+    <!-- Right Panel: Live Preview -->
+    <div class="max-w-3xl mx-auto bg-white p-8 rounded-xl shadow-lg invoice-box">
+      <!-- Header -->
+      <div class="flex justify-between items-center border-b pb-4 mb-6">
+        <div>
+          <h1 class="text-2xl font-bold text-gray-800" id="company-name-display">🛍️ ফুডি হাট</h1>
+          <p class="text-gray-600 text-sm"><span class="font-bold">ঠিকানা:</span> <span id="company-address-display">হাতিয়াড়া, কাশিয়ানী, গোপালগঞ্জ</span></p>
+          <p class="text-gray-600 text-sm"><span class="font-bold">মোবাইল:</span> <span id="company-mobile-display">01796548423</span></p>
+        </div>
+        <div class="text-right">
+          <p class="text-sm"><span class="font-bold">ইনভয়েস নং:</span> <span id="invoice-number-display">INV-10001</span></p>
+          <p class="text-sm"><span class="font-bold">তারিখ:</span> <span id="invoice-date-display">08 সেপ্টেম্বর 2025</span></p>
+        </div>
+      </div>
+
+      <!-- Customer Info -->
+      <div class="mb-6">
+        <h2 class="font-semibold text-gray-700 mb-2">গ্রাহকের তথ্য</h2>
+        <p><span class="font-bold">নাম:</span> <span id="client-name-display">জনাব রাহাত হোসেন</span></p>
+        <p><span class="font-bold">ফোন:</span> <span id="client-mobile-display">017XXXXXXXX</span></p>
+        <p><span class="font-bold">ঠিকানা:</span> <span id="client-address-display">চট্টগ্রাম, বাংলাদেশ</span></p>
+        <p><span class="font-bold">ডেলিভারি কোড:</span> <span id="statfast-code-display"></span></p>
+      </div>
+
+      <!-- Items Table -->
+      <table class="w-full mb-6">
+        <tr class="heading">
+          <td>পণ্যের নাম</td>
+          <td>পরিমাণ</td>
+          <td>মূল্য (৳)</td>
+          <td>মোট (৳)</td>
+        </tr>
+        <tbody id="invoice-items-display">
+          <!-- Items will be populated dynamically -->
+        </tbody>
+        <tr class="total">
+          <td colspan="3" class="text-right">সর্বমোট:</td>
+          <td id="sub-total">0</td>
+        </tr>
+        <tr class="total">
+          <td colspan="3" class="text-right">ডেলিভারি চার্জ:</td>
+          <td id="delivery-charge-display">0</td>
+        </tr>
+        <tr class="total">
+          <td colspan="3" class="text-right text-blue-600">মোট:</td>
+          <td class="text-blue-600" id="grand-total">0</td>
+        </tr>
+      </table>
+
+      <!-- Footer -->
+      <div class="invoice-footer">
+        <span id="footer-message-display">ধন্যবাদ আমাদের থেকে কেনাকাটার জন্য ❤️</span> <br>
+        <div class="flex justify-center items-center mt-2">
+          <span id="social-media-icon-display" class="inline-block mr-2"></span>
+          <span id="social-media-link-display" class="text-blue-600"></span>
+          <span id="footer-phone-display" class="ml-4"></span>
+        </div>
+        <br>
+        <p id="payment-method-display"><span class="font-bold">পেমেন্ট মেথড:</span> ক্যাশ অন ডেলিভারি (COD)</p>
+      </div>
     </div>
+  </div>
 
-    <div class="mb-4">
-      <label class="block mb-1 font-semibold">তারিখ</label>
-      <input id="invoice-date" type="date" class="w-full border rounded-lg p-2">
+  <!-- Modal for Saved Invoices -->
+  <div id="saved-invoices-modal" class="modal">
+    <div class="modal-content">
+      <span class="close-button" id="close-modal-button">&times;</span>
+      <h2 class="text-2xl font-bold mb-4">সংরক্ষিত ইনভয়েস</h2>
+      <div id="invoice-list-container" class="max-h-96 overflow-y-auto">
+        <!-- Invoices will be populated here -->
+      </div>
+      <p id="empty-list-message" class="text-gray-500 mt-4" style="display: none;">কোনো ইনভয়েস সেভ করা নেই।</p>
+      <div id="loading-message" class="text-blue-500 mt-4 text-center" style="display: none;">ইনভয়েস লোড হচ্ছে...</div>
     </div>
-
-    <!-- Paste / Copy বাটন -->
-    <div class="flex gap-2 mb-4">
-      <button onclick="pasteFromClipboard('client-name')" class="bg-blue-500 text-white px-4 py-2 rounded-lg">Paste</button>
-      <button onclick="copyToClipboard('client-name')" class="bg-green-500 text-white px-4 py-2 rounded-lg">Copy</button>
-    </div>
-
-    <!-- মেসেজ বক্স -->
-    <div id="message-box" class="hidden mt-4 p-4 rounded-lg text-center"></div>
-
-    <!-- সংরক্ষিত ইনভয়েস লিস্ট -->
-    <h2 class="text-xl font-semibold mt-6 mb-2">সংরক্ষিত ইনভয়েস</h2>
-    <div id="invoice-list-container" class="space-y-3"></div>
-    <p id="empty-list-message" class="text-gray-500 text-center">কোন ইনভয়েস সংরক্ষিত নেই।</p>
   </div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-    import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
     import { getFirestore, addDoc, collection, getDocs, doc, deleteDoc, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-    setLogLevel('debug');
+    setLogLevel('debug'); // Enable Firestore logging
 
+    // Canvas environment variables (DO NOT MODIFY)
+    const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
     const firebaseConfig = {
       apiKey: "AIzaSyACr4tymiTKrtPltKbAlLulsdG3efoDowQ",
       authDomain: "facebook-c7ea6.firebaseapp.com",
@@ -57,112 +387,467 @@
       appId: "1:28858429763:web:6ddbe43ea94a4bfaf4bff6",
       measurementId: "G-M3VEVHMDH1"
     };
+    const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
 
-    let app, db, auth, userId;
+    let app;
+    let db;
+    let auth;
+    let userId;
+    let firebaseInitialized = false;
 
-    document.addEventListener('DOMContentLoaded', () => {
-      const messageBox = document.getElementById('message-box');
-      const invoiceListContainer = document.getElementById('invoice-list-container');
-      const emptyListMessage = document.getElementById('empty-list-message');
-
-      // ✅ মেসেজ দেখানোর ফাংশন
-      const showMessage = (msg, className) => {
+    // A function to show messages to the user
+    const showMessage = (msg, className) => {
         messageBox.textContent = msg;
         messageBox.className = `${className} mt-4 p-4 rounded-lg text-center`;
         messageBox.style.display = 'block';
         setTimeout(() => {
-          messageBox.style.display = 'none';
+            messageBox.style.display = 'none';
         }, 3000);
-      };
+    };
 
-      // ✅ Firebase initialize
-      const initializeFirebase = async () => {
+    // Firebase initialization
+    const initializeFirebase = async () => {
         try {
-          app = initializeApp(firebaseConfig);
-          db = getFirestore(app);
-          auth = getAuth(app);
+            if (app) {
+                return;
+            }
+            app = initializeApp(firebaseConfig);
+            db = getFirestore(app);
+            auth = getAuth(app);
+            firebaseInitialized = true;
 
-          await signInAnonymously(auth);
-          userId = auth.currentUser?.uid;
-          console.log("Firebase initialized. User ID:", userId);
-
-          loadInvoices();
+            if (initialAuthToken) {
+                await signInWithCustomToken(auth, initialAuthToken);
+            } else {
+                await signInAnonymously(auth);
+            }
+            userId = auth.currentUser?.uid || crypto.randomUUID();
+            console.log("Firebase initialized successfully. User ID:", userId);
         } catch (e) {
-          console.error("Error initializing Firebase:", e);
-          showMessage("Firebase কনফিগারেশন ত্রুটিপূর্ণ।", 'bg-red-200 text-red-800');
+            console.error("Error initializing Firebase:", e);
+            showMessage("Firebase কনফিগারেশন ত্রুটিপূর্ণ।", 'bg-red-200 text-red-800');
+            firebaseInitialized = false;
         }
-      };
-      initializeFirebase();
+    };
 
-      // ✅ Clipboard থেকে Paste
-      window.pasteFromClipboard = async (targetId) => {
-        const target = document.getElementById(targetId);
-        if (!target) return;
+    // Handles pasting text from the clipboard to a target input field using a fallback method.
+    function pasteFromClipboard(targetId) {
+        const targetElement = document.getElementById(targetId);
+        if (targetElement) {
+            // Focus the element to make it ready for paste operation
+            targetElement.focus();
+            try {
+                // Use the older document.execCommand('paste') as a fallback
+                document.execCommand('paste');
+            } catch (err) {
+                console.error('Failed to execute paste command: ', err);
+            }
+        }
+    }
+    window.pasteFromClipboard = pasteFromClipboard;
+
+    document.addEventListener('DOMContentLoaded', () => {
+      // Input elements
+      const companyNameInput = document.getElementById('company-name-input');
+      const companyAddressInput = document.getElementById('company-address-input');
+      const companyMobileInput = document.getElementById('company-mobile-input');
+      const clientNameInput = document.getElementById('client-name-input');
+      const clientMobileInput = document.getElementById('client-mobile-input');
+      const clientAddressInput = document.getElementById('client-address-input');
+      const statfastCodeInput = document.getElementById('statfast-code-input');
+      const inputItemsContainer = document.getElementById('input-items-container');
+      const addItemButton = document.getElementById('add-item');
+      const deliveryChargeInput = document.getElementById('delivery-charge-input');
+      const paymentMethodInput = document.getElementById('payment-method-input');
+      const footerMessageInput = document.getElementById('footer-message-input');
+      const socialMediaSelect = document.getElementById('social-media-select');
+      const socialMediaLinkInput = document.getElementById('social-media-link-input');
+      const footerPhoneInput = document.getElementById('footer-phone-input');
+      const saveInvoiceButton = document.getElementById('save-invoice-button');
+      const showSavedInvoicesButton = document.getElementById('show-saved-invoices-button');
+      const messageBox = document.getElementById('message-box');
+      const savedInvoicesModal = document.getElementById('saved-invoices-modal');
+      const closeModalButton = document.getElementById('close-modal-button');
+      const invoiceListContainer = document.getElementById('invoice-list-container');
+      const emptyListMessage = document.getElementById('empty-list-message');
+      const loadingMessage = document.getElementById('loading-message');
+
+
+      // Display elements
+      const companyNameDisplay = document.getElementById('company-name-display');
+      const companyAddressDisplay = document.getElementById('company-address-display');
+      const companyMobileDisplay = document.getElementById('company-mobile-display');
+      const clientNameDisplay = document.getElementById('client-name-display');
+      const clientMobileDisplay = document.getElementById('client-mobile-display');
+      const clientAddressDisplay = document.getElementById('client-address-display');
+      const statfastCodeDisplay = document.getElementById('statfast-code-display');
+      const invoiceItemsDisplay = document.getElementById('invoice-items-display');
+      const subTotalDisplay = document.getElementById('sub-total');
+      const grandTotalDisplay = document.getElementById('grand-total');
+      const deliveryChargeDisplay = document.getElementById('delivery-charge-display');
+      const invoiceNumberDisplay = document.getElementById('invoice-number-display');
+      const invoiceDateDisplay = document.getElementById('invoice-date-display');
+      const paymentMethodDisplay = document.getElementById('payment-method-display');
+      const footerMessageDisplay = document.getElementById('footer-message-display');
+      const socialMediaIconDisplay = document.getElementById('social-media-icon-display');
+      const socialMediaLinkDisplay = document.getElementById('social-media-link-display');
+      const footerPhoneDisplay = document.getElementById('footer-phone-display');
+
+      // Tab buttons and contents
+      const tabClientBtn = document.getElementById('tab-client');
+      const tabItemsBtn = document.getElementById('tab-items');
+      const tabSettingsBtn = document.getElementById('tab-settings');
+      const contentClient = document.getElementById('content-client');
+      const contentItems = document.getElementById('content-items');
+      const contentSettings = document.getElementById('content-settings');
+
+      // Function to generate a random invoice number
+      const generateInvoiceNumber = () => {
+        return `INV-${Math.floor(10000 + Math.random() * 90000)}`;
+      };
+
+      // Function to get current date in Bengali
+      const getFormattedDate = () => {
+        const date = new Date();
+        const options = { day: 'numeric', month: 'long', year: 'numeric' };
+        return date.toLocaleDateString('bn-BD', options);
+      };
+
+      // Social media SVG icons
+      const icons = {
+        website: `<svg class="icon-small" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm0 18c-4.411 0-8-3.589-8-8s3.589-8 8-8 8 3.589 8 8-3.589 8-8 8zm-1-14v2.09c.358-.063.722-.09 1.09-.09 1.942 0 3.518 1.407 3.924 3.238L16 11.238V9h-2v3.086c-.34-.131-.692-.224-1.056-.282L12 12H9v-2h2v-2zM9 13v2h2v-2H9zm4 0v2h2v-2h-2zM12 7v2h2V7h-2zm-3 4v2h2v-2H9z"/></svg>`,
+        facebook: `<svg class="icon-small" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm3.176 8.52h-2.164v8.138h-3.172v-8.138H8.761V7.99h1.999V6.372c0-2.28 1.408-3.484 3.587-3.484h2.245v2.793h-1.666c-.662 0-.82.235-.82.812v1.5H16.143L15.65 10.52z"/></svg>`
+      };
+
+      // Set initial invoice details
+      invoiceNumberDisplay.textContent = generateInvoiceNumber();
+      invoiceDateDisplay.textContent = getFormattedDate();
+
+      // Function to get data from all input fields
+      const collectData = () => {
+        const items = [];
+        document.querySelectorAll('#input-items-container .grid').forEach(row => {
+          const itemNameInput = row.querySelector('.item-name-input');
+          const itemQuantityInput = row.querySelector('.item-quantity-input');
+          const itemPriceInput = row.querySelector('.item-price-input');
+
+          items.push({
+            name: itemNameInput.value,
+            quantity: parseFloat(itemQuantityInput.value) || 0,
+            price: parseFloat(itemPriceInput.value) || 0,
+          });
+        });
+
+        return {
+          company: {
+            name: companyNameInput.value,
+            address: companyAddressInput.value,
+            mobile: companyMobileInput.value,
+          },
+          client: {
+            name: clientNameInput.value,
+            mobile: clientMobileInput.value,
+            address: clientAddressInput.value,
+            statfastCode: statfastCodeInput.value,
+          },
+          items: items,
+          deliveryCharge: parseFloat(deliveryChargeInput.value) || 0,
+          paymentMethod: paymentMethodInput.value,
+          footer: {
+            message: footerMessageInput.value,
+            socialMedia: socialMediaSelect.value,
+            socialMediaLink: socialMediaLinkInput.value,
+            phone: footerPhoneInput.value,
+          },
+          invoiceNumber: invoiceNumberDisplay.textContent,
+          invoiceDate: invoiceDateDisplay.textContent,
+          timestamp: new Date().toISOString()
+        };
+      };
+
+      // Function to save data to Firestore
+      const saveInvoice = async () => {
+          if (!firebaseInitialized || !db) {
+              showMessage("Firebase সঠিকভাবে কনফিগার করা হয়নি।", 'bg-red-200 text-red-800');
+              return;
+          }
+
+          const invoiceData = collectData();
+          try {
+              const invoicesCollection = collection(db, `invoices`);
+              await addDoc(invoicesCollection, invoiceData);
+              showMessage("ইনভয়েস সফলভাবে সেভ করা হয়েছে!", 'bg-green-200 text-green-800');
+          } catch (e) {
+              console.error("ইনভয়েস সেভ করার সময় ত্রুটি হয়েছে: ", e);
+              showMessage("ইনভয়েস সেভ করার সময় একটি ত্রুটি হয়েছে।", 'bg-red-200 text-red-800');
+          }
+      };
+      
+      // Function to add a new item row
+      const addItemRow = (item = {}) => {
+        const newItemRow = document.createElement('div');
+        newItemRow.className = 'grid grid-cols-1 md:grid-cols-4 gap-4 items-center mb-4';
+        newItemRow.innerHTML = `
+          <div class="input-group md:col-span-2">
+              <input type="text" placeholder="পণ্যের নাম" value="${item.name || ''}" class="item-name-input w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500">
+              <button class="paste-button" onclick="pasteFromClipboard(this.previousElementSibling.id)">
+                  📋
+              </button>
+          </div>
+          <div class="input-group">
+              <input type="number" placeholder="পরিমাণ" value="${item.quantity || 1}" min="1" class="item-quantity-input w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 text-right">
+              <button class="paste-button" onclick="pasteFromClipboard(this.previousElementSibling.id)">
+                  📋
+              </button>
+          </div>
+          <div class="input-group">
+              <input type="number" placeholder="মূল্য" value="${item.price || 0}" min="0" class="item-price-input w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 text-right">
+              <button class="paste-button" onclick="pasteFromClipboard(this.previousElementSibling.id)">
+                  📋
+              </button>
+          </div>
+          <p class="text-right text-sm">৳ 0</p>
+        `;
+        // To ensure unique IDs for dynamically created inputs
+        const uniqueId = `item-name-${Date.now()}`;
+        newItemRow.querySelector('.item-name-input').id = uniqueId;
+        const uniqueId2 = `item-quantity-${Date.now()}`;
+        newItemRow.querySelector('.item-quantity-input').id = uniqueId2;
+        const uniqueId3 = `item-price-${Date.now()}`;
+        newItemRow.querySelector('.item-price-input').id = uniqueId3;
+        
+        inputItemsContainer.appendChild(newItemRow);
+        updateInvoicePreview();
+      };
+
+      // Function to load a saved invoice into the form
+      const loadInvoiceData = (invoiceData) => {
+        // Populate client info
+        clientNameInput.value = invoiceData.client.name || '';
+        clientMobileInput.value = invoiceData.client.mobile || '';
+        clientAddressInput.value = invoiceData.client.address || '';
+        statfastCodeInput.value = invoiceData.client.statfastCode || '';
+        companyNameInput.value = invoiceData.company.name || '';
+        companyAddressInput.value = invoiceData.company.address || '';
+        companyMobileInput.value = invoiceData.company.mobile || '';
+        footerMessageInput.value = invoiceData.footer.message || '';
+        socialMediaSelect.value = invoiceData.footer.socialMedia || 'website';
+        socialMediaLinkInput.value = invoiceData.footer.socialMediaLink || '';
+        footerPhoneInput.value = invoiceData.footer.phone || '';
+        deliveryChargeInput.value = invoiceData.deliveryCharge || 0;
+        paymentMethodInput.value = invoiceData.paymentMethod || 'ক্যাশ অন ডেলিভারি (COD)';
+
+        // Populate items
+        inputItemsContainer.innerHTML = '';
+        if (invoiceData.items && invoiceData.items.length > 0) {
+            invoiceData.items.forEach(item => {
+                addItemRow(item);
+            });
+        } else {
+            addItemRow();
+        }
+
+        // Close the modal and show a message
+        savedInvoicesModal.style.display = 'none';
+        showMessage("ইনভয়েস সফলভাবে লোড করা হয়েছে!", 'bg-blue-200 text-blue-800');
+        updateInvoicePreview();
+        activateTab('client');
+      };
+      
+      // Function to delete an invoice from Firestore
+      const deleteInvoice = async (docId) => {
+        if (!firebaseInitialized || !db) {
+              showMessage("Firebase সঠিকভাবে কনফিগার করা হয়নি।", 'bg-red-200 text-red-800');
+              return;
+        }
         try {
-          const text = await navigator.clipboard.readText();
-          target.value = text;
-          target.focus();
-        } catch (err) {
-          console.warn("Clipboard API failed, fallback execCommand");
-          target.focus();
-          document.execCommand('paste');
+          await deleteDoc(doc(db, "invoices", docId));
+          showMessage("ইনভয়েস সফলভাবে মুছে ফেলা হয়েছে!", 'bg-green-200 text-green-800');
+          // Refresh the list after deletion
+          loadSavedInvoices();
+        } catch (e) {
+          console.error("ইনভয়েস মোছার সময় ত্রুটি হয়েছে: ", e);
+          showMessage("ইনভয়েস মোছার সময় একটি ত্রুটি হয়েছে।", 'bg-red-200 text-red-800');
         }
       };
 
-      // ✅ Clipboard এ Copy
-      window.copyToClipboard = async (targetId) => {
-        const target = document.getElementById(targetId);
-        if (!target) return;
-        try {
-          await navigator.clipboard.writeText(target.value);
-          showMessage("টেক্সট কপি করা হয়েছে ✅", "bg-green-200 text-green-800");
-        } catch (err) {
-          console.error("Copy failed:", err);
-          showMessage("কপি ব্যর্থ ❌", "bg-red-200 text-red-800");
-        }
-      };
-
-      // ✅ ইনভয়েস লোড
-      const loadInvoices = async () => {
-        try {
-          const snapshot = await getDocs(collection(db, "invoices"));
-          const invoices = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-          renderSavedInvoicesList(invoices);
-        } catch (err) {
-          console.error("Load invoices failed:", err);
-        }
-      };
-
-      // ✅ ইনভয়েস দেখানো
+      // Function to render the list of saved invoices in the modal
       const renderSavedInvoicesList = (invoices) => {
         invoiceListContainer.innerHTML = '';
         emptyListMessage.style.display = 'none';
-
+        
         if (invoices.length === 0) {
-          emptyListMessage.style.display = 'block';
-          return;
+            emptyListMessage.style.display = 'block';
+            return;
         }
 
         invoices.forEach(invoice => {
           const listItem = document.createElement('div');
-          listItem.className = 'p-3 bg-gray-50 rounded-lg shadow flex justify-between items-center';
+          listItem.className = 'invoice-list-item';
           listItem.innerHTML = `
-            <div>
-              <p class="font-bold text-gray-800">${invoice.client?.name || 'অজানা'}</p>
+            <div class="flex flex-col">
+              <p class="font-bold text-gray-800">${invoice.client.name}</p>
               <p class="text-sm text-gray-500">ইনভয়েস নং: ${invoice.invoiceNumber}</p>
               <p class="text-sm text-gray-500">তারিখ: ${invoice.invoiceDate}</p>
             </div>
-            <button class="bg-red-500 text-white px-3 py-1 rounded-lg delete-btn">Delete</button>
+            <div class="space-x-2 flex">
+              <button class="bg-blue-500 text-white text-xs px-3 py-1 rounded-full hover:bg-blue-600 load-invoice-btn" data-doc-id="${invoice.id}">লোড করুন</button>
+              <button class="bg-red-500 text-white text-xs px-3 py-1 rounded-full hover:bg-red-600 delete-invoice-btn" data-doc-id="${invoice.id}">মুছুন</button>
+            </div>
           `;
-          listItem.querySelector(".delete-btn").addEventListener("click", async () => {
-            await deleteDoc(doc(db, "invoices", invoice.id));
-            showMessage("ইনভয়েস ডিলিট হয়েছে 🗑️", "bg-red-200 text-red-800");
-            loadInvoices();
-          });
           invoiceListContainer.appendChild(listItem);
         });
+
+        // Attach event listeners to the new buttons
+        invoiceListContainer.querySelectorAll('.load-invoice-btn').forEach(btn => {
+            const invoice = invoices.find(inv => inv.id === btn.dataset.docId);
+            btn.addEventListener('click', () => loadInvoiceData(invoice));
+        });
+
+        invoiceListContainer.querySelectorAll('.delete-invoice-btn').forEach(btn => {
+            btn.addEventListener('click', () => deleteInvoice(btn.dataset.docId));
+        });
       };
+
+      // Function to load all saved invoices from Firestore
+      const loadSavedInvoices = async () => {
+          if (!firebaseInitialized || !db) {
+              showMessage("Firebase সঠিকভাবে কনফিগার করা হয়নি।", 'bg-red-200 text-red-800');
+              return;
+          }
+          savedInvoicesModal.style.display = 'flex';
+          loadingMessage.style.display = 'block';
+          invoiceListContainer.innerHTML = '';
+          emptyListMessage.style.display = 'none';
+
+          try {
+              const querySnapshot = await getDocs(collection(db, "invoices"));
+              const invoices = [];
+              querySnapshot.forEach((doc) => {
+                  invoices.push({ id: doc.id, ...doc.data() });
+              });
+              // Sort invoices by timestamp to show the latest first
+              invoices.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+              renderSavedInvoicesList(invoices);
+          } catch (e) {
+              console.error("ইনভয়েস লোড করার সময় ত্রুটি হয়েছে: ", e);
+              showMessage("ইনভয়েস লোড করার সময় একটি ত্রুটি হয়েছে।", 'bg-red-200 text-red-800');
+          } finally {
+              loadingMessage.style.display = 'none';
+          }
+      };
+
+      // Function to load data (now from a default state)
+      const loadData = () => {
+        companyNameInput.value = 'ফুডি হাট';
+        companyAddressInput.value = 'হাতিয়াড়া, কাশিয়ানী, গোপালগঞ্জ';
+        companyMobileInput.value = '01796548423';
+        footerMessageInput.value = 'ধন্যবাদ আমাদের থেকে কেনাকাটার জন্য ❤️';
+        socialMediaLinkInput.value = 'www.apnarshop.com';
+        footerPhoneInput.value = '01796548423';
+        addItemRow();
+        activateTab('client');
+      };
+
+      // Function to update the entire invoice preview
+      const updateInvoicePreview = () => {
+        // Update company and client info
+        companyNameDisplay.textContent = companyNameInput.value || 'প্রতিষ্ঠানের নাম';
+        companyAddressDisplay.textContent = companyAddressInput.value || 'ঢাকা, বাংলাদেশ';
+        companyMobileDisplay.textContent = companyMobileInput.value || '018XXXXXXXX';
+        
+        clientNameDisplay.textContent = clientNameInput.value || 'জনাব রাহাত হোসেন';
+        clientMobileDisplay.textContent = clientMobileInput.value || '017XXXXXXXX';
+        clientAddressDisplay.textContent = clientAddressInput.value || 'চট্টগ্রাম, বাংলাদেশ';
+        statfastCodeDisplay.textContent = statfastCodeInput.value || '';
+
+        // Update items table
+        invoiceItemsDisplay.innerHTML = '';
+        let subTotal = 0;
+        
+        const itemRows = document.querySelectorAll('#input-items-container .grid');
+        itemRows.forEach((row) => {
+          const itemNameInput = row.querySelector('.item-name-input');
+          const itemQuantityInput = row.querySelector('.item-quantity-input');
+          const itemPriceInput = row.querySelector('.item-price-input');
+          
+          const itemName = itemNameInput.value;
+          const quantity = parseFloat(itemQuantityInput.value) || 0;
+          const price = parseFloat(itemPriceInput.value) || 0;
+          const itemTotal = quantity * price;
+          
+          row.querySelector('p').textContent = `৳ ${itemTotal.toFixed(2)}`;
+
+          subTotal += itemTotal;
+
+          const displayRow = document.createElement('tr');
+          displayRow.className = 'item';
+          displayRow.innerHTML = `
+            <td>${itemName || 'পণ্যের নাম'}</td>
+            <td class="text-center">${quantity}</td>
+            <td class="text-center">${price.toFixed(2)}</td>
+            <td class="text-center">${itemTotal.toFixed(2)}</td>
+          `;
+          invoiceItemsDisplay.appendChild(displayRow);
+        });
+
+        // Update totals
+        const deliveryCharge = parseFloat(deliveryChargeInput.value) || 0;
+        const grandTotal = subTotal + deliveryCharge;
+
+        subTotalDisplay.textContent = subTotal.toFixed(2);
+        deliveryChargeDisplay.textContent = deliveryCharge.toFixed(2);
+        grandTotalDisplay.textContent = grandTotal.toFixed(2);
+
+        // Update payment method display
+        paymentMethodDisplay.innerHTML = `<span class="font-bold">পেমেন্ট মেথড:</span> ${paymentMethodInput.value}`;
+
+        // Update footer display
+        footerMessageDisplay.textContent = footerMessageInput.value || 'ধন্যবাদ আমাদের থেকে কেনাকাটার জন্য ❤️';
+        footerPhoneDisplay.textContent = `📞 ${footerPhoneInput.value || '01796548423'}`;
+        
+        // Update social media icon and link
+        const selectedIcon = socialMediaSelect.value;
+        const socialLink = socialMediaLinkInput.value;
+        socialMediaIconDisplay.innerHTML = icons[selectedIcon] || '';
+        socialMediaLinkDisplay.innerHTML = `<a href="http://${socialLink}" target="_blank" class="text-blue-600">${socialLink}</a>`;
+      };
+
+      // Function to handle tab switching
+      const activateTab = (tabId) => {
+          document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+          document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+
+          document.getElementById(`tab-${tabId}`).classList.add('active');
+          document.getElementById(`content-${tabId}`).classList.add('active');
+      };
+
+      // Event listeners for tab buttons
+      tabClientBtn.addEventListener('click', () => activateTab('client'));
+      tabItemsBtn.addEventListener('click', () => activateTab('items'));
+      tabSettingsBtn.addEventListener('click', () => activateTab('settings'));
+      
+      // Event listeners for saving and updating
+      document.getElementById('input-panel').addEventListener('input', updateInvoicePreview);
+      
+      // Add new item row
+      addItemButton.addEventListener('click', addItemRow);
+
+      // Save invoice to Firestore
+      saveInvoiceButton.addEventListener('click', saveInvoice);
+
+      // Show and load saved invoices
+      showSavedInvoicesButton.addEventListener('click', loadSavedInvoices);
+      closeModalButton.addEventListener('click', () => {
+        savedInvoicesModal.style.display = 'none';
+      });
+
+      // Initial load of data when the page loads
+      loadData();
     });
+
+    // Initialize Firebase on page load
+    initializeFirebase();
   </script>
 </body>
 </html>
