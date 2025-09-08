@@ -58,6 +58,43 @@
         box-shadow: none;
       }
     }
+    .tab-button {
+        padding: 10px 15px;
+        background-color: #e5e7eb;
+        color: #4b5563;
+        font-weight: 600;
+        border-radius: 8px 8px 0 0;
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
+    .tab-button.active {
+        background-color: #2563eb;
+        color: white;
+    }
+    .tab-content {
+        display: none;
+    }
+    .tab-content.active {
+        display: block;
+    }
+    .input-group {
+        position: relative;
+    }
+    .paste-button {
+        position: absolute;
+        right: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: #e5e7eb;
+        border: none;
+        padding: 4px 8px;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
+    .paste-button:hover {
+        background: #d1d5db;
+    }
   </style>
 </head>
 <body class="bg-gray-50 p-6">
@@ -68,74 +105,132 @@
     <div id="input-panel" class="no-print bg-white rounded-xl shadow-2xl p-6 md:p-10">
       <h1 class="text-3xl font-bold text-gray-800 mb-6">ইনপুট ফর্ম</h1>
       
-      <!-- Company Info Input -->
-      <div class="mb-8 border-b pb-8">
-        <h3 class="font-semibold text-lg text-gray-800 mb-2">প্রতিষ্ঠানের তথ্য</h3>
-        <input type="text" id="company-name-input" placeholder="প্রতিষ্ঠানের নাম" value="ফুডি হাট" class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 mb-2">
-        <input type="text" id="company-address-input" placeholder="প্রতিষ্ঠানের ঠিকানা" value="হাতিয়াড়া, কাশিয়ানী, গোপালগঞ্জ" class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 mb-2">
-        <input type="text" id="company-mobile-input" placeholder="মোবাইল নাম্বার" value="01796548423" class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500">
+      <!-- Tab Buttons -->
+      <div class="flex space-x-2 mb-4">
+          <button id="tab-client" class="tab-button active">গ্রাহকের তথ্য</button>
+          <button id="tab-items" class="tab-button">পণ্যের বিবরণ</button>
+          <button id="tab-company" class="tab-button">প্রতিষ্ঠানের তথ্য</button>
       </div>
-
-      <!-- Client Info Input -->
-      <div class="mb-8 border-b pb-8">
-        <h3 class="font-semibold text-lg text-gray-800 mb-2">গ্রাহকের তথ্য</h3>
-        <input type="text" id="client-name-input" placeholder="গ্রাহকের নাম" class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 mb-2">
-        <input type="text" id="client-mobile-input" placeholder="গ্রাহকের ফোন নাম্বার" class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 mb-2">
-        <input type="text" id="client-address-input" placeholder="গ্রাহকের ঠিকানা" class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500">
-        <input type="text" id="statfast-code-input" placeholder="ডেলিভারি কোড" class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 mt-2">
-      </div>
-
-      <!-- Items Input -->
-      <div class="mb-6">
-        <h3 class="font-semibold text-lg text-gray-800 mb-4">পণ্যের বিবরণ</h3>
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4 font-semibold text-gray-700">
-          <div class="md:col-span-2">পণ্যের নাম</div>
-          <div>পরিমাণ</div>
-          <div>মূল্য (৳)</div>
-          <div>মোট</div>
+      
+      <!-- Tab Contents -->
+      <div id="tab-content-container">
+        <!-- Client Info Tab -->
+        <div id="content-client" class="tab-content active mb-8 border-b pb-8">
+            <h3 class="font-semibold text-lg text-gray-800 mb-4">গ্রাহকের তথ্য</h3>
+            <div class="input-group mb-2">
+                <input type="text" id="client-name-input" placeholder="গ্রাহকের নাম" class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500">
+                <button class="paste-button" onclick="pasteFromClipboard('client-name-input')">
+                    📋
+                </button>
+            </div>
+            <div class="input-group mb-2">
+                <input type="text" id="client-mobile-input" placeholder="গ্রাহকের ফোন নাম্বার" class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500">
+                <button class="paste-button" onclick="pasteFromClipboard('client-mobile-input')">
+                    📋
+                </button>
+            </div>
+            <div class="input-group">
+                <input type="text" id="client-address-input" placeholder="গ্রাহকের ঠিকানা" class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500">
+                <button class="paste-button" onclick="pasteFromClipboard('client-address-input')">
+                    📋
+                </button>
+            </div>
+            <div class="input-group mt-2">
+                <input type="text" id="statfast-code-input" placeholder="ডেলিভারি কোড" class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500">
+                <button class="paste-button" onclick="pasteFromClipboard('statfast-code-input')">
+                    📋
+                </button>
+            </div>
         </div>
-        <div id="input-items-container">
-          <!-- Item rows will be added dynamically -->
+        
+        <!-- Items Tab -->
+        <div id="content-items" class="tab-content mb-6">
+            <h3 class="font-semibold text-lg text-gray-800 mb-4">পণ্যের বিবরণ</h3>
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4 font-semibold text-gray-700">
+                <div class="md:col-span-2">পণ্যের নাম</div>
+                <div>পরিমাণ</div>
+                <div>মূল্য (৳)</div>
+                <div>মোট</div>
+            </div>
+            <div id="input-items-container">
+                <!-- Item rows will be added dynamically -->
+            </div>
+            <button id="add-item" class="mt-4 bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg transition duration-300 ease-in-out">
+                + আরও পণ্য যোগ করুন
+            </button>
+            <div class="flex flex-col md:flex-row justify-end mt-8">
+              <div class="w-full md:w-1/2 lg:w-1/3 space-y-2">
+                <div class="flex justify-between items-center text-gray-700">
+                  <span class="font-medium">ডেলিভারি চার্জ:</span>
+                  <input type="number" id="delivery-charge-input" value="0" min="0" class="w-24 text-right border rounded-md px-2 py-1">
+                </div>
+                <div class="flex justify-between items-center text-gray-700">
+                  <span class="font-medium">পেমেন্ট মেথড:</span>
+                  <select id="payment-method-input" class="w-24 border rounded-md px-2 py-1 bg-white">
+                    <option value="ক্যাশ অন ডেলিভারি (COD)">ক্যাশ অন ডেলিভারি (COD)</option>
+                    <option value="বিকাশ (bKash)">বিকাশ (bKash)</option>
+                  </select>
+                </div>
+              </div>
+            </div>
         </div>
-        <button id="add-item" class="mt-4 bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg transition duration-300 ease-in-out">
-          + আরও পণ্য যোগ করুন
-        </button>
-      </div>
 
-      <!-- Delivery Charge & Payment Method Input -->
-      <div class="flex flex-col md:flex-row justify-end mt-8">
-        <div class="w-full md:w-1/2 lg:w-1/3 space-y-2">
-          <div class="flex justify-between items-center text-gray-700">
-            <span class="font-medium">ডেলিভারি চার্জ:</span>
-            <input type="number" id="delivery-charge-input" value="0" min="0" class="w-24 text-right border rounded-md px-2 py-1">
-          </div>
-          <div class="flex justify-between items-center text-gray-700">
-            <span class="font-medium">পেমেন্ট মেথড:</span>
-            <select id="payment-method-input" class="w-24 border rounded-md px-2 py-1 bg-white">
-              <option value="ক্যাশ অন ডেলিভারি (COD)">ক্যাশ অন ডেলিভারি (COD)</option>
-              <option value="বিকাশ (bKash)">বিকাশ (bKash)</option>
-            </select>
-          </div>
+        <!-- Company Info Tab -->
+        <div id="content-company" class="tab-content mb-8 border-b pb-8">
+            <h3 class="font-semibold text-lg text-gray-800 mb-4">প্রতিষ্ঠানের তথ্য</h3>
+            <div class="input-group mb-2">
+                <input type="text" id="company-name-input" placeholder="প্রতিষ্ঠানের নাম" value="ফুডি হাট" class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500">
+                <button class="paste-button" onclick="pasteFromClipboard('company-name-input')">
+                    📋
+                </button>
+            </div>
+            <div class="input-group mb-2">
+                <input type="text" id="company-address-input" placeholder="প্রতিষ্ঠানের ঠিকানা" value="হাতিয়াড়া, কাশিয়ানী, গোপালগঞ্জ" class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500">
+                <button class="paste-button" onclick="pasteFromClipboard('company-address-input')">
+                    📋
+                </button>
+            </div>
+            <div class="input-group">
+                <input type="text" id="company-mobile-input" placeholder="মোবাইল নাম্বার" value="01796548423" class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500">
+                <button class="paste-button" onclick="pasteFromClipboard('company-mobile-input')">
+                    📋
+                </button>
+            </div>
+
+            <!-- Footer Info Input moved here -->
+            <div class="mt-8 border-t pt-8">
+              <h3 class="font-semibold text-lg text-gray-800 mb-2">ফুটারে তথ্য</h3>
+              <div class="input-group mb-2">
+                  <textarea id="footer-message-input" placeholder="ধন্যবাদ বার্তা" rows="2" class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500">ধন্যবাদ আমাদের থেকে কেনাকাটার জন্য ❤️</textarea>
+                  <button class="paste-button" onclick="pasteFromClipboard('footer-message-input')">
+                      📋
+                  </button>
+              </div>
+              
+              <div class="flex items-center gap-2 mb-2">
+                <select id="social-media-select" class="w-2/5 md:w-1/3 border rounded-md px-2 py-1 bg-white">
+                  <option value="website">ওয়েবসাইট</option>
+                  <option value="facebook">ফেসবুক</option>
+                  <option value="whatsapp">হোয়াটসঅ্যাপ</option>
+                </select>
+                <div class="input-group w-full">
+                    <input type="text" id="social-media-link-input" placeholder="লিংক/ব্যবহারকারীর নাম" value="www.apnarshop.com" class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500">
+                    <button class="paste-button" onclick="pasteFromClipboard('social-media-link-input')">
+                        📋
+                    </button>
+                </div>
+              </div>
+              
+              <div class="input-group">
+                  <input type="text" id="footer-phone-input" placeholder="মোবাইল নাম্বার" value="01796548423" class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500">
+                  <button class="paste-button" onclick="pasteFromClipboard('footer-phone-input')">
+                      📋
+                  </button>
+              </div>
+            </div>
         </div>
       </div>
       
-      <!-- Footer Info Input -->
-      <div class="mt-8 border-t pt-8">
-        <h3 class="font-semibold text-lg text-gray-800 mb-2">ফুটারে তথ্য</h3>
-        <textarea id="footer-message-input" placeholder="ধন্যবাদ বার্তা" rows="2" class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 mb-2">ধন্যবাদ আমাদের থেকে কেনাকাটার জন্য ❤️</textarea>
-        
-        <div class="flex items-center gap-2 mb-2">
-          <select id="social-media-select" class="w-2/5 md:w-1/3 border rounded-md px-2 py-1 bg-white">
-            <option value="website">ওয়েবসাইট</option>
-            <option value="facebook">ফেসবুক</option>
-            <option value="whatsapp">হোয়াটসঅ্যাপ</option>
-          </select>
-          <input type="text" id="social-media-link-input" placeholder="লিংক/ব্যবহারকারীর নাম" value="www.apnarshop.com" class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500">
-        </div>
-        
-        <input type="text" id="footer-phone-input" placeholder="মোবাইল নাম্বার" value="01796548423" class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500">
-      </div>
-
       <!-- Print Button -->
       <div class="no-print mt-6 text-center">
         <button onclick="window.print()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg flex items-center justify-center gap-2">
@@ -208,6 +303,21 @@
   </div>
 
   <script>
+    // Handles pasting text from the clipboard to a target input field using a fallback method.
+    function pasteFromClipboard(targetId) {
+        const targetElement = document.getElementById(targetId);
+        if (targetElement) {
+            // Focus the element to make it ready for paste operation
+            targetElement.focus();
+            try {
+                // Use the older document.execCommand('paste') as a fallback
+                document.execCommand('paste');
+            } catch (err) {
+                console.error('Failed to execute paste command: ', err);
+            }
+        }
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
       // Input elements
       const companyNameInput = document.getElementById('company-name-input');
@@ -245,6 +355,14 @@
       const socialMediaIconDisplay = document.getElementById('social-media-icon-display');
       const socialMediaLinkDisplay = document.getElementById('social-media-link-display');
       const footerPhoneDisplay = document.getElementById('footer-phone-display');
+
+      // Tab buttons and contents
+      const tabCompanyBtn = document.getElementById('tab-company');
+      const tabClientBtn = document.getElementById('tab-client');
+      const tabItemsBtn = document.getElementById('tab-items');
+      const contentCompany = document.getElementById('content-company');
+      const contentClient = document.getElementById('content-client');
+      const contentItems = document.getElementById('content-items');
 
       // Function to generate a random invoice number
       const generateInvoiceNumber = () => {
@@ -295,6 +413,7 @@
           socialMediaSelect: socialMediaSelect.value,
           socialMediaLink: socialMediaLinkInput.value,
           footerPhone: footerPhoneInput.value,
+          activeTab: document.querySelector('.tab-button.active').id.replace('tab-', ''),
         };
       };
 
@@ -309,11 +428,34 @@
         const newItemRow = document.createElement('div');
         newItemRow.className = 'grid grid-cols-1 md:grid-cols-4 gap-4 items-center mb-4';
         newItemRow.innerHTML = `
-          <input type="text" placeholder="পণ্যের নাম" value="${item.name || ''}" class="item-name-input md:col-span-2 px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500">
-          <input type="number" placeholder="পরিমাণ" value="${item.quantity || 1}" min="1" class="item-quantity-input px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 text-right">
-          <input type="number" placeholder="মূল্য" value="${item.price || 0}" min="0" class="item-price-input px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 text-right">
+          <div class="input-group md:col-span-2">
+              <input type="text" placeholder="পণ্যের নাম" value="${item.name || ''}" class="item-name-input w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500">
+              <button class="paste-button" onclick="pasteFromClipboard(this.previousElementSibling.id)">
+                  📋
+              </button>
+          </div>
+          <div class="input-group">
+              <input type="number" placeholder="পরিমাণ" value="${item.quantity || 1}" min="1" class="item-quantity-input w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 text-right">
+              <button class="paste-button" onclick="pasteFromClipboard(this.previousElementSibling.id)">
+                  📋
+              </button>
+          </div>
+          <div class="input-group">
+              <input type="number" placeholder="মূল্য" value="${item.price || 0}" min="0" class="item-price-input w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 text-right">
+              <button class="paste-button" onclick="pasteFromClipboard(this.previousElementSibling.id)">
+                  📋
+              </button>
+          </div>
           <p class="text-right text-sm">৳ 0</p>
         `;
+        // To ensure unique IDs for dynamically created inputs
+        const uniqueId = `item-name-${Date.now()}`;
+        newItemRow.querySelector('.item-name-input').id = uniqueId;
+        const uniqueId2 = `item-quantity-${Date.now()}`;
+        newItemRow.querySelector('.item-quantity-input').id = uniqueId2;
+        const uniqueId3 = `item-price-${Date.now()}`;
+        newItemRow.querySelector('.item-price-input').id = uniqueId3;
+        
         inputItemsContainer.appendChild(newItemRow);
         updateInvoicePreview();
       };
@@ -337,6 +479,10 @@
           socialMediaSelect.value = data.socialMediaSelect || 'website';
           socialMediaLinkInput.value = data.socialMediaLink || '';
           footerPhoneInput.value = data.footerPhone || '01796548423';
+
+          // Set active tab based on saved data
+          const activeTabId = data.activeTab || 'client';
+          activateTab(activeTabId);
           
           inputItemsContainer.innerHTML = '';
           if (data.items && data.items.length > 0) {
@@ -351,6 +497,7 @@
           companyAddressInput.value = 'হাতিয়াড়া, কাশিয়ানী, গোপালগঞ্জ';
           companyMobileInput.value = '01796548423';
           addItemRow();
+          activateTab('client');
         }
       };
 
@@ -417,6 +564,21 @@
         socialMediaIconDisplay.innerHTML = icons[selectedIcon] || '';
         socialMediaLinkDisplay.innerHTML = `<a href="http://${socialLink}" target="_blank" class="text-blue-600">${socialLink}</a>`;
       };
+
+      // Function to handle tab switching
+      const activateTab = (tabId) => {
+          document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+          document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+
+          document.getElementById(`tab-${tabId}`).classList.add('active');
+          document.getElementById(`content-${tabId}`).classList.add('active');
+          saveData();
+      };
+
+      // Event listeners for tab buttons
+      tabClientBtn.addEventListener('click', () => activateTab('client'));
+      tabItemsBtn.addEventListener('click', () => activateTab('items'));
+      tabCompanyBtn.addEventListener('click', () => activateTab('company'));
       
       // Event listeners for saving and updating
       document.getElementById('input-panel').addEventListener('input', () => {
