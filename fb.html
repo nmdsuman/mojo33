@@ -99,51 +99,33 @@
 </head>
 <body class="bg-gray-50 p-6">
 
-  <!-- Main container for the split view -->
   <div class="invoice-container grid grid-cols-1 lg:grid-cols-2 gap-8 w-full max-w-7xl mx-auto">
-    <!-- Left Panel: Input Forms -->
     <div id="input-panel" class="no-print bg-white rounded-xl shadow-2xl p-6 md:p-10">
       <h1 class="text-3xl font-bold text-gray-800 mb-6">ইনপুট ফর্ম</h1>
       
-      <!-- Tab Buttons -->
       <div class="flex space-x-2 mb-4">
           <button id="tab-client" class="tab-button active">গ্রাহকের তথ্য</button>
           <button id="tab-items" class="tab-button">পণ্যের বিবরণ</button>
           <button id="tab-company" class="tab-button">প্রতিষ্ঠানের তথ্য</button>
       </div>
       
-      <!-- Tab Contents -->
       <div id="tab-content-container">
-        <!-- Client Info Tab -->
         <div id="content-client" class="tab-content active mb-8 border-b pb-8">
             <h3 class="font-semibold text-lg text-gray-800 mb-4">গ্রাহকের তথ্য</h3>
             <div class="input-group mb-2">
                 <input type="text" id="client-name-input" placeholder="গ্রাহকের নাম" class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500">
-                <button class="paste-button" onclick="pasteFromClipboard('client-name-input')">
-                    📋
-                </button>
             </div>
             <div class="input-group mb-2">
                 <input type="text" id="client-mobile-input" placeholder="গ্রাহকের ফোন নাম্বার" class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500">
-                <button class="paste-button" onclick="pasteFromClipboard('client-mobile-input')">
-                    📋
-                </button>
             </div>
             <div class="input-group">
                 <input type="text" id="client-address-input" placeholder="গ্রাহকের ঠিকানা" class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500">
-                <button class="paste-button" onclick="pasteFromClipboard('client-address-input')">
-                    📋
-                </button>
             </div>
             <div class="input-group mt-2">
                 <input type="text" id="statfast-code-input" placeholder="ডেলিভারি কোড" class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500">
-                <button class="paste-button" onclick="pasteFromClipboard('statfast-code-input')">
-                    📋
-                </button>
             </div>
         </div>
         
-        <!-- Items Tab -->
         <div id="content-items" class="tab-content mb-6">
             <h3 class="font-semibold text-lg text-gray-800 mb-4">পণ্যের বিবরণ</h3>
             <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4 font-semibold text-gray-700">
@@ -153,8 +135,7 @@
                 <div>মোট</div>
             </div>
             <div id="input-items-container">
-                <!-- Item rows will be added dynamically -->
-            </div>
+                </div>
             <button id="add-item" class="mt-4 bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg transition duration-300 ease-in-out">
                 + আরও পণ্য যোগ করুন
             </button>
@@ -175,36 +156,28 @@
             </div>
         </div>
 
-        <!-- Company Info Tab -->
         <div id="content-company" class="tab-content mb-8 border-b pb-8">
             <h3 class="font-semibold text-lg text-gray-800 mb-4">প্রতিষ্ঠানের তথ্য</h3>
             <div class="input-group mb-2">
                 <input type="text" id="company-name-input" placeholder="প্রতিষ্ঠানের নাম" value="ফুডি হাট" class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500">
-                <button class="paste-button" onclick="pasteFromClipboard('company-name-input')">
-                    📋
-                </button>
             </div>
             <div class="input-group mb-2">
                 <input type="text" id="company-address-input" placeholder="প্রতিষ্ঠানের ঠিকানা" value="হাতিয়াড়া, কাশিয়ানী, গোপালগঞ্জ" class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500">
-                <button class="paste-button" onclick="pasteFromClipboard('company-address-input')">
-                    📋
-                </button>
             </div>
             <div class="input-group">
                 <input type="text" id="company-mobile-input" placeholder="মোবাইল নাম্বার" value="01796548423" class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500">
-                <button class="paste-button" onclick="pasteFromClipboard('company-mobile-input')">
-                    📋
-                </button>
+            </div>
+            <div class="input-group mt-2">
+                <input type="text" id="invoice-number-input" placeholder="ইনভয়েস নং" class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500">
+            </div>
+            <div class="input-group mt-2">
+                <input type="text" id="invoice-date-input" placeholder="তারিখ" class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500">
             </div>
 
-            <!-- Footer Info Input moved here -->
             <div class="mt-8 border-t pt-8">
               <h3 class="font-semibold text-lg text-gray-800 mb-2">ফুটারে তথ্য</h3>
               <div class="input-group mb-2">
                   <textarea id="footer-message-input" placeholder="ধন্যবাদ বার্তা" rows="2" class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500">ধন্যবাদ আমাদের থেকে কেনাকাটার জন্য ❤️</textarea>
-                  <button class="paste-button" onclick="pasteFromClipboard('footer-message-input')">
-                      📋
-                  </button>
               </div>
               
               <div class="flex items-center gap-2 mb-2">
@@ -215,23 +188,16 @@
                 </select>
                 <div class="input-group w-full">
                     <input type="text" id="social-media-link-input" placeholder="লিংক/ব্যবহারকারীর নাম" value="www.apnarshop.com" class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500">
-                    <button class="paste-button" onclick="pasteFromClipboard('social-media-link-input')">
-                        📋
-                    </button>
                 </div>
               </div>
               
               <div class="input-group">
                   <input type="text" id="footer-phone-input" placeholder="মোবাইল নাম্বার" value="01796548423" class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500">
-                  <button class="paste-button" onclick="pasteFromClipboard('footer-phone-input')">
-                      📋
-                  </button>
               </div>
             </div>
         </div>
       </div>
       
-      <!-- Print Button -->
       <div class="no-print mt-6 text-center">
         <button onclick="window.print()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg flex items-center justify-center gap-2">
           🖨️ প্রিন্ট করুন
@@ -239,9 +205,7 @@
       </div>
     </div>
 
-    <!-- Right Panel: Live Preview -->
     <div class="max-w-3xl mx-auto bg-white p-8 rounded-xl shadow-lg invoice-box">
-      <!-- Header -->
       <div class="flex justify-between items-center border-b pb-4 mb-6">
         <div>
           <h1 class="text-2xl font-bold text-gray-800" id="company-name-display">🛍️ ফুডি হাট</h1>
@@ -254,7 +218,6 @@
         </div>
       </div>
 
-      <!-- Customer Info -->
       <div class="mb-6">
         <h2 class="font-semibold text-gray-700 mb-2">গ্রাহকের তথ্য</h2>
         <p><span class="font-bold">নাম:</span> <span id="client-name-display">জনাব রাহাত হোসেন</span></p>
@@ -263,7 +226,6 @@
         <p><span class="font-bold">ডেলিভারি কোড:</span> <span id="statfast-code-display"></span></p>
       </div>
 
-      <!-- Items Table -->
       <table class="w-full mb-6">
         <tr class="heading">
           <td>পণ্যের নাম</td>
@@ -272,8 +234,7 @@
           <td>মোট (৳)</td>
         </tr>
         <tbody id="invoice-items-display">
-          <!-- Items will be populated dynamically -->
-        </tbody>
+          </tbody>
         <tr class="total">
           <td colspan="3" class="text-right">সর্বমোট:</td>
           <td id="sub-total">0</td>
@@ -288,7 +249,6 @@
         </tr>
       </table>
 
-      <!-- Footer -->
       <div class="invoice-footer">
         <span id="footer-message-display">ধন্যবাদ আমাদের থেকে কেনাকাটার জন্য ❤️</span> <br>
         <div class="flex justify-center items-center mt-2">
@@ -303,20 +263,7 @@
   </div>
 
   <script>
-    // Handles pasting text from the clipboard to a target input field using a fallback method.
-    function pasteFromClipboard(targetId) {
-        const targetElement = document.getElementById(targetId);
-        if (targetElement) {
-            // Focus the element to make it ready for paste operation
-            targetElement.focus();
-            try {
-                // Use the older document.execCommand('paste') as a fallback
-                document.execCommand('paste');
-            } catch (err) {
-                console.error('Failed to execute paste command: ', err);
-            }
-        }
-    }
+    // No pasteFromClipboard function needed now.
 
     document.addEventListener('DOMContentLoaded', () => {
       // Input elements
@@ -335,6 +282,8 @@
       const socialMediaSelect = document.getElementById('social-media-select');
       const socialMediaLinkInput = document.getElementById('social-media-link-input');
       const footerPhoneInput = document.getElementById('footer-phone-input');
+      const invoiceNumberInput = document.getElementById('invoice-number-input');
+      const invoiceDateInput = document.getElementById('invoice-date-input');
 
       // Display elements
       const companyNameDisplay = document.getElementById('company-name-display');
@@ -384,8 +333,8 @@
       };
 
       // Set initial invoice details
-      invoiceNumberDisplay.textContent = generateInvoiceNumber();
-      invoiceDateDisplay.textContent = getFormattedDate();
+      invoiceNumberInput.value = generateInvoiceNumber();
+      invoiceDateInput.value = getFormattedDate();
 
       // Function to get data from all input fields
       const collectData = () => {
@@ -406,6 +355,8 @@
           clientMobile: clientMobileInput.value,
           clientAddress: clientAddressInput.value,
           statfastCode: statfastCodeInput.value,
+          invoiceNumber: invoiceNumberInput.value,
+          invoiceDate: invoiceDateInput.value,
           items: items,
           deliveryCharge: deliveryChargeInput.value,
           paymentMethod: paymentMethodInput.value,
@@ -430,32 +381,15 @@
         newItemRow.innerHTML = `
           <div class="input-group md:col-span-2">
               <input type="text" placeholder="পণ্যের নাম" value="${item.name || ''}" class="item-name-input w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500">
-              <button class="paste-button" onclick="pasteFromClipboard(this.previousElementSibling.id)">
-                  📋
-              </button>
           </div>
           <div class="input-group">
               <input type="number" placeholder="পরিমাণ" value="${item.quantity || 1}" min="1" class="item-quantity-input w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 text-right">
-              <button class="paste-button" onclick="pasteFromClipboard(this.previousElementSibling.id)">
-                  📋
-              </button>
           </div>
           <div class="input-group">
               <input type="number" placeholder="মূল্য" value="${item.price || 0}" min="0" class="item-price-input w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 text-right">
-              <button class="paste-button" onclick="pasteFromClipboard(this.previousElementSibling.id)">
-                  📋
-              </button>
           </div>
           <p class="text-right text-sm">৳ 0</p>
         `;
-        // To ensure unique IDs for dynamically created inputs
-        const uniqueId = `item-name-${Date.now()}`;
-        newItemRow.querySelector('.item-name-input').id = uniqueId;
-        const uniqueId2 = `item-quantity-${Date.now()}`;
-        newItemRow.querySelector('.item-quantity-input').id = uniqueId2;
-        const uniqueId3 = `item-price-${Date.now()}`;
-        newItemRow.querySelector('.item-price-input').id = uniqueId3;
-        
         inputItemsContainer.appendChild(newItemRow);
         updateInvoicePreview();
       };
@@ -473,6 +407,8 @@
           clientMobileInput.value = data.clientMobile || '';
           clientAddressInput.value = data.clientAddress || '';
           statfastCodeInput.value = data.statfastCode || '';
+          invoiceNumberInput.value = data.invoiceNumber || generateInvoiceNumber();
+          invoiceDateInput.value = data.invoiceDate || getFormattedDate();
           deliveryChargeInput.value = data.deliveryCharge || '0';
           paymentMethodInput.value = data.paymentMethod || 'ক্যাশ অন ডেলিভারি (COD)';
           footerMessageInput.value = data.footerMessage || '';
@@ -496,6 +432,8 @@
           companyNameInput.value = 'ফুডি হাট';
           companyAddressInput.value = 'হাতিয়াড়া, কাশিয়ানী, গোপালগঞ্জ';
           companyMobileInput.value = '01796548423';
+          invoiceNumberInput.value = generateInvoiceNumber();
+          invoiceDateInput.value = getFormattedDate();
           addItemRow();
           activateTab('client');
         }
@@ -512,6 +450,9 @@
         clientMobileDisplay.textContent = clientMobileInput.value || '017XXXXXXXX';
         clientAddressDisplay.textContent = clientAddressInput.value || 'চট্টগ্রাম, বাংলাদেশ';
         statfastCodeDisplay.textContent = statfastCodeInput.value || '';
+        
+        invoiceNumberDisplay.textContent = invoiceNumberInput.value || generateInvoiceNumber();
+        invoiceDateDisplay.textContent = invoiceDateInput.value || getFormattedDate();
 
         // Update items table
         invoiceItemsDisplay.innerHTML = '';
@@ -598,4 +539,4 @@
   </script>
 
 </body>
-</html>
+          </html>
