@@ -57,6 +57,10 @@
       .invoice-box {
         box-shadow: none;
       }
+      @page {
+        size: auto;
+        margin: 0mm;
+      }
     }
     .tab-button {
         padding: 10px 15px;
@@ -444,16 +448,21 @@
     };
 
     // Handles pasting text from the clipboard to a target input field using a fallback method.
-    function pasteFromClipboard(targetId) {
+    async function pasteFromClipboard(targetId) {
         const targetElement = document.getElementById(targetId);
         if (targetElement) {
-            // Focus the element to make it ready for paste operation
-            targetElement.focus();
             try {
-                // Use the older document.execCommand('paste') as a fallback
-                document.execCommand('paste');
+                const text = await navigator.clipboard.readText();
+                targetElement.value = text;
             } catch (err) {
-                console.error('Failed to execute paste command: ', err);
+                console.error('Failed to read from clipboard: ', err);
+                // Fallback for older browsers
+                try {
+                    targetElement.focus();
+                    document.execCommand('paste');
+                } catch (err) {
+                    console.error('Failed to execute paste command: ', err);
+                }
             }
         }
     }
@@ -499,7 +508,7 @@
         document.getElementById('sub-total').textContent = subTotal.toFixed(2);
         document.getElementById('delivery-charge-display').textContent = invoiceData.deliveryCharge.toFixed(2);
         document.getElementById('grand-total').textContent = grandTotal.toFixed(2);
-
+        
         // Add a small delay to allow the DOM to update before printing
         setTimeout(() => {
             window.print();
@@ -693,19 +702,19 @@
         newItemRow.innerHTML = `
           <div class="input-group md:col-span-2">
               <input type="text" placeholder="পণ্যের নাম" value="${item.name || ''}" class="item-name-input w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500">
-              <button class="paste-button" onclick="pasteFromClipboard(this.previousElementSibling.id)">
+              <button class="paste-button" onclick="pasteFromClipboard('item-name-${Date.now()}')">
                   📋
               </button>
           </div>
           <div class="input-group">
               <input type="number" placeholder="পরিমাণ" value="${item.quantity || 1}" min="1" class="item-quantity-input w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 text-right">
-              <button class="paste-button" onclick="pasteFromClipboard(this.previousElementSibling.id)">
+              <button class="paste-button" onclick="pasteFromClipboard('item-quantity-${Date.now()}')">
                   📋
               </button>
           </div>
           <div class="input-group">
               <input type="number" placeholder="মূল্য" value="${item.price || 0}" min="0" class="item-price-input w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 text-right">
-              <button class="paste-button" onclick="pasteFromClipboard(this.previousElementSibling.id)">
+              <button class="paste-button" onclick="pasteFromClipboard('item-price-${Date.now()}')">
                   📋
               </button>
           </div>
@@ -758,7 +767,6 @@
         activateTab('client');
         showMessage("ইনভয়েস সফলভাবে লোড করা হয়েছে!", 'bg-blue-200 text-blue-800');
         updateInvoicePreview();
-        activateTab('client');
       };
       
       // Function to delete an invoice from Firestore
