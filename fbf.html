@@ -158,6 +158,7 @@
           <button id="tab-client" class="tab-button active">গ্রাহকের তথ্য</button>
           <button id="tab-items" class="tab-button">পণ্যের বিবরণ</button>
           <button id="tab-settings" class="tab-button">সেটিংস</button>
+          <button id="tab-saved-invoices" class="tab-button">সংরক্ষিত ইনভয়েস দেখুন</button>
       </div>
       
       <!-- Tab Contents -->
@@ -276,18 +277,21 @@
               </div>
             </div>
         </div>
+        <!-- Saved Invoices Tab -->
+        <div id="content-saved-invoices" class="tab-content mb-8 border-b pb-8">
+            <h3 class="font-semibold text-lg text-gray-800 mb-4">সংরক্ষিত ইনভয়েস</h3>
+            <div id="invoice-list-container" class="max-h-96 overflow-y-auto">
+                <!-- Invoices will be populated here -->
+            </div>
+            <p id="empty-list-message" class="text-gray-500 mt-4" style="display: none;">কোনো ইনভয়েস সেভ করা নেই।</p>
+            <div id="loading-message" class="text-blue-500 mt-4 text-center" style="display: none;">ইনভয়েস লোড হচ্ছে...</div>
+        </div>
       </div>
       
       <!-- Save and Print Buttons -->
       <div class="no-print mt-6 text-center">
-        <button id="show-saved-invoices-button" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-6 rounded-lg flex items-center justify-center gap-2">
-          📁 সংরক্ষিত ইনভয়েস দেখুন
-        </button>
         <button id="save-invoice-button" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded-lg flex items-center justify-center gap-2 mt-2">
           ✅ ইনভয়েস সেভ করুন
-        </button>
-        <button onclick="window.print()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg flex items-center justify-center gap-2 mt-2">
-          🖨️ প্রিন্ট করুন
         </button>
       </div>
       <div id="message-box" class="mt-4 p-4 rounded-lg text-center" style="display: none;"></div>
@@ -356,19 +360,6 @@
     </div>
   </div>
 
-  <!-- Modal for Saved Invoices -->
-  <div id="saved-invoices-modal" class="modal">
-    <div class="modal-content">
-      <span class="close-button" id="close-modal-button">&times;</span>
-      <h2 class="text-2xl font-bold mb-4">সংরক্ষিত ইনভয়েস</h2>
-      <div id="invoice-list-container" class="max-h-96 overflow-y-auto">
-        <!-- Invoices will be populated here -->
-      </div>
-      <p id="empty-list-message" class="text-gray-500 mt-4" style="display: none;">কোনো ইনভয়েস সেভ করা নেই।</p>
-      <div id="loading-message" class="text-blue-500 mt-4 text-center" style="display: none;">ইনভয়েস লোড হচ্ছে...</div>
-    </div>
-  </div>
-
   <!-- New Modal for Confirmation -->
   <div id="confirmation-modal" class="modal">
       <div class="modal-content text-center">
@@ -383,7 +374,6 @@
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-    import { getAuth } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
     import { getFirestore, addDoc, collection, getDocs, doc, deleteDoc, setLogLevel, query, where, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
     setLogLevel('debug'); // Enable Firestore logging
@@ -468,6 +458,53 @@
         }
     }
     window.pasteFromClipboard = pasteFromClipboard;
+    
+    const printInvoice = (invoiceData) => {
+        // Load data into preview panel
+        document.getElementById('company-name-display').textContent = invoiceData.company.name || '';
+        document.getElementById('company-address-display').textContent = invoiceData.company.address || '';
+        document.getElementById('company-mobile-display').textContent = invoiceData.company.mobile || '';
+
+        document.getElementById('client-name-display').textContent = invoiceData.client.name || '';
+        document.getElementById('client-mobile-display').textContent = invoiceData.client.mobile || '';
+        document.getElementById('client-address-display').textContent = invoiceData.client.address || '';
+        document.getElementById('statfast-code-display').textContent = invoiceData.client.statfastCode || '';
+
+        document.getElementById('invoice-number-display').textContent = invoiceData.invoiceNumber;
+        document.getElementById('invoice-date-display').textContent = invoiceData.invoiceDate;
+
+        document.getElementById('footer-message-display').textContent = invoiceData.footer.message || '';
+        document.getElementById('social-media-link-display').textContent = invoiceData.footer.socialMediaLink || '';
+        document.getElementById('footer-phone-display').textContent = `📞 ${invoiceData.footer.phone || ''}`;
+        document.getElementById('payment-method-display').innerHTML = `<span class="font-bold">পেমেন্ট মেথড:</span> ${invoiceData.paymentMethod}`;
+        
+        let subTotal = 0;
+        const invoiceItemsDisplay = document.getElementById('invoice-items-display');
+        invoiceItemsDisplay.innerHTML = '';
+        invoiceData.items.forEach(item => {
+            const itemTotal = item.quantity * item.price;
+            subTotal += itemTotal;
+            const displayRow = document.createElement('tr');
+            displayRow.className = 'item';
+            displayRow.innerHTML = `
+              <td>${item.name || 'পণ্যের নাম'}</td>
+              <td class="text-center">${item.quantity}</td>
+              <td class="text-center">${item.price.toFixed(2)}</td>
+              <td class="text-center">${itemTotal.toFixed(2)}</td>
+            `;
+            invoiceItemsDisplay.appendChild(displayRow);
+        });
+
+        const grandTotal = subTotal + invoiceData.deliveryCharge;
+        document.getElementById('sub-total').textContent = subTotal.toFixed(2);
+        document.getElementById('delivery-charge-display').textContent = invoiceData.deliveryCharge.toFixed(2);
+        document.getElementById('grand-total').textContent = grandTotal.toFixed(2);
+
+        // Add a small delay to allow the DOM to update before printing
+        setTimeout(() => {
+            window.print();
+        }, 100);
+    };
 
     document.addEventListener('DOMContentLoaded', () => {
       // Input elements
@@ -487,16 +524,6 @@
       const socialMediaLinkInput = document.getElementById('social-media-link-input');
       const footerPhoneInput = document.getElementById('footer-phone-input');
       const saveInvoiceButton = document.getElementById('save-invoice-button');
-      const showSavedInvoicesButton = document.getElementById('show-saved-invoices-button');
-      const savedInvoicesModal = document.getElementById('saved-invoices-modal');
-      const closeModalButton = document.getElementById('close-modal-button');
-      const invoiceListContainer = document.getElementById('invoice-list-container');
-      const emptyListMessage = document.getElementById('empty-list-message');
-      const loadingMessage = document.getElementById('loading-message');
-      const confirmationModal = document.getElementById('confirmation-modal');
-      const updateConfirmButton = document.getElementById('update-confirm-button');
-      const updateCancelButton = document.getElementById('update-cancel-button');
-
 
       // Display elements
       const companyNameDisplay = document.getElementById('company-name-display');
@@ -517,14 +544,24 @@
       const socialMediaIconDisplay = document.getElementById('social-media-icon-display');
       const socialMediaLinkDisplay = document.getElementById('social-media-link-display');
       const footerPhoneDisplay = document.getElementById('footer-phone-display');
+      const confirmationModal = document.getElementById('confirmation-modal');
+      const updateConfirmButton = document.getElementById('update-confirm-button');
+      const updateCancelButton = document.getElementById('update-cancel-button');
+      
+      const invoiceListContainer = document.getElementById('invoice-list-container');
+      const emptyListMessage = document.getElementById('empty-list-message');
+      const loadingMessage = document.getElementById('loading-message');
+
 
       // Tab buttons and contents
       const tabClientBtn = document.getElementById('tab-client');
       const tabItemsBtn = document.getElementById('tab-items');
       const tabSettingsBtn = document.getElementById('tab-settings');
+      const tabSavedInvoicesBtn = document.getElementById('tab-saved-invoices');
       const contentClient = document.getElementById('content-client');
       const contentItems = document.getElementById('content-items');
       const contentSettings = document.getElementById('content-settings');
+      const contentSavedInvoices = document.getElementById('content-saved-invoices');
 
       // Function to generate a random invoice number
       const generateInvoiceNumber = () => {
@@ -717,7 +754,8 @@
         }
 
         // Close the modal and show a message
-        savedInvoicesModal.style.display = 'none';
+        contentSavedInvoices.classList.remove('active');
+        activateTab('client');
         showMessage("ইনভয়েস সফলভাবে লোড করা হয়েছে!", 'bg-blue-200 text-blue-800');
         updateInvoicePreview();
         activateTab('client');
@@ -740,6 +778,53 @@
           showMessage("ইনভয়েস মোছার সময় একটি ত্রুটি হয়েছে।", 'bg-red-200 text-red-800');
         }
       };
+      
+      const printInvoice = (invoiceData) => {
+        // Load data into preview panel
+        document.getElementById('company-name-display').textContent = invoiceData.company.name || '';
+        document.getElementById('company-address-display').textContent = invoiceData.company.address || '';
+        document.getElementById('company-mobile-display').textContent = invoiceData.company.mobile || '';
+
+        document.getElementById('client-name-display').textContent = invoiceData.client.name || '';
+        document.getElementById('client-mobile-display').textContent = invoiceData.client.mobile || '';
+        document.getElementById('client-address-display').textContent = invoiceData.client.address || '';
+        document.getElementById('statfast-code-display').textContent = invoiceData.client.statfastCode || '';
+
+        document.getElementById('invoice-number-display').textContent = invoiceData.invoiceNumber;
+        document.getElementById('invoice-date-display').textContent = invoiceData.invoiceDate;
+
+        document.getElementById('footer-message-display').textContent = invoiceData.footer.message || '';
+        document.getElementById('social-media-link-display').textContent = invoiceData.footer.socialMediaLink || '';
+        document.getElementById('footer-phone-display').textContent = `📞 ${invoiceData.footer.phone || ''}`;
+        document.getElementById('payment-method-display').innerHTML = `<span class="font-bold">পেমেন্ট মেথড:</span> ${invoiceData.paymentMethod}`;
+        
+        let subTotal = 0;
+        const invoiceItemsDisplay = document.getElementById('invoice-items-display');
+        invoiceItemsDisplay.innerHTML = '';
+        invoiceData.items.forEach(item => {
+            const itemTotal = item.quantity * item.price;
+            subTotal += itemTotal;
+            const displayRow = document.createElement('tr');
+            displayRow.className = 'item';
+            displayRow.innerHTML = `
+              <td>${item.name || 'পণ্যের নাম'}</td>
+              <td class="text-center">${item.quantity}</td>
+              <td class="text-center">${item.price.toFixed(2)}</td>
+              <td class="text-center">${itemTotal.toFixed(2)}</td>
+            `;
+            invoiceItemsDisplay.appendChild(displayRow);
+        });
+
+        const grandTotal = subTotal + invoiceData.deliveryCharge;
+        document.getElementById('sub-total').textContent = subTotal.toFixed(2);
+        document.getElementById('delivery-charge-display').textContent = invoiceData.deliveryCharge.toFixed(2);
+        document.getElementById('grand-total').textContent = grandTotal.toFixed(2);
+        
+        // Add a small delay to allow the DOM to update before printing
+        setTimeout(() => {
+            window.print();
+        }, 100);
+    };
 
       // Function to render the list of saved invoices in the modal
       const renderSavedInvoicesList = (invoices) => {
@@ -765,6 +850,7 @@
             <div class="space-x-2 flex">
               <button class="bg-blue-500 text-white text-xs px-3 py-1 rounded-full hover:bg-blue-600 load-invoice-btn" data-doc-id="${invoice.id}">লোড করুন</button>
               <button class="bg-red-500 text-white text-xs px-3 py-1 rounded-full hover:bg-red-600 delete-invoice-btn" data-doc-id="${invoice.id}">মুছুন</button>
+              <button class="bg-gray-500 text-white text-xs px-3 py-1 rounded-full hover:bg-gray-600 print-invoice-btn" data-doc-id="${invoice.id}">প্রিন্ট</button>
             </div>
           `;
           invoiceListContainer.appendChild(listItem);
@@ -779,6 +865,11 @@
         invoiceListContainer.querySelectorAll('.delete-invoice-btn').forEach(btn => {
             btn.addEventListener('click', () => deleteInvoice(btn.dataset.docId));
         });
+        
+        invoiceListContainer.querySelectorAll('.print-invoice-btn').forEach(btn => {
+            const invoice = invoices.find(inv => inv.id === btn.dataset.docId);
+            btn.addEventListener('click', () => printInvoice(invoice));
+        });
       };
 
       // Function to load all saved invoices from Firestore
@@ -787,12 +878,10 @@
               showMessage("Firebase সঠিকভাবে কনফিগার করা হয়নি।", 'bg-red-200 text-red-800');
               return;
           }
-          const savedInvoicesModal = document.getElementById('saved-invoices-modal');
           const invoiceListContainer = document.getElementById('invoice-list-container');
           const emptyListMessage = document.getElementById('empty-list-message');
           const loadingMessage = document.getElementById('loading-message');
           
-          savedInvoicesModal.style.display = 'flex';
           loadingMessage.style.display = 'block';
           invoiceListContainer.innerHTML = '';
           emptyListMessage.style.display = 'none';
@@ -898,12 +987,17 @@
 
           document.getElementById(`tab-${tabId}`).classList.add('active');
           document.getElementById(`content-${tabId}`).classList.add('active');
+          
+          if(tabId === 'saved-invoices') {
+              loadSavedInvoices();
+          }
       };
 
       // Event listeners for tab buttons
       tabClientBtn.addEventListener('click', () => activateTab('client'));
       tabItemsBtn.addEventListener('click', () => activateTab('items'));
       tabSettingsBtn.addEventListener('click', () => activateTab('settings'));
+      tabSavedInvoicesBtn.addEventListener('click', () => activateTab('saved-invoices'));
       
       // Event listeners for saving and updating
       document.getElementById('input-panel').addEventListener('input', updateInvoicePreview);
@@ -924,12 +1018,6 @@
           hideConfirmationModal();
           docToUpdateId = null; // Reset document ID
           showMessage("আপডেট বাতিল করা হয়েছে।", 'bg-gray-200 text-gray-800');
-      });
-
-      // Show and load saved invoices
-      showSavedInvoicesButton.addEventListener('click', loadSavedInvoices);
-      closeModalButton.addEventListener('click', () => {
-        savedInvoicesModal.style.display = 'none';
       });
 
       // Initial load of data when the page loads
