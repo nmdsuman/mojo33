@@ -394,6 +394,7 @@
     let auth;
     let userId;
     let firebaseInitialized = false;
+    let isSaving = false; // New variable to track saving state
 
     // A function to show messages to the user
     const showMessage = (msg, className) => {
@@ -567,19 +568,31 @@
 
       // Function to save data to Firestore
       const saveInvoice = async () => {
+          if (isSaving) {
+              return;
+          }
           if (!firebaseInitialized || !db) {
               showMessage("Firebase সঠিকভাবে কনফিগার করা হয়নি।", 'bg-red-200 text-red-800');
               return;
           }
 
+          isSaving = true;
+          saveInvoiceButton.disabled = true;
+          saveInvoiceButton.textContent = "সেভ হচ্ছে...";
+
           const invoiceData = collectData();
           try {
               const invoicesCollection = collection(db, `invoices`);
               await addDoc(invoicesCollection, invoiceData);
-              showMessage("ইনভয়েস সফলভাবে সেভ করা হয়েছে!", 'bg-green-200 text-green-800');
+              // Notification for successful save
+              showMessage("✅ ইনভয়েস সেভ করা হয়েছে!", 'bg-green-200 text-green-800');
           } catch (e) {
               console.error("ইনভয়েস সেভ করার সময় ত্রুটি হয়েছে: ", e);
               showMessage("ইনভয়েস সেভ করার সময় একটি ত্রুটি হয়েছে।", 'bg-red-200 text-red-800');
+          } finally {
+              isSaving = false;
+              saveInvoiceButton.disabled = false;
+              saveInvoiceButton.textContent = "✅ ইনভয়েস সেভ করুন";
           }
       };
       
@@ -636,6 +649,9 @@
         footerPhoneInput.value = invoiceData.footer.phone || '';
         deliveryChargeInput.value = invoiceData.deliveryCharge || 0;
         paymentMethodInput.value = invoiceData.paymentMethod || 'ক্যাশ অন ডেলিভারি (COD)';
+        
+        // ইনভয়েস নম্বর আপডেট করুন (Update invoice number)
+        invoiceNumberDisplay.textContent = invoiceData.invoiceNumber;
 
         // Populate items
         inputItemsContainer.innerHTML = '';
