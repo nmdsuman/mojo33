@@ -669,6 +669,7 @@
         const loadParticipants = async (postId) => {
             const playersContainer = document.getElementById('modal-players-container');
             playersContainer.innerHTML = 'লোডিং খেলোয়াড়...';
+            hideModal('playerListModal');
             showModal('playerListModal');
 
             const participantsRef = collection(db, 'artifacts', appId, 'public', 'data', 'posts', postId, 'participants');
