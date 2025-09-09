@@ -1,0 +1,919 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ইউজার এবং অ্যাডমিন ওয়েবসাইট</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+        }
+
+        .spinner {
+            border-top-color: #3b82f6;
+            border-left-color: #3b82f6;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Modal specific styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 100;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.4);
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+            padding: 20px;
+            border-radius: 10px;
+            width: 80%;
+            max-width: 500px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .close-button {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close-button:hover,
+        .close-button:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
+
+    <!-- Main Container -->
+    <div id="main-container" class="bg-white p-6 md:p-10 rounded-xl shadow-xl w-full max-w-4xl mx-auto flex flex-col items-center">
+
+        <!-- Loading Spinner -->
+        <div id="loading" class="hidden flex flex-col items-center justify-center space-y-4">
+            <div class="spinner w-12 h-12 border-4 rounded-full border-gray-200"></div>
+            <p class="text-gray-600 font-medium">লোডিং...</p>
+        </div>
+
+        <!-- Authentication and main app views -->
+        <div id="auth-view" class="w-full">
+            <h1 class="text-4xl font-bold text-center text-gray-800 mb-6">লগইন / সাইন আপ</h1>
+            <div id="message-box" class="hidden bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 rounded relative mb-4" role="alert">
+                <span class="block sm:inline" id="message-text"></span>
+            </div>
+            <form id="auth-form" class="space-y-4">
+                <div id="full-name-field" class="hidden">
+                    <label for="full-name" class="block text-sm font-medium text-gray-700 mb-1">পুরো নাম</label>
+                    <input type="text" id="full-name" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div>
+                    <label for="email" class="block text-sm font-medium text-gray-700 mb-1">ইমেইল</label>
+                    <input type="email" id="email" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div>
+                    <label for="password" class="block text-sm font-medium text-gray-700 mb-1">পাসওয়ার্ড</label>
+                    <input type="password" id="password" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <button type="submit" id="auth-btn" class="w-full bg-blue-600 text-white font-semibold py-2 rounded-lg hover:bg-blue-700 transition duration-300">লগইন</button>
+            </form>
+            <div class="mt-4 text-center">
+                <button id="toggle-auth-btn" class="text-blue-600 hover:text-blue-800 font-medium">সাইন আপ-এ স্যুইচ করুন</button>
+            </div>
+        </div>
+
+        <!-- Main App View -->
+        <div id="app-view" class="hidden w-full">
+            <header class="flex flex-col md:flex-row justify-between items-center mb-6 border-b pb-4">
+                <h1 id="welcome-message" class="text-3xl font-bold text-gray-800 mb-2 md:mb-0">স্বাগতম!</h1>
+                <div class="flex flex-col items-end md:items-center space-x-0 md:space-x-4">
+                    <span id="user-info" class="text-gray-600 font-medium"></span>
+                    <p class="text-gray-600 font-medium mt-1">ওয়ালেট: <span id="wallet-balance" class="font-bold text-green-600"></span></p>
+                    <button id="logout-btn" class="mt-4 md:mt-0 bg-red-500 text-white font-semibold px-4 py-2 rounded-lg hover:bg-red-600 transition duration-300">লগআউট</button>
+                </div>
+            </header>
+
+            <!-- Send Money Section -->
+            <div id="send-money-section" class="mb-8 bg-purple-50 p-6 rounded-xl shadow-inner">
+                <h2 class="text-2xl font-semibold text-gray-800 mb-4">টাকা পাঠান</h2>
+                <form id="send-money-form" class="space-y-4">
+                    <div>
+                        <label for="recipient-email" class="block text-sm font-medium text-gray-700 mb-1">প্রাপকের ইমেইল</label>
+                        <div class="flex space-x-2">
+                            <input type="email" id="recipient-email" required class="flex-grow px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
+                            <button type="button" id="verify-email-btn" class="bg-purple-600 text-white font-semibold px-4 py-2 rounded-lg hover:bg-purple-700 transition duration-300">ভেরিফাই</button>
+                        </div>
+                        <div id="recipient-info" class="mt-2 text-sm font-medium text-gray-600"></div>
+                    </div>
+                    <div>
+                        <label for="amount" class="block text-sm font-medium text-gray-700 mb-1">পরিমাণ (৳)</label>
+                        <input type="number" id="amount" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
+                    </div>
+                    <button type="submit" id="send-btn" class="w-full bg-purple-600 text-white font-semibold py-2 rounded-lg hover:bg-purple-700 transition duration-300">টাকা পাঠান</button>
+                </form>
+            </div>
+
+            <!-- Admin Post Section -->
+            <div id="admin-post-section" class="hidden mb-8 p-6 rounded-xl shadow-inner bg-gray-50">
+                <h2 class="text-2xl font-semibold text-gray-800 mb-4">অ্যাডমিন প্যানেল</h2>
+
+                <!-- Contest Post Form -->
+                <div id="contest-form-view">
+                    <h3 class="text-xl font-semibold text-gray-700 mb-2">নতুন প্রতিযোগিতা ঘোষণা করুন</h3>
+                    <form id="contest-post-form" class="space-y-4">
+                        <div>
+                            <label for="contest-name" class="block text-sm font-medium text-gray-700 mb-1">প্রতিযোগিতার নাম</label>
+                            <input type="text" id="contest-name" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500">
+                        </div>
+                        <div>
+                            <label for="game-name" class="block text-sm font-medium text-gray-700 mb-1">গেমের নাম</label>
+                            <input type="text" id="game-name" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">প্রতিযোগিতার ধরণ</label>
+                            <div class="flex space-x-4">
+                                <label class="inline-flex items-center">
+                                    <input type="radio" name="contest-type" value="1v1" checked class="form-radio text-orange-600">
+                                    <span class="ml-2">১v১</span>
+                                </label>
+                                <label class="inline-flex items-center">
+                                    <input type="radio" name="contest-type" value="2v2" class="form-radio text-orange-600">
+                                    <span class="ml-2">২v২</span>
+                                </label>
+                                <label class="inline-flex items-center">
+                                    <input type="radio" name="contest-type" value="৫০ জনের জন্য ফ্রি টু অল" class="form-radio text-orange-600">
+                                    <span class="ml-2">৫০ জনের জন্য ফ্রি টু অল</span>
+                                </label>
+                            </div>
+                        </div>
+                        <div>
+                            <label for="entry-fee" class="block text-sm font-medium text-gray-700 mb-1">এন্ট্রি ফি (৳)</label>
+                            <input type="number" id="entry-fee" required min="0" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500">
+                        </div>
+                        <div>
+                            <label for="max-players" class="block text-sm font-medium text-gray-700 mb-1">সর্বোচ্চ খেলোয়াড়</label>
+                            <input type="number" id="max-players" required min="1" max="50" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500">
+                        </div>
+                        <div>
+                            <label for="start-time" class="block text-sm font-medium text-gray-700 mb-1">শুরুর তারিখ ও সময়</label>
+                            <input type="datetime-local" id="start-time" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500">
+                        </div>
+                         <div>
+                            <label for="id-type" class="block text-sm font-medium text-gray-700 mb-1">প্রয়োজনীয় আইডি টাইপ</label>
+                            <select id="id-type" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500">
+                                <option value="Free Fire ID">Free Fire ID</option>
+                                <option value="PUBG ID">PUBG ID</option>
+                                <option value="Ludo ID">Ludo ID</option>
+                                <option value="অন্যান্য">অন্যান্য</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="w-full bg-orange-600 text-white font-semibold py-2 rounded-lg hover:bg-orange-700 transition duration-300">প্রতিযোগিতা পোস্ট করুন</button>
+                    </form>
+                </div>
+
+                <!-- Admin Contest Management View -->
+                <div id="admin-contest-list" class="hidden">
+                    <h3 class="text-xl font-semibold text-gray-700 mb-2">আপনার প্রতিযোগিতা</h3>
+                    <div id="admin-contests-container" class="space-y-4"></div>
+                    <button id="back-to-form-btn" class="mt-4 bg-gray-500 text-white font-semibold py-2 px-4 rounded-lg hover:bg-gray-600 transition duration-300">নতুন পোস্ট ফর্ম-এ ফিরে যান</button>
+                </div>
+
+                <!-- Admin Participant List View -->
+                <div id="admin-participant-list" class="hidden">
+                    <h3 class="text-xl font-semibold text-gray-700 mb-2">যোগদানকারী খেলোয়াড়</h3>
+                    <div id="participants-container" class="space-y-4"></div>
+                    <button id="back-to-contests-btn" class="mt-4 bg-gray-500 text-white font-semibold py-2 px-4 rounded-lg hover:bg-gray-600 transition duration-300">প্রতিযোগিতার তালিকায় ফিরে যান</button>
+                </div>
+            </div>
+
+            <!-- Posts Wall Section -->
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-2xl font-semibold text-gray-800">সকল পোস্ট</h2>
+            </div>
+            <div id="posts-container" class="space-y-6">
+                <p class="text-center text-gray-500">কোনো পোস্ট নেই।</p>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- The Modal for User ID Input -->
+    <div id="joinModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <h2 id="modal-title" class="text-2xl font-semibold mb-4 text-gray-800"></h2>
+            <form id="join-form" class="space-y-4">
+                <div>
+                    <label id="modal-label" for="user-id-input" class="block text-sm font-medium text-gray-700 mb-1"></label>
+                    <input type="text" id="user-id-input" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <button type="submit" class="w-full bg-blue-600 text-white font-semibold py-2 rounded-lg hover:bg-blue-700 transition duration-300">যোগদান করুন</button>
+            </form>
+            <div id="modal-message" class="mt-4 text-center text-sm font-medium text-red-500"></div>
+        </div>
+    </div>
+
+
+    <!-- Firebase SDKs -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc, updateDoc, collection, query, onSnapshot, orderBy, addDoc, getDocs, where, runTransaction, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Firebase-এর জন্য গ্লোবাল ভেরিয়েবল
+        const appId = 'sports-b43bc';
+        const firebaseConfig = {
+            apiKey: "AIzaSyBGie5wbfrN_LN-VWO4XGkmH-HMagoBb4w",
+            authDomain: "sports-b43bc.firebaseapp.com",
+            projectId: "sports-b43bc",
+            storageBucket: "sports-b43bc.firebasestorage.app",
+            messagingSenderId: "314789205670",
+            appId: "1:314789205670:web:70ba8d443bee5b71d60667",
+            measurementId: "G-BS73QC3HCR"
+        };
+        
+        let app, db, auth, userId = null;
+        let isLoginView = true;
+        const messageBox = document.getElementById('message-box');
+        const messageText = document.getElementById('message-text');
+        const fullNameField = document.getElementById('full-name-field');
+        const authBtn = document.getElementById('auth-btn');
+        const toggleAuthBtn = document.getElementById('toggle-auth-btn');
+
+        // Modal Elements
+        const joinModal = document.getElementById('joinModal');
+        const modalTitle = document.getElementById('modal-title');
+        const modalLabel = document.getElementById('modal-label');
+        const userIdInput = document.getElementById('user-id-input');
+        const joinForm = document.getElementById('join-form');
+        const modalMessage = document.getElementById('modal-message');
+        const closeModalBtn = document.querySelector('.close-button');
+
+        let currentContestId = null;
+        let currentContestDetails = null;
+
+        // Admin panel views
+        const contestFormView = document.getElementById('contest-form-view');
+        const adminContestList = document.getElementById('admin-contest-list');
+        const adminParticipantList = document.getElementById('admin-participant-list');
+        const backToFormBtn = document.getElementById('back-to-form-btn');
+        const backToContestsBtn = document.getElementById('back-to-contests-btn');
+
+        // ব্যবহারকারীকে বার্তা দেখানোর জন্য ফাংশন
+        const showMessage = (text, type = 'info') => {
+            messageText.textContent = text;
+            messageBox.className = `block sm:inline bg-${type === 'error' ? 'red' : 'blue'}-100 border border-${type === 'error' ? 'red' : 'blue'}-400 text-${type === 'error' ? 'red' : 'blue'}-700 px-4 py-3 rounded relative mb-4`;
+            messageBox.classList.remove('hidden');
+        };
+
+        const hideMessage = () => {
+            messageBox.classList.add('hidden');
+        };
+
+        // Firebase-এর সূচনা
+        const initFirebase = async () => {
+            try {
+                if (firebaseConfig) {
+                    app = initializeApp(firebaseConfig);
+                    auth = getAuth(app);
+                    db = getFirestore(app);
+
+                    // প্রমাণীকরণ অবস্থার পরিবর্তন শোনার জন্য লিসেনার
+                    onAuthStateChanged(auth, async (user) => {
+                        const loading = document.getElementById('loading');
+                        const authView = document.getElementById('auth-view');
+                        const appView = document.getElementById('app-view');
+                        loading.classList.add('hidden');
+
+                        if (user) {
+                            userId = user.uid;
+                            authView.classList.add('hidden');
+                            appView.classList.remove('hidden');
+
+                            const userRef = doc(db, 'artifacts', appId, 'users', userId);
+                            const userDoc = await getDoc(userRef);
+
+                            if (!userDoc.exists()) {
+                                await setDoc(userRef, {
+                                    email: user.email || 'Anonymous',
+                                    fullName: document.getElementById('full-name')?.value || 'Anonymous',
+                                    role: 'user',
+                                    wallet: 0
+                                });
+                            } else {
+                                const userData = userDoc.data();
+                                if (userData && typeof userData.wallet === 'undefined') {
+                                    await updateDoc(userRef, {
+                                        wallet: 0
+                                    });
+                                }
+                            }
+                            const welcomeMessage = document.getElementById('welcome-message');
+                            const userInfo = document.getElementById('user-info');
+                            const walletBalance = document.getElementById('wallet-balance');
+                            const adminPostSection = document.getElementById('admin-post-section');
+                            
+                            onSnapshot(userRef, (docSnap) => {
+                                const userData = docSnap.data();
+                                if (userData) {
+                                    const userRole = userData.role;
+                                    const userWallet = userData.wallet;
+                                    const userName = userData.fullName || 'Guest';
+                                    userInfo.textContent = `ID: ${user.uid} (${userRole})`;
+                                    walletBalance.textContent = `${userWallet} ৳`;
+                                    welcomeMessage.textContent = `স্বাগতম, ${userName}!`;
+                                    
+                                    if (userRole === 'admin') {
+                                        adminPostSection.classList.remove('hidden');
+                                        
+                                    } else {
+                                        adminPostSection.classList.add('hidden');
+                                    }
+                                }
+                            });
+
+                            const postsCollectionRef = collection(db, 'artifacts', appId, 'public', 'data', 'posts');
+                            const postsQuery = query(postsCollectionRef, orderBy('timestamp', 'desc'));
+                            onSnapshot(postsQuery, (snapshot) => {
+                                const posts = snapshot.docs.map(doc => ({
+                                    id: doc.id,
+                                    ...doc.data()
+                                }));
+                                renderPosts(posts);
+                            });
+
+                        } else {
+                            authView.classList.remove('hidden');
+                            appView.classList.add('hidden');
+                        }
+                    });
+
+                } else {
+                    showMessage("Firebase কনফিগারেশন পাওয়া যায়নি। অ্যাপটি চলতে পারবে না।", 'error');
+                }
+            } catch (error) {
+                console.error("Firebase ইনিশিয়ালাইজেশন ব্যর্থ হয়েছে:", error);
+                showMessage("Firebase ইনিশিয়ালাইজেশনে সমস্যা হয়েছে।", 'error');
+            }
+        };
+
+        const renderPosts = async (posts) => {
+            const container = document.getElementById('posts-container');
+            container.innerHTML = '';
+            if (posts.length === 0) {
+                container.innerHTML = '<p class="text-center text-gray-500">কোনো পোস্ট নেই।</p>';
+                return;
+            }
+
+            const currentUser = auth.currentUser;
+            const currentUserRole = currentUser ? (await getDoc(doc(db, 'artifacts', appId, 'users', currentUser.uid))).data().role : null;
+
+            for (const post of posts) {
+                const postElement = document.createElement('div');
+                postElement.className = 'bg-white p-6 rounded-xl shadow-lg';
+                
+                let contentHTML = `<p class="text-gray-800 text-lg mb-2">${post.content}</p>`;
+                let joinButtonHTML = '';
+                let adminButtonHTML = '';
+
+                if (post.contestDetails) {
+                    try {
+                        const contestDetails = JSON.parse(post.contestDetails);
+                        const participantsRef = collection(db, 'artifacts', appId, 'public', 'data', 'posts', post.id, 'participants');
+                        let hasJoined = false;
+                        if(currentUser) {
+                            const participantDoc = await getDoc(doc(participantsRef, currentUser.uid));
+                            hasJoined = participantDoc.exists();
+                            
+                            if (currentUserRole === 'admin' && currentUser.uid === post.authorId) {
+                                adminButtonHTML = `
+                                    <div class="flex space-x-2 mt-4">
+                                        <button
+                                            class="bg-blue-500 text-white font-semibold py-2 px-4 rounded-lg hover:bg-blue-600 transition duration-300 view-participants-btn"
+                                            data-post-id="${post.id}"
+                                        >
+                                            প্লেয়ার দেখুন
+                                        </button>
+                                        <button
+                                            class="bg-red-500 text-white font-semibold py-2 px-4 rounded-lg hover:bg-red-600 transition duration-300 delete-post-btn"
+                                            data-post-id="${post.id}"
+                                        >
+                                            পোস্ট ডিলিট করুন
+                                        </button>
+                                    </div>
+                                `;
+                            }
+                        }
+
+                        contentHTML = `
+                            <p class="text-gray-800 text-2xl font-bold mb-2">${contestDetails.contestName}</p>
+                            <p class="text-gray-600 text-lg font-medium mb-4">${contestDetails.gameName}</p>
+                            <div class="mt-4 p-4 rounded-lg bg-orange-50 border-l-4 border-orange-500">
+                                <ul class="list-disc list-inside text-gray-700">
+                                    <li>ধরণ: ${contestDetails.contestType}</li>
+                                    <li>এন্ট্রি ফি: ${contestDetails.entryFee} কয়েন</li>
+                                    <li>সর্বোচ্চ খেলোয়াড়: ${contestDetails.maxPlayers} জন</li>
+                                    <li>শুরুর সময়: ${new Date(contestDetails.startTime).toLocaleString('bn-BD')}</li>
+                                    <li>প্রয়োজনীয় আইডি: ${contestDetails.requiredIdType}</li>
+                                </ul>
+                            </div>
+                        `;
+
+                        if (currentUser) {
+                            if (!hasJoined) {
+                                joinButtonHTML = `
+                                    <button
+                                        class="mt-4 w-full bg-orange-600 text-white font-semibold py-2 rounded-lg hover:bg-orange-700 transition duration-300 join-contest-btn"
+                                        data-post-id="${post.id}"
+                                        data-entry-fee="${contestDetails.entryFee}"
+                                        data-id-type="${contestDetails.requiredIdType}"
+                                    >
+                                        প্রতিযোগিতায় যোগ দিন
+                                    </button>
+                                `;
+                            } else {
+                                joinButtonHTML = `
+                                    <button class="mt-4 w-full bg-gray-400 text-white font-semibold py-2 rounded-lg cursor-not-allowed" disabled>
+                                        আপনি ইতিমধ্যেই যোগদান করেছেন
+                                    </button>
+                                `;
+                            }
+                        } else {
+                            joinButtonHTML = `
+                                <button class="mt-4 w-full bg-blue-600 text-white font-semibold py-2 rounded-lg hover:bg-blue-700 transition duration-300" onclick="alert('যোগদান করতে হলে লগইন করতে হবে।')">
+                                    লগইন করে যোগ দিন
+                                </button>
+                            `;
+                        }
+
+                    } catch (e) {
+                        console.error("Error parsing contestDetails:", e);
+                    }
+                }
+
+                postElement.innerHTML = `
+                    ${contentHTML}
+                    ${joinButtonHTML}
+                    ${adminButtonHTML}
+                `;
+                container.appendChild(postElement);
+            }
+        };
+
+        // Admin Panel Functions
+        const loadAdminContests = () => {
+            contestFormView.classList.remove('hidden');
+            adminParticipantList.classList.add('hidden');
+            adminContestList.classList.add('hidden');
+        };
+
+        const loadParticipants = async (postId) => {
+            contestFormView.classList.add('hidden');
+            adminContestList.classList.add('hidden');
+            adminParticipantList.classList.remove('hidden');
+
+            const participantsContainer = document.getElementById('participants-container');
+            participantsContainer.innerHTML = 'লোডিং খেলোয়াড়...';
+
+            const participantsRef = collection(db, 'artifacts', appId, 'public', 'data', 'posts', postId, 'participants');
+            const participantsSnapshot = await getDocs(participantsRef);
+            participantsContainer.innerHTML = '';
+
+            if (participantsSnapshot.empty) {
+                participantsContainer.innerHTML = '<p class="text-center text-gray-500">এই প্রতিযোগিতায় কোনো খেলোয়াড় যোগদান করেনি।</p>';
+                return;
+            }
+
+            const contestDoc = await getDoc(doc(db, 'artifacts', appId, 'public', 'data', 'posts', postId));
+            const contestDetails = JSON.parse(contestDoc.data().contestDetails);
+            const prizeAmount = Math.round((contestDetails.entryFee * participantsSnapshot.size) * 0.9);
+
+            participantsSnapshot.docs.forEach(doc => {
+                const participantData = doc.data();
+                const participantElement = document.createElement('div');
+                participantElement.className = 'bg-white p-4 rounded-lg shadow-md flex justify-between items-center';
+                participantElement.innerHTML = `
+                    <div>
+                        <p class="font-semibold text-gray-800">${participantData.fullName || participantData.email}</p>
+                        <p class="text-sm text-gray-500">ইমেইল: ${participantData.email}</p>
+                        <p class="text-sm text-gray-500">${contestDetails.requiredIdType}: ${participantData.idValue}</p>
+                    </div>
+                    <button class="declare-winner-btn bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition duration-300" data-user-id="${doc.id}" data-prize-amount="${prizeAmount}">
+                        বিজয়ী ঘোষণা করুন
+                    </button>
+                `;
+                participantsContainer.appendChild(participantElement);
+            });
+        };
+
+        const declareWinner = async (winnerId, prizeAmount) => {
+            const winnerRef = doc(db, 'artifacts', appId, 'users', winnerId);
+            try {
+                await runTransaction(db, async (transaction) => {
+                    const winnerDoc = await transaction.get(winnerRef);
+                    if (!winnerDoc.exists()) {
+                        throw "Winner user does not exist!";
+                    }
+                    const winnerData = winnerDoc.data();
+                    const newWalletBalance = (winnerData.wallet || 0) + prizeAmount;
+                    transaction.update(winnerRef, { wallet: newWalletBalance });
+                });
+                showMessage("বিজয়ীর ওয়ালেটে সফলভাবে টাকা যোগ করা হয়েছে!", 'success');
+            } catch (e) {
+                console.error("Winner declaration error:", e);
+                showMessage("বিজয়ী ঘোষণা করতে সমস্যা হয়েছে: " + e.message, 'error');
+            }
+        };
+
+        document.getElementById('app-view').addEventListener('click', (e) => {
+             if (e.target.classList.contains('delete-post-btn')) {
+                const postId = e.target.getAttribute('data-post-id');
+                if (confirm('আপনি কি এই পোস্টটি মুছে ফেলতে চান? এটি ফিরিয়ে আনা যাবে না।')) {
+                    deletePost(postId);
+                }
+            } else if (e.target.classList.contains('view-participants-btn')) {
+                const postId = e.target.getAttribute('data-post-id');
+                loadParticipants(postId);
+            } else if (e.target.classList.contains('declare-winner-btn')) {
+                const winnerId = e.target.getAttribute('data-user-id');
+                const prize = parseFloat(e.target.getAttribute('data-prize-amount'));
+                if (confirm(`আপনি কি এই ব্যবহারকারীকে বিজয়ী ঘোষণা করতে চান এবং তার ওয়ালেটে ${prize} ৳ যোগ করতে চান?`)) {
+                    declareWinner(winnerId, prize);
+                }
+            }
+        });
+
+        const deletePost = async (postId) => {
+            try {
+                const postRef = doc(db, 'artifacts', appId, 'public', 'data', 'posts', postId);
+                const participantsRef = collection(db, 'artifacts', appId, 'public', 'data', 'posts', postId, 'participants');
+                
+                // Delete all participants first
+                const participantsSnapshot = await getDocs(participantsRef);
+                const deletePromises = [];
+                participantsSnapshot.docs.forEach(doc => {
+                    deletePromises.push(deleteDoc(doc.ref));
+                });
+                await Promise.all(deletePromises);
+
+                // Then delete the post
+                await deleteDoc(postRef);
+                showMessage("পোস্ট সফলভাবে মুছে ফেলা হয়েছে!", 'success');
+            } catch (error) {
+                console.error("Error deleting post:", error);
+                showMessage("পোস্ট মুছে ফেলতে সমস্যা হয়েছে: " + error.message, 'error');
+            }
+        };
+
+
+        backToFormBtn.addEventListener('click', () => {
+            adminContestList.classList.add('hidden');
+            contestFormView.classList.remove('hidden');
+        });
+
+        backToContestsBtn.addEventListener('click', () => {
+            adminParticipantList.classList.add('hidden');
+            adminContestList.classList.remove('hidden');
+        });
+
+        // লগইন এবং সাইন আপ ফর্মের মধ্যে স্যুইচ করার জন্য
+        toggleAuthBtn.addEventListener('click', () => {
+            isLoginView = !isLoginView;
+            authBtn.textContent = isLoginView ? 'লগইন' : 'সাইন আপ';
+            toggleAuthBtn.textContent = isLoginView ? 'সাইন আপ-এ স্যুইচ করুন' : 'লগইন-এ স্যুইচ করুন';
+            
+            if (!isLoginView) {
+                fullNameField.classList.remove('hidden');
+            } else {
+                fullNameField.classList.add('hidden');
+            }
+            hideMessage();
+        });
+
+        // প্রমাণীকরণ ফর্ম জমা দেওয়ার জন্য
+        document.getElementById('auth-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            try {
+                if (isLoginView) {
+                    await signInWithEmailAndPassword(auth, email, password);
+                } else {
+                    const fullName = document.getElementById('full-name').value;
+                    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                    const user = userCredential.user;
+                    const userRef = doc(db, 'artifacts', appId, 'users', user.uid);
+                    await setDoc(userRef, { email: user.email, fullName: fullName, role: 'user', wallet: 0 });
+                    showMessage("সাইন আপ সফল হয়েছে! এখন লগইন করুন।", 'success');
+                    isLoginView = true;
+                    toggleAuthBtn.textContent = 'সাইন আপ-এ স্যুইচ করুন';
+                    authBtn.textContent = 'লগইন';
+                    fullNameField.classList.add('hidden');
+                }
+            } catch (error) {
+                console.error("Authentication Error:", error);
+                if (isLoginView) {
+                    showMessage("লগইন ব্যর্থ হয়েছে: " + error.message, 'error');
+                } else {
+                    showMessage("সাইন আপ ব্যর্থ হয়েছে: " + error.message, 'error');
+                }
+            }
+        });
+
+        // টাকা পাঠানোর ফর্ম জমা দেওয়ার জন্য
+        document.getElementById('send-money-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const recipientEmail = document.getElementById('recipient-email').value;
+            const amount = parseFloat(document.getElementById('amount').value);
+            const user = auth.currentUser;
+
+            if (!user) {
+                showMessage("টাকা পাঠাতে হলে লগইন করতে হবে।", 'error');
+                return;
+            }
+            if (recipientEmail === user.email) {
+                showMessage("আপনি নিজের ওয়ালেটে টাকা পাঠাতে পারবেন না।", 'error');
+                return;
+            }
+            if (isNaN(amount) || amount <= 0) {
+                showMessage("টাকার পরিমাণ সঠিক নয়।", 'error');
+                return;
+            }
+
+            try {
+                const usersRef = collection(db, 'artifacts', appId, 'users');
+                const recipientQuery = query(usersRef, where('email', '==', recipientEmail));
+                const recipientSnapshot = await getDocs(recipientQuery);
+
+                if (recipientSnapshot.empty) {
+                    showMessage("এই ইমেলের কোনো ব্যবহারকারী পাওয়া যায়নি।", 'error');
+                    return;
+                }
+
+                const recipientDoc = recipientSnapshot.docs[0];
+                const recipientData = recipientDoc.data();
+                const recipientRef = doc(db, 'artifacts', appId, 'users', recipientDoc.id);
+
+                await runTransaction(db, async (transaction) => {
+                    const senderRef = doc(db, 'artifacts', appId, 'users', user.uid);
+                    const senderDoc = await transaction.get(senderRef);
+                    if (!senderDoc.exists()) {
+                        throw "Sender does not exist!";
+                    }
+
+                    const senderData = senderDoc.data();
+                    const senderBalance = senderData.wallet || 0;
+
+                    if (senderBalance < amount) {
+                        throw "আপনার ওয়ালেটে যথেষ্ট টাকা নেই।";
+                    }
+
+                    const newSenderBalance = senderBalance - amount;
+                    const newRecipientBalance = (recipientData.wallet || 0) + amount;
+
+                    transaction.update(senderRef, { wallet: newSenderBalance });
+                    transaction.update(recipientRef, { wallet: newRecipientBalance });
+                });
+
+                showMessage("টাকা সফলভাবে পাঠানো হয়েছে!", 'success');
+                document.getElementById('recipient-email').value = '';
+                document.getElementById('amount').value = '';
+                document.getElementById('recipient-info').textContent = '';
+
+            } catch (error) {
+                console.error("Transaction Error:", error);
+                showMessage("টাকা পাঠাতে সমস্যা হয়েছে: " + error.message, 'error');
+            }
+        });
+
+        // ইমেইল যাচাই করার জন্য
+        document.getElementById('verify-email-btn').addEventListener('click', async () => {
+            const recipientEmail = document.getElementById('recipient-email').value;
+            const recipientInfoDiv = document.getElementById('recipient-info');
+            recipientInfoDiv.textContent = 'যাচাই করা হচ্ছে...';
+            recipientInfoDiv.classList.remove('text-red-500');
+            recipientInfoDiv.classList.add('text-gray-600');
+
+            if (!recipientEmail) {
+                recipientInfoDiv.textContent = 'অনুগ্রহ করে একটি ইমেল লিখুন।';
+                recipientInfoDiv.classList.add('text-red-500');
+                return;
+            }
+
+            try {
+                const usersRef = collection(db, 'artifacts', appId, 'users');
+                const q = query(usersRef, where('email', '==', recipientEmail));
+                const querySnapshot = await getDocs(q);
+
+                if (querySnapshot.empty) {
+                    recipientInfoDiv.textContent = 'এই ইমেলের কোনো ব্যবহারকারী পাওয়া যায়নি।';
+                    recipientInfoDiv.classList.add('text-red-500');
+                } else {
+                    const recipientData = querySnapshot.docs[0].data();
+                    const recipientName = recipientData.fullName || recipientData.email;
+                    recipientInfoDiv.textContent = `ব্যবহারকারী: ${recipientName}`;
+                    recipientInfoDiv.classList.remove('text-red-500');
+                    recipientInfoDiv.classList.add('text-green-600');
+                }
+            } catch (error) {
+                console.error("Verification Error:", error);
+                recipientInfoDiv.textContent = 'যাচাই করতে সমস্যা হয়েছে।';
+                recipientInfoDiv.classList.add('text-red-500');
+            }
+        });
+
+        // Contest Post form জমা দেওয়ার জন্য
+        document.getElementById('contest-post-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const user = auth.currentUser;
+            if (!user) {
+                showMessage("প্রতিযোগিতা পোস্ট করতে হলে লগইন করতে হবে।", 'error');
+                return;
+            }
+            
+            const userRef = doc(db, 'artifacts', appId, 'users', user.uid);
+            const userDoc = await getDoc(userRef);
+            const userData = userDoc.data();
+            if (userData.role !== 'admin') {
+                showMessage("আপনার প্রতিযোগিতা পোস্ট করার অনুমতি নেই।", 'error');
+                return;
+            }
+
+            const contestName = document.getElementById('contest-name').value;
+            const gameName = document.getElementById('game-name').value;
+            const entryFee = parseFloat(document.getElementById('entry-fee').value);
+            const maxPlayers = parseInt(document.getElementById('max-players').value);
+            const startTime = document.getElementById('start-time').value;
+            const requiredIdType = document.getElementById('id-type').value;
+
+            if (!contestName || !gameName || isNaN(entryFee) || isNaN(maxPlayers) || !startTime) {
+                showMessage("অনুগ্রহ করে সকল ফিল্ড পূরণ করুন।", 'error');
+                return;
+            }
+
+            const contestDetails = {
+                contestName,
+                gameName,
+                contestType: document.querySelector('input[name="contest-type"]:checked').value,
+                entryFee,
+                maxPlayers,
+                startTime,
+                requiredIdType,
+            };
+
+            try {
+                const postsCollectionRef = collection(db, 'artifacts', appId, 'public', 'data', 'posts');
+                await addDoc(postsCollectionRef, {
+                    author: userData.fullName || userData.email || 'Anonymous',
+                    authorId: user.uid,
+                    content: `🚨 নতুন প্রতিযোগিতা: ${contestName} ঘোষণা! আপনার গেমিং দক্ষতা দেখানোর সময় এসেছে! আমরা নিয়ে এসেছি একটি নতুন এবং উত্তেজনাপূর্ণ ${gameName} প্রতিযোগিতা।`,
+                    timestamp: Date.now(),
+                    contestDetails: JSON.stringify(contestDetails),
+                });
+                showMessage("প্রতিযোগিতা সফলভাবে পোস্ট করা হয়েছে!", 'success');
+                document.getElementById('contest-post-form').reset();
+            } catch (error) {
+                console.error("Contest Post Error:", error);
+                showMessage("প্রতিযোগিতা পোস্ট করতে সমস্যা হয়েছে: " + error.message, 'error');
+            }
+        });
+
+        // Modal Logic
+        closeModalBtn.onclick = () => {
+            joinModal.style.display = 'none';
+        };
+
+        window.onclick = (event) => {
+            if (event.target == joinModal) {
+                joinModal.style.display = 'none';
+            }
+        };
+
+        document.getElementById('posts-container').addEventListener('click', async (e) => {
+            if (e.target.classList.contains('join-contest-btn')) {
+                const postId = e.target.getAttribute('data-post-id');
+                const entryFee = parseFloat(e.target.getAttribute('data-entry-fee'));
+                const requiredIdType = e.target.getAttribute('data-id-type');
+                
+                const userRef = doc(db, 'artifacts', appId, 'users', auth.currentUser.uid);
+                const userDoc = await getDoc(userRef);
+                const userData = userDoc.data();
+
+                if (userData.wallet < entryFee) {
+                    showMessage("আপনার ওয়ালেটে যথেষ্ট কয়েন নেই।", 'error');
+                    return;
+                }
+
+                currentContestId = postId;
+                currentContestDetails = { entryFee, requiredIdType };
+                modalTitle.textContent = `${requiredIdType} দিন`;
+                modalLabel.textContent = `আপনার ${requiredIdType} লিখুন:`;
+                joinModal.style.display = 'block';
+            }
+        });
+        
+        document.getElementById('posts-container').addEventListener('click', async (e) => {
+             if (e.target.classList.contains('view-participants-btn')) {
+                const postId = e.target.getAttribute('data-post-id');
+                loadParticipants(postId);
+                document.getElementById('admin-contest-list').classList.add('hidden');
+                document.getElementById('admin-participant-list').classList.remove('hidden');
+            }
+        });
+
+
+        joinForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const userIdValue = userIdInput.value;
+            const user = auth.currentUser;
+            modalMessage.textContent = '';
+
+            if (!userIdValue.trim()) {
+                modalMessage.textContent = "অনুগ্রহ করে আপনার আইডি লিখুন।";
+                return;
+            }
+
+            try {
+                const contestRef = doc(db, 'artifacts', appId, 'public', 'data', 'posts', currentContestId);
+                const userRef = doc(db, 'artifacts', appId, 'users', user.uid);
+                const participantsRef = doc(db, 'artifacts', appId, 'public', 'data', 'posts', currentContestId, 'participants', user.uid);
+
+                await runTransaction(db, async (transaction) => {
+                    const userDoc = await transaction.get(userRef);
+                    if (!userDoc.exists()) {
+                        throw new Error("User document does not exist!");
+                    }
+                    const userData = userDoc.data();
+                    const currentWallet = userData.wallet || 0;
+
+                    if (currentWallet < currentContestDetails.entryFee) {
+                        throw new Error("আপনার ওয়ালেটে যথেষ্ট কয়েন নেই।");
+                    }
+                    
+                    const participantDoc = await transaction.get(participantsRef);
+                    if (participantDoc.exists()) {
+                        throw new Error("আপনি ইতিমধ্যেই এই প্রতিযোগিতায় যোগদান করেছেন।");
+                    }
+
+                    const newWalletBalance = currentWallet - currentContestDetails.entryFee;
+                    transaction.update(userRef, { wallet: newWalletBalance });
+                    
+                    transaction.set(participantsRef, {
+                        fullName: userData.fullName || userData.email,
+                        email: userData.email,
+                        idValue: userIdValue,
+                        joinedAt: Date.now()
+                    });
+                });
+
+                showMessage("সফলভাবে প্রতিযোগিতায় যোগদান করা হয়েছে!", 'success');
+                joinModal.style.display = 'none';
+                userIdInput.value = '';
+
+            } catch (error) {
+                console.error("Join Contest Error:", error);
+                modalMessage.textContent = "যোগদান করতে সমস্যা হয়েছে: " + error.message;
+            }
+        });
+
+        // লগআউট করার জন্য
+        document.getElementById('logout-btn').addEventListener('click', async () => {
+            try {
+                await signOut(auth);
+            } catch (error) {
+                console.error("Logout Error:", error);
+                showMessage("লগআউট করতে সমস্যা হয়েছে।", 'error');
+            }
+        });
+
+        // পেজ লোড হলে Firebase শুরু করুন
+        window.onload = function() {
+            const loading = document.getElementById('loading');
+            loading.classList.remove('hidden');
+            initFirebase();
+        }
+    </script>
+
+</body>
+</html>
