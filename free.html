@@ -63,6 +63,17 @@
             text-decoration: none;
             cursor: pointer;
         }
+        
+        /* New styles for collected fee display */
+        .bg-green-50 {
+            background-color: #f0fdf4;
+        }
+        .border-green-500 {
+            border-color: #22c55e;
+        }
+        .text-green-700 {
+            color: #15803d;
+        }
     </style>
 </head>
 
@@ -179,6 +190,14 @@
                             <label for="start-time" class="block text-sm font-medium text-gray-700 mb-1">শুরুর তারিখ ও সময়</label>
                             <input type="datetime-local" id="start-time" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500">
                         </div>
+                        <div>
+                            <label for="room-id" class="block text-sm font-medium text-gray-700 mb-1">রুম আইডি</label>
+                            <input type="text" id="room-id" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500">
+                        </div>
+                        <div>
+                            <label for="room-pass" class="block text-sm font-medium text-gray-700 mb-1">রুম পাসওয়ার্ড</label>
+                            <input type="text" id="room-pass" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500">
+                        </div>
                          <div>
                             <label for="id-type" class="block text-sm font-medium text-gray-700 mb-1">প্রয়োজনীয় আইডি টাইপ</label>
                             <select id="id-type" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500">
@@ -190,20 +209,6 @@
                         </div>
                         <button type="submit" class="w-full bg-orange-600 text-white font-semibold py-2 rounded-lg hover:bg-orange-700 transition duration-300">প্রতিযোগিতা পোস্ট করুন</button>
                     </form>
-                </div>
-
-                <!-- Admin Contest Management View -->
-                <div id="admin-contest-list" class="hidden">
-                    <h3 class="text-xl font-semibold text-gray-700 mb-2">আপনার প্রতিযোগিতা</h3>
-                    <div id="admin-contests-container" class="space-y-4"></div>
-                    <button id="back-to-form-btn" class="mt-4 bg-gray-500 text-white font-semibold py-2 px-4 rounded-lg hover:bg-gray-600 transition duration-300">নতুন পোস্ট ফর্ম-এ ফিরে যান</button>
-                </div>
-
-                <!-- Admin Participant List View -->
-                <div id="admin-participant-list" class="hidden">
-                    <h3 class="text-xl font-semibold text-gray-700 mb-2">যোগদানকারী খেলোয়াড়</h3>
-                    <div id="participants-container" class="space-y-4"></div>
-                    <button id="back-to-contests-btn" class="mt-4 bg-gray-500 text-white font-semibold py-2 px-4 rounded-lg hover:bg-gray-600 transition duration-300">প্রতিযোগিতার তালিকায় ফিরে যান</button>
                 </div>
             </div>
 
@@ -231,6 +236,55 @@
                 <button type="submit" class="w-full bg-blue-600 text-white font-semibold py-2 rounded-lg hover:bg-blue-700 transition duration-300">যোগদান করুন</button>
             </form>
             <div id="modal-message" class="mt-4 text-center text-sm font-medium text-red-500"></div>
+        </div>
+    </div>
+    
+    <!-- Admin Edit Modal -->
+    <div id="adminEditModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <h2 class="text-2xl font-semibold mb-4 text-gray-800">পোস্ট এডিট করুন</h2>
+            <form id="edit-form" class="space-y-4">
+                 <div>
+                    <label for="edit-contest-name" class="block text-sm font-medium text-gray-700 mb-1">প্রতিযোগিতার নাম</label>
+                    <input type="text" id="edit-contest-name" required class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+                </div>
+                <div>
+                    <label for="edit-game-name" class="block text-sm font-medium text-gray-700 mb-1">গেমের নাম</label>
+                    <input type="text" id="edit-game-name" required class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+                </div>
+                <div>
+                    <label for="edit-entry-fee" class="block text-sm font-medium text-gray-700 mb-1">এন্ট্রি ফি (৳)</label>
+                    <input type="number" id="edit-entry-fee" required min="0" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+                </div>
+                <div>
+                    <label for="edit-max-players" class="block text-sm font-medium text-gray-700 mb-1">সর্বোচ্চ খেলোয়াড়</label>
+                    <input type="number" id="edit-max-players" required min="1" max="50" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+                </div>
+                <div>
+                    <label for="edit-start-time" class="block text-sm font-medium text-gray-700 mb-1">শুরুর তারিখ ও সময়</label>
+                    <input type="datetime-local" id="edit-start-time" required class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+                </div>
+                <div>
+                    <label for="edit-room-id" class="block text-sm font-medium text-gray-700 mb-1">রুম আইডি</label>
+                    <input type="text" id="edit-room-id" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+                </div>
+                <div>
+                    <label for="edit-room-pass" class="block text-sm font-medium text-gray-700 mb-1">রুম পাসওয়ার্ড</label>
+                    <input type="text" id="edit-room-pass" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+                </div>
+                <button type="submit" class="w-full bg-green-600 text-white font-semibold py-2 rounded-lg hover:bg-green-700 transition duration-300">আপডেট করুন</button>
+            </form>
+        </div>
+    </div>
+
+
+    <!-- The Modal for Player List -->
+    <div id="playerListModal" class="modal">
+        <div class="modal-content max-w-2xl">
+            <span class="close-button">&times;</span>
+            <h2 class="text-2xl font-semibold mb-4 text-gray-800">যোগদানকারী খেলোয়াড়</h2>
+            <div id="modal-players-container" class="space-y-4"></div>
         </div>
     </div>
 
@@ -268,17 +322,18 @@
         const userIdInput = document.getElementById('user-id-input');
         const joinForm = document.getElementById('join-form');
         const modalMessage = document.getElementById('modal-message');
-        const closeModalBtn = document.querySelector('.close-button');
-
+        const closeModalBtns = document.querySelectorAll('.close-button');
+        const adminEditModal = document.getElementById('adminEditModal');
+        const editForm = document.getElementById('edit-form');
+        const playerListModal = document.getElementById('playerListModal');
         let currentContestId = null;
         let currentContestDetails = null;
+        let currentPostIdToEdit = null;
 
         // Admin panel views
         const contestFormView = document.getElementById('contest-form-view');
-        const adminContestList = document.getElementById('admin-contest-list');
-        const adminParticipantList = document.getElementById('admin-participant-list');
-        const backToFormBtn = document.getElementById('back-to-form-btn');
-        const backToContestsBtn = document.getElementById('back-to-contests-btn');
+        const adminPostSection = document.getElementById('admin-post-section');
+        const mainContainer = document.getElementById('main-container');
 
         // ব্যবহারকারীকে বার্তা দেখানোর জন্য ফাংশন
         const showMessage = (text, type = 'info') => {
@@ -289,6 +344,26 @@
 
         const hideMessage = () => {
             messageBox.classList.add('hidden');
+        };
+
+        const showModal = (modalId) => {
+            document.getElementById(modalId).style.display = 'block';
+        };
+
+        const hideModal = (modalId) => {
+            document.getElementById(modalId).style.display = 'none';
+        };
+
+        closeModalBtns.forEach(btn => {
+            btn.onclick = (e) => {
+                hideModal(e.target.closest('.modal').id);
+            };
+        });
+
+        window.onclick = (event) => {
+            if (event.target.classList.contains('modal')) {
+                event.target.style.display = 'none';
+            }
         };
 
         // Firebase-এর সূচনা
@@ -332,7 +407,6 @@
                             const welcomeMessage = document.getElementById('welcome-message');
                             const userInfo = document.getElementById('user-info');
                             const walletBalance = document.getElementById('wallet-balance');
-                            const adminPostSection = document.getElementById('admin-post-section');
                             
                             onSnapshot(userRef, (docSnap) => {
                                 const userData = docSnap.data();
@@ -388,7 +462,18 @@
 
             const currentUser = auth.currentUser;
             const currentUserRole = currentUser ? (await getDoc(doc(db, 'artifacts', appId, 'users', currentUser.uid))).data().role : null;
-
+            let joinedPosts = new Set();
+            if (currentUser) {
+                const postsWithParticipants = await getDocs(collection(db, 'artifacts', appId, 'public', 'data', 'posts'));
+                for (const postDoc of postsWithParticipants.docs) {
+                    const participantsRef = collection(db, 'artifacts', appId, 'public', 'data', 'posts', postDoc.id, 'participants');
+                    const participantDoc = await getDoc(doc(participantsRef, currentUser.uid));
+                    if (participantDoc.exists()) {
+                        joinedPosts.add(postDoc.id);
+                    }
+                }
+            }
+            
             for (const post of posts) {
                 const postElement = document.createElement('div');
                 postElement.className = 'bg-white p-6 rounded-xl shadow-lg';
@@ -396,34 +481,68 @@
                 let contentHTML = `<p class="text-gray-800 text-lg mb-2">${post.content}</p>`;
                 let joinButtonHTML = '';
                 let adminButtonHTML = '';
+                let roomInfoHTML = '';
+                let collectedFeeHTML = '';
 
                 if (post.contestDetails) {
                     try {
                         const contestDetails = JSON.parse(post.contestDetails);
                         const participantsRef = collection(db, 'artifacts', appId, 'public', 'data', 'posts', post.id, 'participants');
-                        let hasJoined = false;
-                        if(currentUser) {
-                            const participantDoc = await getDoc(doc(participantsRef, currentUser.uid));
-                            hasJoined = participantDoc.exists();
-                            
-                            if (currentUserRole === 'admin' && currentUser.uid === post.authorId) {
-                                adminButtonHTML = `
-                                    <div class="flex space-x-2 mt-4">
-                                        <button
-                                            class="bg-blue-500 text-white font-semibold py-2 px-4 rounded-lg hover:bg-blue-600 transition duration-300 view-participants-btn"
-                                            data-post-id="${post.id}"
-                                        >
-                                            প্লেয়ার দেখুন
+                        
+                        const participantsSnapshot = await getDocs(participantsRef);
+                        const participantsCount = participantsSnapshot.size;
+                        const totalCollected = participantsCount * contestDetails.entryFee;
+                        
+                        let hasJoined = joinedPosts.has(post.id);
+
+                        if (currentUserRole === 'admin' && currentUser.uid === post.authorId) {
+                            adminButtonHTML = `
+                                <div class="flex space-x-2 mt-4">
+                                    <button
+                                        class="bg-blue-500 text-white font-semibold py-2 px-4 rounded-lg hover:bg-blue-600 transition duration-300 view-participants-btn"
+                                        data-post-id="${post.id}"
+                                    >
+                                        প্লেয়ার দেখুন
+                                    </button>
+                                    <button
+                                        class="bg-green-500 text-white font-semibold py-2 px-4 rounded-lg hover:bg-green-600 transition duration-300 edit-post-btn"
+                                        data-post-id="${post.id}"
+                                    >
+                                        পোস্ট এডিট করুন
+                                    </button>
+                                    <button
+                                        class="bg-red-500 text-white font-semibold py-2 px-4 rounded-lg hover:bg-red-600 transition duration-300 delete-post-btn"
+                                        data-post-id="${post.id}"
+                                    >
+                                        পোস্ট ডিলিট করুন
+                                    </button>
+                                </div>
+                            `;
+                        }
+
+                        if (hasJoined) {
+                            roomInfoHTML = `
+                                <div class="mt-4 p-4 rounded-lg bg-blue-50 border-l-4 border-blue-500">
+                                    <p class="font-semibold text-blue-700">রুম আইডি: <span id="room-id-${post.id}">${contestDetails.roomId}</span>
+                                        <button onclick="copyToClipboard('room-id-${post.id}')" class="ml-2 text-blue-500 hover:text-blue-700">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline" viewBox="0 0 20 20" fill="currentColor">
+                                                <path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" />
+                                                <path d="M6 15a2 2 0 11-4 0 2 2 0 014 0zm0 0v-2a1 1 0 011-1h2a1 1 0 011 1v2a2 2 0 11-4 0zm8-2a1 1 0 00-1-1h-2a1 1 0 100 2h2a1 1 0 001-1z" />
+                                                <path fill-rule="evenodd" d="M3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd" />
+                                            </svg>
                                         </button>
-                                        <button
-                                            class="bg-red-500 text-white font-semibold py-2 px-4 rounded-lg hover:bg-red-600 transition duration-300 delete-post-btn"
-                                            data-post-id="${post.id}"
-                                        >
-                                            পোস্ট ডিলিট করুন
+                                    </p>
+                                    <p class="font-semibold text-blue-700">রুম পাসওয়ার্ড: <span id="room-pass-${post.id}">${contestDetails.roomPass}</span>
+                                        <button onclick="copyToClipboard('room-pass-${post.id}')" class="ml-2 text-blue-500 hover:text-blue-700">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline" viewBox="0 0 20 20" fill="currentColor">
+                                                <path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" />
+                                                <path d="M6 15a2 2 0 11-4 0 2 2 0 014 0zm0 0v-2a1 1 0 011-1h2a1 1 0 011 1v2a2 2 0 11-4 0zm8-2a1 1 0 00-1-1h-2a1 1 0 100 2h2a1 1 0 001-1z" />
+                                                <path fill-rule="evenodd" d="M3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd" />
+                                            </svg>
                                         </button>
-                                    </div>
-                                `;
-                            }
+                                    </p>
+                                </div>
+                            `;
                         }
 
                         contentHTML = `
@@ -437,6 +556,12 @@
                                     <li>শুরুর সময়: ${new Date(contestDetails.startTime).toLocaleString('bn-BD')}</li>
                                     <li>প্রয়োজনীয় আইডি: ${contestDetails.requiredIdType}</li>
                                 </ul>
+                            </div>
+                        `;
+                        
+                        collectedFeeHTML = `
+                            <div class="mt-4 p-4 rounded-lg bg-green-50 border-l-4 border-green-500">
+                                <p class="font-semibold text-green-700">সংগৃহীত ফি: ${totalCollected} ৳</p>
                             </div>
                         `;
 
@@ -474,6 +599,8 @@
 
                 postElement.innerHTML = `
                     ${contentHTML}
+                    ${collectedFeeHTML}
+                    ${roomInfoHTML}
                     ${joinButtonHTML}
                     ${adminButtonHTML}
                 `;
@@ -481,27 +608,28 @@
             }
         };
 
-        // Admin Panel Functions
-        const loadAdminContests = () => {
-            contestFormView.classList.remove('hidden');
-            adminParticipantList.classList.add('hidden');
-            adminContestList.classList.add('hidden');
+        const copyToClipboard = (elementId) => {
+            const textToCopy = document.getElementById(elementId).innerText;
+            navigator.clipboard.writeText(textToCopy).then(() => {
+                showMessage('কপি করা হয়েছে!', 'success');
+            }).catch(err => {
+                console.error('কপি করতে ব্যর্থ:', err);
+                showMessage('কপি করতে ব্যর্থ।', 'error');
+            });
         };
 
+        // Admin Panel Functions
         const loadParticipants = async (postId) => {
-            contestFormView.classList.add('hidden');
-            adminContestList.classList.add('hidden');
-            adminParticipantList.classList.remove('hidden');
-
-            const participantsContainer = document.getElementById('participants-container');
-            participantsContainer.innerHTML = 'লোডিং খেলোয়াড়...';
+            const playersContainer = document.getElementById('modal-players-container');
+            playersContainer.innerHTML = 'লোডিং খেলোয়াড়...';
+            showModal('playerListModal');
 
             const participantsRef = collection(db, 'artifacts', appId, 'public', 'data', 'posts', postId, 'participants');
             const participantsSnapshot = await getDocs(participantsRef);
-            participantsContainer.innerHTML = '';
+            playersContainer.innerHTML = '';
 
             if (participantsSnapshot.empty) {
-                participantsContainer.innerHTML = '<p class="text-center text-gray-500">এই প্রতিযোগিতায় কোনো খেলোয়াড় যোগদান করেনি।</p>';
+                playersContainer.innerHTML = '<p class="text-center text-gray-500">এই প্রতিযোগিতায় কোনো খেলোয়াড় যোগদান করেনি।</p>';
                 return;
             }
 
@@ -523,53 +651,15 @@
                         বিজয়ী ঘোষণা করুন
                     </button>
                 `;
-                participantsContainer.appendChild(participantElement);
+                playersContainer.appendChild(participantElement);
             });
         };
-
-        const declareWinner = async (winnerId, prizeAmount) => {
-            const winnerRef = doc(db, 'artifacts', appId, 'users', winnerId);
-            try {
-                await runTransaction(db, async (transaction) => {
-                    const winnerDoc = await transaction.get(winnerRef);
-                    if (!winnerDoc.exists()) {
-                        throw "Winner user does not exist!";
-                    }
-                    const winnerData = winnerDoc.data();
-                    const newWalletBalance = (winnerData.wallet || 0) + prizeAmount;
-                    transaction.update(winnerRef, { wallet: newWalletBalance });
-                });
-                showMessage("বিজয়ীর ওয়ালেটে সফলভাবে টাকা যোগ করা হয়েছে!", 'success');
-            } catch (e) {
-                console.error("Winner declaration error:", e);
-                showMessage("বিজয়ী ঘোষণা করতে সমস্যা হয়েছে: " + e.message, 'error');
-            }
-        };
-
-        document.getElementById('app-view').addEventListener('click', (e) => {
-             if (e.target.classList.contains('delete-post-btn')) {
-                const postId = e.target.getAttribute('data-post-id');
-                if (confirm('আপনি কি এই পোস্টটি মুছে ফেলতে চান? এটি ফিরিয়ে আনা যাবে না।')) {
-                    deletePost(postId);
-                }
-            } else if (e.target.classList.contains('view-participants-btn')) {
-                const postId = e.target.getAttribute('data-post-id');
-                loadParticipants(postId);
-            } else if (e.target.classList.contains('declare-winner-btn')) {
-                const winnerId = e.target.getAttribute('data-user-id');
-                const prize = parseFloat(e.target.getAttribute('data-prize-amount'));
-                if (confirm(`আপনি কি এই ব্যবহারকারীকে বিজয়ী ঘোষণা করতে চান এবং তার ওয়ালেটে ${prize} ৳ যোগ করতে চান?`)) {
-                    declareWinner(winnerId, prize);
-                }
-            }
-        });
 
         const deletePost = async (postId) => {
             try {
                 const postRef = doc(db, 'artifacts', appId, 'public', 'data', 'posts', postId);
                 const participantsRef = collection(db, 'artifacts', appId, 'public', 'data', 'posts', postId, 'participants');
                 
-                // Delete all participants first
                 const participantsSnapshot = await getDocs(participantsRef);
                 const deletePromises = [];
                 participantsSnapshot.docs.forEach(doc => {
@@ -577,7 +667,6 @@
                 });
                 await Promise.all(deletePromises);
 
-                // Then delete the post
                 await deleteDoc(postRef);
                 showMessage("পোস্ট সফলভাবে মুছে ফেলা হয়েছে!", 'success');
             } catch (error) {
@@ -586,16 +675,79 @@
             }
         };
 
+        const updatePost = async (postId, updatedDetails) => {
+             try {
+                const postRef = doc(db, 'artifacts', appId, 'public', 'data', 'posts', postId);
+                const postDoc = await getDoc(postRef);
+                const currentPostData = postDoc.data();
+                const currentContestDetails = JSON.parse(currentPostData.contestDetails);
 
-        backToFormBtn.addEventListener('click', () => {
-            adminContestList.classList.add('hidden');
-            contestFormView.classList.remove('hidden');
+                const newContestDetails = {
+                    ...currentContestDetails,
+                    ...updatedDetails
+                };
+
+                await updateDoc(postRef, {
+                    contestDetails: JSON.stringify(newContestDetails)
+                });
+                showMessage("পোস্ট সফলভাবে আপডেট করা হয়েছে!", 'success');
+                hideModal('adminEditModal');
+            } catch (error) {
+                console.error("Error updating post:", error);
+                showMessage("পোস্ট আপডেট করতে সমস্যা হয়েছে: " + error.message, 'error');
+            }
+        };
+        
+        document.getElementById('app-view').addEventListener('click', (e) => {
+             if (e.target.classList.contains('delete-post-btn')) {
+                const postId = e.target.getAttribute('data-post-id');
+                // Use a modal instead of a native confirm box
+                showModal('deleteConfirmModal');
+            } else if (e.target.classList.contains('view-participants-btn')) {
+                const postId = e.target.getAttribute('data-post-id');
+                loadParticipants(postId);
+            } else if (e.target.classList.contains('declare-winner-btn')) {
+                const winnerId = e.target.getAttribute('data-user-id');
+                const prize = parseFloat(e.target.getAttribute('data-prize-amount'));
+                // Use a modal instead of a native confirm box
+                showModal('declareWinnerModal');
+            } else if (e.target.classList.contains('edit-post-btn')) {
+                const postId = e.target.getAttribute('data-post-id');
+                currentPostIdToEdit = postId;
+                loadPostForEditing(postId);
+            }
+        });
+        
+        const loadPostForEditing = async (postId) => {
+            const postDoc = await getDoc(doc(db, 'artifacts', appId, 'public', 'data', 'posts', postId));
+            const postData = postDoc.data();
+            const contestDetails = JSON.parse(postData.contestDetails);
+            
+            document.getElementById('edit-contest-name').value = contestDetails.contestName;
+            document.getElementById('edit-game-name').value = contestDetails.gameName;
+            document.getElementById('edit-entry-fee').value = contestDetails.entryFee;
+            document.getElementById('edit-max-players').value = contestDetails.maxPlayers;
+            document.getElementById('edit-start-time').value = contestDetails.startTime;
+            document.getElementById('edit-room-id').value = contestDetails.roomId || '';
+            document.getElementById('edit-room-pass').value = contestDetails.roomPass || '';
+            
+            showModal('adminEditModal');
+        };
+
+        editForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const updatedDetails = {
+                contestName: document.getElementById('edit-contest-name').value,
+                gameName: document.getElementById('edit-game-name').value,
+                entryFee: parseFloat(document.getElementById('edit-entry-fee').value),
+                maxPlayers: parseInt(document.getElementById('edit-max-players').value),
+                startTime: document.getElementById('edit-start-time').value,
+                roomId: document.getElementById('edit-room-id').value,
+                roomPass: document.getElementById('edit-room-pass').value,
+            };
+            updatePost(currentPostIdToEdit, updatedDetails);
         });
 
-        backToContestsBtn.addEventListener('click', () => {
-            adminParticipantList.classList.add('hidden');
-            adminContestList.classList.remove('hidden');
-        });
 
         // লগইন এবং সাইন আপ ফর্মের মধ্যে স্যুইচ করার জন্য
         toggleAuthBtn.addEventListener('click', () => {
@@ -766,6 +918,8 @@
             const maxPlayers = parseInt(document.getElementById('max-players').value);
             const startTime = document.getElementById('start-time').value;
             const requiredIdType = document.getElementById('id-type').value;
+            const roomId = document.getElementById('room-id').value;
+            const roomPass = document.getElementById('room-pass').value;
 
             if (!contestName || !gameName || isNaN(entryFee) || isNaN(maxPlayers) || !startTime) {
                 showMessage("অনুগ্রহ করে সকল ফিল্ড পূরণ করুন।", 'error');
@@ -780,6 +934,8 @@
                 maxPlayers,
                 startTime,
                 requiredIdType,
+                roomId,
+                roomPass,
             };
 
             try {
@@ -800,13 +956,16 @@
         });
 
         // Modal Logic
-        closeModalBtn.onclick = () => {
-            joinModal.style.display = 'none';
-        };
+        closeModalBtns.forEach(btn => {
+            btn.onclick = () => {
+                const modalId = btn.closest('.modal').id;
+                hideModal(modalId);
+            };
+        });
 
         window.onclick = (event) => {
-            if (event.target == joinModal) {
-                joinModal.style.display = 'none';
+            if (event.target.classList.contains('modal')) {
+                event.target.style.display = 'none';
             }
         };
 
@@ -830,15 +989,6 @@
                 modalTitle.textContent = `${requiredIdType} দিন`;
                 modalLabel.textContent = `আপনার ${requiredIdType} লিখুন:`;
                 joinModal.style.display = 'block';
-            }
-        });
-        
-        document.getElementById('posts-container').addEventListener('click', async (e) => {
-             if (e.target.classList.contains('view-participants-btn')) {
-                const postId = e.target.getAttribute('data-post-id');
-                loadParticipants(postId);
-                document.getElementById('admin-contest-list').classList.add('hidden');
-                document.getElementById('admin-participant-list').classList.remove('hidden');
             }
         });
 
