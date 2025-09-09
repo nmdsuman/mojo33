@@ -288,6 +288,23 @@
         </div>
     </div>
 
+    <!-- The Modal for Declare Winner -->
+    <div id="declareWinnerModal" class="modal">
+        <div class="modal-content max-w-sm">
+            <span class="close-button">&times;</span>
+            <h2 class="text-2xl font-semibold mb-4 text-gray-800">বিজয়ী ঘোষণা করুন</h2>
+            <form id="declare-winner-form" class="space-y-4">
+                <input type="hidden" id="winner-user-id">
+                <input type="hidden" id="winner-post-id">
+                <div>
+                    <label for="prize-amount" class="block text-sm font-medium text-gray-700 mb-1">পুরস্কারের পরিমাণ (৳)</label>
+                    <input type="number" id="prize-amount" required min="0" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500">
+                </div>
+                <button type="submit" class="w-full bg-green-600 text-white font-semibold py-2 rounded-lg hover:bg-green-700 transition duration-300">পুরস্কার প্রদান করুন</button>
+            </form>
+        </div>
+    </div>
+
 
     <!-- Firebase SDKs -->
     <script type="module">
@@ -326,6 +343,7 @@
         const adminEditModal = document.getElementById('adminEditModal');
         const editForm = document.getElementById('edit-form');
         const playerListModal = document.getElementById('playerListModal');
+        const declareWinnerModal = document.getElementById('declareWinnerModal');
         let currentContestId = null;
         let currentContestDetails = null;
         let currentPostIdToEdit = null;
@@ -461,7 +479,12 @@
             }
 
             const currentUser = auth.currentUser;
-            const currentUserRole = currentUser ? (await getDoc(doc(db, 'artifacts', appId, 'users', currentUser.uid))).data().role : null;
+            let currentUserRole = null;
+            if (currentUser) {
+                const userDoc = await getDoc(doc(db, 'artifacts', appId, 'users', currentUser.uid));
+                currentUserRole = userDoc.data().role;
+            }
+            
             let joinedPosts = new Set();
             if (currentUser) {
                 const postsWithParticipants = await getDocs(collection(db, 'artifacts', appId, 'public', 'data', 'posts'));
@@ -492,10 +515,12 @@
                         const participantsSnapshot = await getDocs(participantsRef);
                         const participantsCount = participantsSnapshot.size;
                         const totalCollected = participantsCount * contestDetails.entryFee;
+                        const totalPrize = totalCollected * 0.9;
+                        const totalProfit = totalCollected * 0.1;
                         
                         let hasJoined = joinedPosts.has(post.id);
 
-                        if (currentUserRole === 'admin' && currentUser.uid === post.authorId) {
+                        if (currentUserRole === 'admin') {
                             adminButtonHTML = `
                                 <div class="flex space-x-2 mt-4">
                                     <button
@@ -518,9 +543,36 @@
                                     </button>
                                 </div>
                             `;
-                        }
-
-                        if (hasJoined) {
+                            roomInfoHTML = `
+                                <div class="mt-4 p-4 rounded-lg bg-blue-50 border-l-4 border-blue-500">
+                                    <p class="font-semibold text-blue-700">রুম আইডি: <span id="room-id-${post.id}">${contestDetails.roomId}</span>
+                                        <button onclick="copyToClipboard('room-id-${post.id}')" class="ml-2 text-blue-500 hover:text-blue-700">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline" viewBox="0 0 20 20" fill="currentColor">
+                                                <path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" />
+                                                <path d="M6 15a2 2 0 11-4 0 2 2 0 014 0zm0 0v-2a1 1 0 011-1h2a1 1 0 011 1v2a2 2 0 11-4 0zm8-2a1 1 0 00-1-1h-2a1 1 0 100 2h2a1 1 0 001-1z" />
+                                                <path fill-rule="evenodd" d="M3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd" />
+                                            </svg>
+                                        </button>
+                                    </p>
+                                    <p class="font-semibold text-blue-700">রুম পাসওয়ার্ড: <span id="room-pass-${post.id}">${contestDetails.roomPass}</span>
+                                        <button onclick="copyToClipboard('room-pass-${post.id}')" class="ml-2 text-blue-500 hover:text-blue-700">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline" viewBox="0 0 20 20" fill="currentColor">
+                                                <path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" />
+                                                <path d="M6 15a2 2 0 11-4 0 2 2 0 014 0zm0 0v-2a1 1 0 011-1h2a1 1 0 011 1v2a2 2 0 11-4 0zm8-2a1 1 0 00-1-1h-2a1 1 0 100 2h2a1 1 0 001-1z" />
+                                                <path fill-rule="evenodd" d="M3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd" />
+                                            </svg>
+                                        </button>
+                                    </p>
+                                </div>
+                            `;
+                            collectedFeeHTML = `
+                                <div class="mt-4 p-4 rounded-lg bg-green-50 border-l-4 border-green-500">
+                                    <p class="font-semibold text-green-700">মোট সংগৃহীত ফি: ${totalCollected} ৳</p>
+                                    <p class="font-semibold text-green-700">মোট প্রাইজ পুল (90%): ${totalPrize.toFixed(2)} ৳</p>
+                                    <p class="font-semibold text-green-700">মোট লাভ (10%): ${totalProfit.toFixed(2)} ৳</p>
+                                </div>
+                            `;
+                        } else if (hasJoined) {
                             roomInfoHTML = `
                                 <div class="mt-4 p-4 rounded-lg bg-blue-50 border-l-4 border-blue-500">
                                     <p class="font-semibold text-blue-700">রুম আইডি: <span id="room-id-${post.id}">${contestDetails.roomId}</span>
@@ -559,11 +611,6 @@
                             </div>
                         `;
                         
-                        collectedFeeHTML = `
-                            <div class="mt-4 p-4 rounded-lg bg-green-50 border-l-4 border-green-500">
-                                <p class="font-semibold text-green-700">সংগৃহীত ফি: ${totalCollected} ৳</p>
-                            </div>
-                        `;
 
                         if (currentUser) {
                             if (!hasJoined) {
@@ -635,7 +682,6 @@
 
             const contestDoc = await getDoc(doc(db, 'artifacts', appId, 'public', 'data', 'posts', postId));
             const contestDetails = JSON.parse(contestDoc.data().contestDetails);
-            const prizeAmount = Math.round((contestDetails.entryFee * participantsSnapshot.size) * 0.9);
 
             participantsSnapshot.docs.forEach(doc => {
                 const participantData = doc.data();
@@ -647,12 +693,32 @@
                         <p class="text-sm text-gray-500">ইমেইল: ${participantData.email}</p>
                         <p class="text-sm text-gray-500">${contestDetails.requiredIdType}: ${participantData.idValue}</p>
                     </div>
-                    <button class="declare-winner-btn bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition duration-300" data-user-id="${doc.id}" data-prize-amount="${prizeAmount}">
+                    <button class="declare-winner-btn bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition duration-300" data-user-id="${doc.id}" data-post-id="${postId}">
                         বিজয়ী ঘোষণা করুন
                     </button>
                 `;
                 playersContainer.appendChild(participantElement);
             });
+        };
+
+        const declareWinner = async (postId, userId, prizeAmount) => {
+            try {
+                const userRef = doc(db, 'artifacts', appId, 'users', userId);
+                await runTransaction(db, async (transaction) => {
+                    const userDoc = await transaction.get(userRef);
+                    if (!userDoc.exists()) {
+                        throw new Error("ব্যবহারকারী পাওয়া যায়নি!");
+                    }
+                    const userData = userDoc.data();
+                    const newWalletBalance = (userData.wallet || 0) + prizeAmount;
+                    transaction.update(userRef, { wallet: newWalletBalance });
+                });
+                showMessage("বিজয়ীর ওয়ালেটে টাকা সফলভাবে যোগ করা হয়েছে!", 'success');
+                hideModal('declareWinnerModal');
+            } catch (error) {
+                console.error("Declare Winner Error:", error);
+                showMessage("বিজয়ী ঘোষণা করতে সমস্যা হয়েছে: " + error.message, 'error');
+            }
         };
 
         const deletePost = async (postId) => {
@@ -708,8 +774,10 @@
                 loadParticipants(postId);
             } else if (e.target.classList.contains('declare-winner-btn')) {
                 const winnerId = e.target.getAttribute('data-user-id');
-                const prize = parseFloat(e.target.getAttribute('data-prize-amount'));
-                // Use a modal instead of a native confirm box
+                const postId = e.target.getAttribute('data-post-id');
+                
+                document.getElementById('winner-user-id').value = winnerId;
+                document.getElementById('winner-post-id').value = postId;
                 showModal('declareWinnerModal');
             } else if (e.target.classList.contains('edit-post-btn')) {
                 const postId = e.target.getAttribute('data-post-id');
@@ -718,6 +786,20 @@
             }
         });
         
+        document.getElementById('declare-winner-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const winnerUserId = document.getElementById('winner-user-id').value;
+            const winnerPostId = document.getElementById('winner-post-id').value;
+            const prizeAmount = parseFloat(document.getElementById('prize-amount').value);
+
+            if (isNaN(prizeAmount) || prizeAmount <= 0) {
+                showMessage("দয়া করে পুরস্কারের পরিমাণ সঠিকভাবে লিখুন।", 'error');
+                return;
+            }
+
+            declareWinner(winnerPostId, winnerUserId, prizeAmount);
+        });
+
         const loadPostForEditing = async (postId) => {
             const postDoc = await getDoc(doc(db, 'artifacts', appId, 'public', 'data', 'posts', postId));
             const postData = postDoc.data();
@@ -957,9 +1039,8 @@
 
         // Modal Logic
         closeModalBtns.forEach(btn => {
-            btn.onclick = () => {
-                const modalId = btn.closest('.modal').id;
-                hideModal(modalId);
+            btn.onclick = (e) => {
+                hideModal(e.target.closest('.modal').id);
             };
         });
 
