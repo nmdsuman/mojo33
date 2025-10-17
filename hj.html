@@ -287,6 +287,61 @@
             // Utility: spaced Bengali digits to force pronunciation (e.g., ১২৩ -> ১ ২ ৩)
             const toBnDigitsSpaced = (n) => toBnDigits(n).split('').join(' ');
 
+            // Utility: Convert number to Bengali words (Bangladesh style) for common ranges.
+            // Covers 0..9999 reasonably. Falls back to spaced digits for uncommon composites.
+            const toBnWords = (num) => {
+                num = Math.round(Number(num || 0));
+                if (!isFinite(num) || num < 0) return toBnDigitsSpaced(num);
+
+                const ones = ['শূন্য','এক','দুই','তিন','চার','পাঁচ','ছয়','সাত','আট','নয়'];
+                const teens = {
+                    10:'দশ',11:'এগারো',12:'বারো',13:'তেরো',14:'চৌদ্দ',15:'পনেরো',16:'ষোলো',17:'সতেরো',18:'আঠারো',19:'উনিশ'
+                };
+                const tens = {20:'কুড়ি',30:'তিরিশ',40:'চল্লিশ',50:'পঞ্চাশ',60:'ষাট',70:'সত্তর',80:'আশি',90:'নব্বই'};
+                const twenties = {21:'একুশ',22:'বাইশ',23:'তেইশ',24:'চব্বিশ',25:'পঁচিশ',26:'ছাব্বিশ',27:'সাতাশ',28:'আঠাশ',29:'উনত্রিশ'};
+                const thirties = {31:'একত্রিশ',32:'বত্রিশ',33:'তেত্রিশ',34:'চৌত্রিশ',35:'পঁয়ত্রিশ',36:'ছত্রিশ',37:'সাঁইত্রিশ',38:'আটত্রিশ',39:'উনচল্লিশ'};
+                const forties = {41:'একচল্লিশ',42:'বিয়াল্লিশ',43:'তেতাল্লিশ',44:'চুয়াল্লিশ',45:'পঁয়তাল্লিশ',46:'ছেচল্লিশ',47:'সাতচল্লিশ',48:'আটচল্লিশ',49:'উনপঞ্চাশ'};
+                const fifties = {51:'একান্ন',52:'বাহান্ন',53:'তিপ্পান্ন',54:'চুয়ান্ন',55:'পঞ্চান্ন',56:'ছাপ্পান্ন',57:'সাতান্ন',58:'আটান্ন',59:'উনষাট'};
+                const sixties = {61:'একষট্টি',62:'বাষট্টি',63:'তেষট্টি',64:'চৌষট্টি',65:'পঁয়ষট্টি',66:'ছেষট্টি',67:'সাতষট্টি',68:'আটষট্টি',69:'উনসত্তর'};
+                const seventies = {71:'একাত্তর',72:'বাহাত্তর',73:'তেহাত্তর',74:'চুয়াত্তর',75:'পঁচাত্তর',76:'ছিয়াত্তর',77:'সাতাত্তর',78:'আটাত্তর',79:'উনআশি'};
+                const eighties = {81:'একাশি',82:'বিরাশি',83:'তিরাশি',84:'চুরাশি',85:'পঁচাশি',86:'ছিয়াশি',87:'সাতাশি',88:'অষ্টাশি',89:'উননব্বই'};
+                const nineties = {91:'একানব্বই',92:'বিরানব্বই',93:'তিরানব্বই',94:'চুরানব্বই',95:'পঁচানব্বই',96:'ছিয়ানব্বই',97:'সাতানব্বই',98:'আটানব্বই',99:'নিরানব্বই'};
+                const maps2 = [twenties, thirties, forties, fifties, sixties, seventies, eighties, nineties];
+
+                if (num < 10) return ones[num];
+                if (num >= 10 && num < 20) return teens[num];
+                if (num % 10 === 0 && num < 100) return tens[num] || toBnDigitsSpaced(num);
+                if (num > 20 && num < 100) {
+                    for (const m of maps2) if (m[num]) return m[num];
+                    // Fallback composition (may be less natural): tens + ones
+                    const t = Math.floor(num/10)*10; const r = num%10;
+                    return `${tens[t] || toBnDigitsSpaced(t)} ${ones[r]}`;
+                }
+
+                // Hundreds
+                if (num < 1000) {
+                    const hundredsWord = ['','একশ','দুইশ','তিনশ','চারশ','পাঁচশ','ছয়শ','সাতশ','আটশ','নয়শ'];
+                    const h = Math.floor(num/100);
+                    const r = num % 100;
+                    const hWord = hundredsWord[h];
+                    if (r === 0) return hWord;
+                    const rWord = toBnWords(r);
+                    return `${hWord} ${rWord}`;
+                }
+
+                // Thousands (simple): x হাজার y
+                if (num < 100000) {
+                    const th = Math.floor(num/1000);
+                    const r = num % 1000;
+                    const thWord = th === 1 ? 'এক হাজার' : `${toBnWords(th)} হাজার`;
+                    if (r === 0) return thWord;
+                    return `${thWord} ${toBnWords(r)}`;
+                }
+
+                // Fallback for larger numbers
+                return toBnDigitsSpaced(num);
+            };
+
             // Calculates the sum of the first four columns for a given row.
             const calculateSumOfFirstFourColumns = (row) => {
                 const firstFourNames = columnNames.slice(0, 4);
@@ -576,7 +631,7 @@
                         const queueSpeak = (voice) => {
                             // Build and enqueue each utterance
                             items.forEach(({ name, total }, idx) => {
-                                const text = `${name}, ${toBnDigitsSpaced(total)}`;
+                                const text = `${name}, ${toBnWords(total)}`;
                                 const u = makeUtter(text);
                                 if (voice) {
                                     u.voice = voice;
