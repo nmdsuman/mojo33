@@ -57,10 +57,7 @@
 <body class="bg-gray-100 flex items-center justify-center p-4 min-h-screen overflow-x-hidden">
 
     <div class="bg-white p-4 rounded-lg shadow-xl w-full max-w-4xl md:p-6">
-        <!-- Application Title -->
-        <h1 class="text-2xl font-bold text-center text-gray-800 mb-4 rounded-md p-2 bg-blue-50 sm:text-3xl sm:mb-6">
-            
-        </h1>
+        <!-- Application Title removed to eliminate extra blank space -->
 
         <!-- Clear Button, Toggle Switch and Player Button -->
         <div class="flex flex-col items-center mb-4 space-y-4">
@@ -68,8 +65,11 @@
                 <button id="clearBtn" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-6 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105">
                     Clear
                 </button>
-                <button id="speakBtn" class="bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2 px-6 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105">
-                    Speak
+                <button id="speakBtn" title="Speak" aria-label="Speak" class="bg-indigo-500 hover:bg-indigo-600 text-white p-2 rounded-full shadow-md transition duration-300 ease-in-out transform hover:scale-105">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 14a3 3 0 003-3V7a3 3 0 10-6 0v4a3 3 0 003 3z"/>
+                        <path d="M19 11a1 1 0 10-2 0 5 5 0 11-10 0 1 1 0 10-2 0 7 7 0 0012 4.9V18a1 1 0 112 0v-2.1A7 7 0 0019 11z"/>
+                    </svg>
                 </button>
                 <!-- Edit Toggle Icon -->
                 <button id="editToggleBtn" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold p-2 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105">
@@ -432,11 +432,11 @@
                     th.scope = "col";
                     if(isLocked) {
                         th.innerHTML = `
-                            <span data-col-index="${index}" class="cursor-pointer bg-transparent border-b border-white focus:outline-none text-center text-white placeholder-gray-300 w-12 sm:w-16 md:w-28 rounded-sm px-1 py-0.5 text-sm md:text-lg">${name}</span>
+                            <span data-col-index="${index}" title="${name}" class="cursor-pointer bg-transparent border-b border-white focus:outline-none text-center text-white placeholder-gray-300 w-12 sm:w-16 md:w-28 rounded-sm px-1 py-0.5 text-sm md:text-lg whitespace-nowrap overflow-hidden text-ellipsis truncate">${name}</span>
                         `;
                     } else {
                         th.innerHTML = `
-                            <span data-col-index="${index}" class="cursor-pointer bg-transparent border-b border-white focus:outline-none text-center text-white placeholder-gray-300 w-12 sm:w-16 md:w-28 rounded-sm px-1 py-0.5 text-sm md:text-lg">${name}</span>
+                            <span data-col-index="${index}" title="${name}" class="cursor-pointer bg-transparent border-b border-white focus:outline-none text-center text-white placeholder-gray-300 w-12 sm:w-16 md:w-28 rounded-sm px-1 py-0.5 text-sm md:text-lg whitespace-nowrap overflow-hidden text-ellipsis truncate">${name}</span>
                         `;
                     }
                     tableHeaderRow.appendChild(th);
@@ -460,41 +460,37 @@
                 // Render Data Rows
                 rowData.forEach((row, rowIndex) => {
                     const rowElement = document.createElement('tr');
-                    rowElement.className = `border-b ${rowIndex % 2 === 0 ? 'bg-gray-50' : 'bg-white'}`;
+                    const rowHasAnyValue = columnNames.some(name => {
+                        const v = row[name];
+                        return v !== null && v !== undefined && v.toString().trim() !== '';
+                    });
+                    const initialBg = rowHasAnyValue ? 'bg-yellow-50' : (rowIndex % 2 === 0 ? 'bg-gray-50' : 'bg-white');
+                    rowElement.className = `border-b ${initialBg} hover:bg-sky-50 transition-colors`;
                     
-                    const sumOfFirstFour = calculateSumOfFirstFourColumns(row);
-                    const shouldShowLachha = sumOfFirstFour === 360;
-                    
-                    const lachhaColumns = ['আকিজ'];
-
                     columnNames.forEach((colName, colIndex) => {
                         const cell = document.createElement('td');
                         cell.className = "px-1 py-1 sm:px-2 sm:py-2 whitespace-nowrap text-sm text-gray-900 text-center";
                         
-                        if (shouldShowLachha && lachhaColumns.includes(colName) && (row[colName] === '' || row[colName] === 0 || row[colName] === '0')) {
-                             cell.innerHTML = `
-                                 <span class="block w-12 sm:w-16 md:w-28 bg-red-200 text-red-800 rounded-md px-1 py-0.5 text-center font-bold Lachha-text">
-                                     😫লাচ্ছা
-                                 </span>
-                             `;
-                        } else {
-                            cell.innerHTML = `
-                                 <input
-                                     type="number"
-                                     value="${row[colName]}"
-                                     data-row-index="${rowIndex}"
-                                     data-col-name="${colName}"
-                                     class="responsive-input w-12 sm:w-16 md:w-28 border border-gray-300 rounded-md px-1 py-0.5 text-center focus:ring-blue-500 focus:border-blue-500"
-                                 />
-                             `;
-                        }
+                        cell.innerHTML = `
+                            <input
+                                type="number"
+                                value="${row[colName]}"
+                                data-row-index="${rowIndex}"
+                                data-col-name="${colName}"
+                                class="responsive-input w-12 sm:w-16 md:w-28 border rounded-lg px-1.5 py-1 text-center focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm transition-colors ${row[colName] !== '' ? 'bg-gray-50 border-blue-300' : 'bg-white border-gray-300'}"
+                            />
+                        `;
                         rowElement.appendChild(cell);
                     });
 
                     // Render Total Cell
                     const totalCell = document.createElement('td');
-                    totalCell.className = `px-1 py-1 sm:px-2 sm:py-2 whitespace-nowrap text-sm font-medium text-center bg-blue-50 total-cell`;
-                    totalCell.textContent = Math.round(calculateRowTotal(row)).toString();
+                    const initialRowTotal = Math.round(calculateRowTotal(row));
+                    const totalColorClass = initialRowTotal > 0
+                        ? 'bg-rose-50 text-rose-600'
+                        : (initialRowTotal < 0 ? 'bg-emerald-50 text-emerald-700' : 'bg-gray-100 text-gray-700');
+                    totalCell.className = `px-2 py-1 sm:px-3 sm:py-1.5 whitespace-nowrap text-sm font-semibold text-center rounded-full ${totalColorClass} total-cell`;
+                    totalCell.textContent = initialRowTotal.toString();
                     rowElement.appendChild(totalCell);
 
                     dataBody.appendChild(rowElement);
@@ -563,7 +559,9 @@
                                 } else {
                                     // If Lachha text is visible and condition is not met, revert to input
                                     if (cell.querySelector('.Lachha-text')) {
-                                        cell.innerHTML = `<input type="number" value="${rowData[rowIndex][lachhaColName]}" data-row-index="${rowIndex}" data-col-name="${lachhaColName}" class="responsive-input w-12 sm:w-16 md:w-28 border border-gray-300 rounded-md px-1 py-0.5 text-center focus:ring-blue-500 focus:border-blue-500" />`;
+                                        const valNow = rowData[rowIndex][lachhaColName] || '';
+                                        const filledCls = valNow !== '' ? 'bg-gray-50 border-blue-300' : 'bg-white border-gray-300';
+                                        cell.innerHTML = `<input type="number" value="${valNow}" data-row-index="${rowIndex}" data-col-name="${lachhaColName}" class="responsive-input w-12 sm:w-16 md:w-28 border rounded-md px-1 py-0.5 text-center focus:ring-blue-500 focus:border-blue-500 ${filledCls}" />`;
                                     }
                                 }
                             }
@@ -571,6 +569,24 @@
                         
                         // Update sums and totals after all data and display logic is handled
                         updateTableTotals();
+
+                        // Subtle style difference: filled vs empty inputs
+                        const isFilled = (value !== null && value !== undefined && value.toString().trim() !== '');
+                        target.classList.remove('bg-white', 'border-gray-300', 'bg-gray-50', 'border-blue-300');
+                        if (isFilled) {
+                            target.classList.add('bg-gray-50', 'border-blue-300');
+                        } else {
+                            target.classList.add('bg-white', 'border-gray-300');
+                        }
+
+                        // Row highlight: if any cell in this row has a value, highlight the whole row
+                        const rowEl = dataBody.children[rowIndex];
+                        const rowHasAny = columnNames.some(n => {
+                            const v = (rowData[rowIndex][n] ?? '').toString().trim();
+                            return v !== '';
+                        });
+                        rowEl.classList.remove('bg-white','bg-gray-50','bg-yellow-50');
+                        rowEl.classList.add(rowHasAny ? 'bg-yellow-50' : (rowIndex % 2 === 0 ? 'bg-gray-50' : 'bg-white'));
                     }
                 }
             });
