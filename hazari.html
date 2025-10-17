@@ -33,11 +33,11 @@
 
         @media (max-width: 640px) {
             .table-cell-padding {
-                padding-left: 0.25rem;
-                padding-right: 0.25rem;
+                padding-left: 0.2rem;
+                padding-right: 0.2rem;
             }
             .responsive-input {
-                width: 3rem; /* narrower inputs on mobile to avoid horizontal overflow */
+                width: 2.5rem; /* tighter inputs on mobile to avoid horizontal overflow */
             }
             /* Prevent horizontal scroll on mobile */
             .no-x-overflow {
@@ -50,13 +50,14 @@
             }
             thead th, tbody td {
                 word-break: break-word;
+                font-size: 0.85rem; /* slightly smaller text on mobile */
             }
         }
     </style>
 </head>
-<body class="bg-gray-100 flex items-center justify-center p-4 min-h-screen">
+<body class="bg-gray-100 min-h-screen p-0 sm:p-4 sm:flex sm:items-center sm:justify-center">
 
-    <div class="bg-white p-4 rounded-lg shadow-xl w-full max-w-4xl md:p-6">
+    <div class="w-screen sm:w-full bg-transparent sm:bg-white max-w-none p-0 sm:p-4 md:p-6 rounded-none shadow-none sm:rounded-lg sm:shadow-xl">
         <!-- Application Title removed to eliminate extra blank space -->
 
         <!-- Toolbar: Clear, Speak, Edit, Player -->
@@ -88,8 +89,8 @@
         </div>
 
         <!-- Main Data Table Wrapper -->
-        <div class="overflow-x-auto overflow-y-auto max-h-[70vh] rounded-lg">
-            <table class="w-full table-auto divide-y divide-gray-200 rounded-lg overflow-hidden border border-gray-200">
+        <div class="overflow-x-hidden overflow-y-auto max-h-[70vh] rounded-none sm:rounded-lg">
+            <table class="w-full table-auto divide-y divide-gray-200 rounded-none sm:rounded-lg overflow-hidden border-0 sm:border sm:border-gray-200">
                 <thead class="bg-blue-600 text-white sticky top-0 z-10 shadow">
                     <tr id="tableHeaderRow">
                         <!-- Headers will be dynamically rendered here -->
