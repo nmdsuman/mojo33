@@ -59,9 +59,9 @@
     <div class="bg-white p-4 rounded-lg shadow-xl w-full max-w-4xl md:p-6">
         <!-- Application Title removed to eliminate extra blank space -->
 
-        <!-- Clear Button, Toggle Switch and Player Button -->
-        <div class="flex flex-col items-center mb-4 space-y-4">
-            <div class="flex justify-center items-center space-x-4">
+        <!-- Toolbar: Clear, Speak, Edit, Player -->
+        <div class="flex flex-col items-center mb-3 sm:mb-4">
+            <div class="flex justify-center items-center gap-3 sm:gap-4">
                 <button id="clearBtn" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-6 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105">
                     Clear
                 </button>
@@ -88,15 +88,15 @@
         </div>
 
         <!-- Main Data Table Wrapper -->
-        <div class="overflow-x-hidden">
+        <div class="overflow-x-hidden overflow-y-auto max-h-[70vh] rounded-lg">
             <table class="w-full table-auto divide-y divide-gray-200 rounded-lg overflow-hidden border border-gray-200">
-                <thead class="bg-blue-600 text-white">
+                <thead class="bg-blue-600 text-white sticky top-0 z-10 shadow">
                     <tr id="tableHeaderRow">
                         <!-- Headers will be dynamically rendered here -->
                     </tr>
                 </thead>
                 <!-- Sums Row -->
-                <tbody id="sumRow" class="bg-blue-100 font-bold text-gray-800">
+                <tbody id="sumRow" class="bg-blue-50 font-bold text-gray-800">
                     <tr>
                         <!-- Sums will be dynamically rendered here -->
                     </tr>
@@ -106,6 +106,13 @@
                     <!-- Data rows will be dynamically rendered here -->
                 </tbody>
             </table>
+        </div>
+
+        <!-- Add Round Control -->
+        <div class="flex justify-center mt-3 sm:mt-4 items-center">
+            <button id="addRoundBtn" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-6 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105">
+                Add Round
+            </button>
         </div>
     </div>
 
@@ -170,7 +177,7 @@
         document.addEventListener('DOMContentLoaded', () => {
             // State management using plain JavaScript variables
             let columnNames = ['হামিম', 'সোহেল', 'চঞ্চল', 'আকিজ'];
-            const numRows = 20;
+            let numRows = 1; // start with a single round by default
             const subtractValue = 360;
             let isLocked = true; // Default state is locked
             
@@ -210,23 +217,24 @@
                     try {
                         const parsedData = JSON.parse(savedData);
                         columnNames = parsedData.columnNames || ['হামিম', 'সোহেল', 'চঞ্চল', 'আকিজ'];
-                        rowData = parsedData.rowData;
-                        const initialData = [];
-                        for (let i = 0; i < numRows; i++) {
-                            const row = rowData[i] || { id: i };
+                        rowData = Array.isArray(parsedData.rowData) ? parsedData.rowData : [];
+                        numRows = Math.max(1, rowData.length || 1);
+                        // Ensure all rows have all columns and proper ids
+                        rowData = Array.from({ length: numRows }, (_, i) => {
+                            const row = parsedData.rowData && parsedData.rowData[i] ? { ...parsedData.rowData[i] } : { id: i };
+                            row.id = i;
                             columnNames.forEach(name => {
-                                if (typeof row[name] === 'undefined') {
-                                    row[name] = '';
-                                }
+                                if (typeof row[name] === 'undefined') row[name] = '';
                             });
-                            initialData.push(row);
-                        }
-                        rowData = initialData;
+                            return row;
+                        });
                     } catch (e) {
                         console.error("Failed to parse saved data from localStorage, resetting.", e);
+                        numRows = 1;
                         rowData = initializeRowData();
                     }
                 } else {
+                    numRows = 1;
                     rowData = initializeRowData();
                 }
 
@@ -268,6 +276,7 @@
             const cancelClearBtn = document.getElementById('cancelClearBtn');
             const playerBtn = document.getElementById('playerBtn'); // Direct reference to the player button
             const speakBtn = document.getElementById('speakBtn');
+            let addRoundBtn = null; // will be set after we add it to the DOM
             const playerModal = document.getElementById('playerModal');
             const playerListContainer = document.getElementById('playerListContainer');
             const savePlayerListBtn = document.getElementById('savePlayerListBtn');
@@ -457,29 +466,43 @@
                 emptySumTd.className = "px-1 py-1 sm:px-2 sm:py-3 whitespace-nowrap text-sm text-center bg-blue-200";
                 sumRowBody.appendChild(emptySumTd);
 
-                // Render Data Rows
-                rowData.forEach((row, rowIndex) => {
+                // Render all rounds so previous rounds remain visible
+                rowData.forEach((row, rowIndexVisible) => {
                     const rowElement = document.createElement('tr');
                     const rowHasAnyValue = columnNames.some(name => {
                         const v = row[name];
                         return v !== null && v !== undefined && v.toString().trim() !== '';
                     });
-                    const initialBg = rowHasAnyValue ? 'bg-yellow-50' : (rowIndex % 2 === 0 ? 'bg-gray-50' : 'bg-white');
+                    const initialBg = rowHasAnyValue ? 'bg-yellow-50' : (rowIndexVisible % 2 === 0 ? 'bg-gray-50' : 'bg-white');
                     rowElement.className = `border-b ${initialBg} hover:bg-sky-50 transition-colors`;
+                    // Use the global index from row.id for updates to rowData
+                    const globalRowIndex = typeof row.id === 'number' ? row.id : rowIndexVisible;
+                    const isLastRow = (rowIndexVisible === rowData.length - 1);
                     
                     columnNames.forEach((colName, colIndex) => {
                         const cell = document.createElement('td');
                         cell.className = "px-1 py-1 sm:px-2 sm:py-2 whitespace-nowrap text-sm text-gray-900 text-center";
-                        
-                        cell.innerHTML = `
-                            <input
-                                type="number"
-                                value="${row[colName]}"
-                                data-row-index="${rowIndex}"
-                                data-col-name="${colName}"
-                                class="responsive-input w-12 sm:w-16 md:w-28 border rounded-lg px-1.5 py-1 text-center focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm transition-colors ${row[colName] !== '' ? 'bg-gray-50 border-blue-300' : 'bg-white border-gray-300'}"
-                            />
-                        `;
+                        if (isLastRow) {
+                            // Active round: editable inputs
+                            cell.innerHTML = `
+                                <input
+                                    type="number"
+                                    value="${row[colName]}"
+                                    data-row-index-global="${globalRowIndex}"
+                                    data-col-name="${colName}"
+                                    class="responsive-input w-12 sm:w-16 md:w-28 border rounded-lg px-1.5 py-1 text-center focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm transition-colors ${row[colName] !== '' ? 'bg-gray-50 border-blue-300' : 'bg-white border-gray-300'}"
+                                />
+                            `;
+                        } else {
+                            // Previous rounds: read-only display with 0 if empty, Call Bridge style (+/- and color)
+                            const numRaw = (row[colName] === '' || row[colName] === undefined || row[colName] === null) ? 0 : parseFloat(row[colName]);
+                            const val = isNaN(numRaw) ? 0 : numRaw;
+                            const text = `${val}`; // no '+' sign in Hazari
+                            const color = val > 0 ? 'text-emerald-600' : (val < 0 ? 'text-rose-600' : 'text-gray-500');
+                            cell.innerHTML = `
+                                <span class="inline-block min-w-[3rem] px-1 py-0.5 rounded-md ${color} text-base font-semibold">${text}</span>
+                            `;
+                        }
                         rowElement.appendChild(cell);
                     });
 
@@ -531,41 +554,13 @@
             dataBody.addEventListener('input', (event) => {
                 const target = event.target;
                 if (target.tagName === 'INPUT' && target.type === 'number') {
-                    const rowIndex = parseInt(target.dataset.rowIndex, 10);
+                    const globalRowIndex = parseInt(target.dataset.rowIndexGlobal, 10);
                     const colName = target.dataset.colName;
                     const value = target.value;
                     
-                    if (!isNaN(rowIndex) && colName) {
-                        rowData[rowIndex][colName] = value;
+                    if (!isNaN(globalRowIndex) && colName) {
+                        rowData[globalRowIndex][colName] = value;
                         saveData();
-                        
-                        // Dynamically update the Lachha text without re-rendering the whole table
-                        const rowElement = dataBody.children[rowIndex];
-                        const sumOfFirstFour = calculateSumOfFirstFourColumns(rowData[rowIndex]);
-                        const shouldShowLachha = sumOfFirstFour === 360;
-                        const lachhaColumns = ['আকিজ'];
-
-                        lachhaColumns.forEach(lachhaColName => {
-                            const lachhaColIndex = columnNames.indexOf(lachhaColName);
-                            if (lachhaColIndex !== -1) {
-                                const cell = rowElement.children[lachhaColIndex];
-                                if (shouldShowLachha && (rowData[rowIndex][lachhaColName] === '' || rowData[rowIndex][lachhaColName] === '0')) {
-                                    // Replace input with Lachha span
-                                    if (cell.querySelector('input')) {
-                                        cell.innerHTML = `<span class="block w-12 sm:w-16 md:w-28 bg-red-200 text-red-800 rounded-md px-1 py-0.5 text-center font-bold Lachha-text">
-                                            😫লাচ্ছা
-                                        </span>`;
-                                    }
-                                } else {
-                                    // If Lachha text is visible and condition is not met, revert to input
-                                    if (cell.querySelector('.Lachha-text')) {
-                                        const valNow = rowData[rowIndex][lachhaColName] || '';
-                                        const filledCls = valNow !== '' ? 'bg-gray-50 border-blue-300' : 'bg-white border-gray-300';
-                                        cell.innerHTML = `<input type="number" value="${valNow}" data-row-index="${rowIndex}" data-col-name="${lachhaColName}" class="responsive-input w-12 sm:w-16 md:w-28 border rounded-md px-1 py-0.5 text-center focus:ring-blue-500 focus:border-blue-500 ${filledCls}" />`;
-                                    }
-                                }
-                            }
-                        });
                         
                         // Update sums and totals after all data and display logic is handled
                         updateTableTotals();
@@ -580,13 +575,13 @@
                         }
 
                         // Row highlight: if any cell in this row has a value, highlight the whole row
-                        const rowEl = dataBody.children[rowIndex];
+                        const rowEl = target.closest('tr');
                         const rowHasAny = columnNames.some(n => {
-                            const v = (rowData[rowIndex][n] ?? '').toString().trim();
+                            const v = (rowData[globalRowIndex][n] ?? '').toString().trim();
                             return v !== '';
                         });
                         rowEl.classList.remove('bg-white','bg-gray-50','bg-yellow-50');
-                        rowEl.classList.add(rowHasAny ? 'bg-yellow-50' : (rowIndex % 2 === 0 ? 'bg-gray-50' : 'bg-white'));
+                        rowEl.classList.add(rowHasAny ? 'bg-yellow-50' : 'bg-white');
                     }
                 }
             });
@@ -596,6 +591,7 @@
             });
 
             confirmClearBtn.addEventListener('click', () => {
+                numRows = 1;
                 rowData = initializeRowData();
                 renderTable();
                 clearConfirmModal.classList.add('hidden');
@@ -795,6 +791,24 @@
                 }
             });
 
+            // Add Round functionality
+            const setupAddRound = () => {
+                addRoundBtn = document.getElementById('addRoundBtn');
+                if (!addRoundBtn) return;
+                // Always keep Add Round enabled
+                addRoundBtn.disabled = false;
+                addRoundBtn.classList.remove('bg-gray-400','cursor-not-allowed');
+                addRoundBtn.classList.add('bg-green-500');
+                addRoundBtn.onclick = () => {
+                    numRows += 1;
+                    const newRow = { id: rowData.length };
+                    columnNames.forEach(name => { newRow[name] = ''; });
+                    rowData.push(newRow);
+                    saveData();
+                    renderTable();
+                };
+            };
+
             savePlayerListBtn.addEventListener('click', () => {
                 // Sort before saving to keep persistent order
                 sortPlayers();
@@ -866,6 +880,7 @@
             editIcon.classList.toggle('hidden', isLocked);
             playerBtn.classList.toggle('hidden', isLocked);
             renderTable();
+            setupAddRound();
         });
     </script>
 </body>
