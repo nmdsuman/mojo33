@@ -256,6 +256,7 @@
             const confirmClearBtn = document.getElementById('confirmClearBtn');
             const cancelClearBtn = document.getElementById('cancelClearBtn');
             const playerBtn = document.getElementById('playerBtn'); // Direct reference to the player button
+            const speakBtn = document.getElementById('speakBtn');
             const playerModal = document.getElementById('playerModal');
             const playerListContainer = document.getElementById('playerListContainer');
             const savePlayerListBtn = document.getElementById('savePlayerListBtn');
@@ -276,6 +277,15 @@
                     return sum + (isNaN(value) ? 0 : value);
                 }, 0);
             };
+
+            // Utility: convert digits to Bengali numerals (e.g., 123 -> ১২৩)
+            const toBnDigits = (n) => {
+                const map = '০১২৩৪৫৬৭৮৯';
+                const s = Math.round(Number(n || 0)).toString();
+                return s.replace(/[0-9]/g, d => map[d]);
+            };
+            // Utility: spaced Bengali digits to force pronunciation (e.g., ১২৩ -> ১ ২ ৩)
+            const toBnDigitsSpaced = (n) => toBnDigits(n).split('').join(' ');
 
             // Calculates the sum of the first four columns for a given row.
             const calculateSumOfFirstFourColumns = (row) => {
@@ -528,6 +538,82 @@
                 playerModal.classList.remove('hidden');
                 document.getElementById('addPlayerInput').value = '';
                 addPlayerBtn.textContent = 'যোগ করুন';
+            });
+
+            // Speak first 4 player names with their totals for Bangladesh (bn-BD)
+            speakBtn.addEventListener('click', () => {
+                try {
+                    const firstFour = columnNames.slice(0, 4);
+                    const items = firstFour.map(name => ({
+                        name,
+                        total: Math.round(calculateColumnSum(name))
+                    }));
+
+                    if ('speechSynthesis' in window) {
+                        const synth = window.speechSynthesis;
+                        synth.cancel();
+                        // Prepare utterances: speak each name+number separately to avoid number skipping
+                        const makeUtter = (text) => {
+                            const u = new SpeechSynthesisUtterance(text);
+                            u.lang = 'bn-BD';
+                            u.rate = 0.85;
+                            u.pitch = 1;
+                            u.volume = 1;
+                            return u;
+                        };
+
+                        // Try to use a Bengali voice if available
+                        const pickBnVoice = () => {
+                            const voices = synth.getVoices() || [];
+                            // Priority: exact bn-BD, then any bn, then names containing Bangla/Bengali/Bangladesh
+                            const bnBD = voices.find(v => (v.lang||'').toLowerCase() === 'bn-bd');
+                            const bnAny = voices.find(v => (v.lang||'').toLowerCase().startsWith('bn'));
+                            const byName = voices.find(v => /bangla|bengali|bangladesh/i.test(v.name || ''));
+                            return bnBD || bnAny || byName || voices[0] || null;
+                        };
+                        // Some browsers load voices asynchronously; ensure we speak regardless
+                        const voicesNow = synth.getVoices();
+                        const queueSpeak = (voice) => {
+                            // Build and enqueue each utterance
+                            items.forEach(({ name, total }, idx) => {
+                                const text = `${name}, ${toBnDigitsSpaced(total)}`;
+                                const u = makeUtter(text);
+                                if (voice) {
+                                    u.voice = voice;
+                                    if (voice.lang) u.lang = voice.lang;
+                                }
+                                // Stagger slightly to avoid clipping
+                                setTimeout(() => synth.speak(u), idx * 150);
+                            });
+                        };
+                        if (!voicesNow || voicesNow.length === 0) {
+                            // Attempt delayed speak once voices load
+                            const speakWithVoices = () => {
+                                const v = pickBnVoice();
+                                queueSpeak(v);
+                            };
+                            const onVoices = () => {
+                                synth.onvoiceschanged = null;
+                                speakWithVoices();
+                            };
+                            synth.onvoiceschanged = onVoices;
+                            // Fallback timeout in case onvoiceschanged never fires
+                            setTimeout(() => {
+                                if (synth.speaking || synth.pending) return;
+                                speakWithVoices();
+                            }, 600);
+                        } else {
+                            const v = pickBnVoice();
+                            queueSpeak(v);
+                        }
+                    } else {
+                        // Fallback: simple alert if TTS not supported
+                        const fallback = items.map(({name, total}) => `${name}: ${toBnDigits(total)}`).join('\n');
+                        alert(fallback);
+                    }
+                } catch (e) {
+                    console.error('Speak failed', e);
+                }
             });
 
             cancelPlayerBtn.addEventListener('click', () => {
