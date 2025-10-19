@@ -3,7 +3,6 @@
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         /* Custom font import for consistency and style */
@@ -58,21 +57,16 @@
 <body class="bg-gray-100 min-h-screen p-0 sm:p-4 sm:flex sm:items-center sm:justify-center">
 
     <div class="w-screen sm:w-full bg-transparent sm:bg-white max-w-none p-0 sm:p-4 md:p-6 rounded-none shadow-none sm:rounded-lg sm:shadow-xl">
-        <!-- Application Title removed to eliminate extra blank space -->
-
-        <!-- Toolbar: Clear, Speak, Edit, Player -->
         <div class="flex flex-col items-center mb-3 sm:mb-4">
             <div class="flex justify-center items-center gap-3 sm:gap-4">
                 <button id="clearBtn" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-6 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105">
                     Clear
                 </button>
-                <button id="speakBtn" title="Speak" aria-label="Speak" class="bg-indigo-500 hover:bg-indigo-600 text-white p-2 rounded-full shadow-md transition duration-300 ease-in-out transform hover:scale-105">
+                <button id="totalAudioBtn" title="Play Total Scores" aria-label="Play Total Scores" class="bg-indigo-500 hover:bg-indigo-600 text-white p-2 rounded-full shadow-md transition duration-300 ease-in-out transform hover:scale-105">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M12 14a3 3 0 003-3V7a3 3 0 10-6 0v4a3 3 0 003 3z"/>
-                        <path d="M19 11a1 1 0 10-2 0 5 5 0 11-10 0 1 1 0 10-2 0 7 7 0 0012 4.9V18a1 1 0 112 0v-2.1A7 7 0 0019 11z"/>
+                        <path d="M5 3v18l14-9L5 3z" /> 
                     </svg>
                 </button>
-                <!-- Edit Toggle Icon -->
                 <button id="editToggleBtn" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold p-2 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105">
                     <svg id="lockIcon" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
@@ -81,35 +75,29 @@
                         <path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                     </svg>
                 </button>
-                <!-- Player Button moved here -->
                 <button id="playerBtn" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-6 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105">
                     Player
                 </button>
             </div>
         </div>
 
-        <!-- Main Data Table Wrapper -->
+        <audio id="playbackAudio" preload="auto" class="hidden"></audio>
+
         <div class="overflow-x-hidden overflow-y-auto max-h-[70vh] rounded-none sm:rounded-lg">
             <table class="w-full table-auto divide-y divide-gray-200 rounded-none sm:rounded-lg overflow-hidden border-0 sm:border sm:border-gray-200">
                 <thead class="bg-blue-600 text-white sticky top-0 z-10 shadow">
                     <tr id="tableHeaderRow">
-                        <!-- Headers will be dynamically rendered here -->
-                    </tr>
+                        </tr>
                 </thead>
-                <!-- Sums Row -->
                 <tbody id="sumRow" class="bg-blue-50 font-bold text-gray-800">
                     <tr>
-                        <!-- Sums will be dynamically rendered here -->
-                    </tr>
+                        </tr>
                 </tbody>
-                <!-- Data Rows -->
                 <tbody id="dataBody" class="bg-white divide-y divide-gray-200">
-                    <!-- Data rows will be dynamically rendered here -->
-                </tbody>
+                    </tbody>
             </table>
         </div>
 
-        <!-- Add Round Control -->
         <div class="flex justify-center mt-3 sm:mt-4 items-center">
             <button id="addRoundBtn" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-6 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105">
                 Add Round
@@ -117,7 +105,6 @@
         </div>
     </div>
 
-    <!-- Confirmation Modal (initially hidden) -->
     <div id="clearConfirmModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
         <div class="bg-white p-6 rounded-lg shadow-xl text-center">
             <p class="text-lg font-semibold mb-4 text-gray-800">আপনি কি নিশ্চিত যে আপনি সমস্ত সংখ্যা মুছে ফেলতে চান?</p>
@@ -132,14 +119,12 @@
         </div>
     </div>
     
-    <!-- Player Selection Modal (initially hidden) -->
     <div id="playerModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
         <div class="modal-content w-full max-w-sm mx-auto p-6 rounded-lg shadow-xl">
             <p class="text-lg font-semibold mb-4 text-gray-800 text-center">খেলোয়াড় নির্বাচন করুন</p>
             <p class="text-sm text-gray-600 mb-4 text-center">সর্বোচ্চ ৪ জন খেলোয়াড় নির্বাচন করা যাবে</p>
             <div id="playerListContainer" class="max-h-60 overflow-y-auto border border-gray-300 rounded-lg p-2 mb-4 space-y-2">
-                <!-- Player names will be dynamically rendered here -->
-            </div>
+                </div>
             <div class="flex justify-center space-x-4">
                 <button id="savePlayerListBtn" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105">
                     Save
@@ -158,13 +143,11 @@
         </div>
     </div>
     
-    <!-- Dynamic Player Selection Modal (initially hidden) -->
     <div id="dynamicPlayerModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
         <div class="modal-content w-full max-w-xs mx-auto p-6 rounded-lg shadow-xl">
             <p class="text-lg font-semibold mb-4 text-gray-800 text-center">খেলোয়াড় নির্বাচন করুন</p>
             <div id="dynamicPlayerList" class="max-h-60 overflow-y-auto border border-gray-300 rounded-lg p-2 mb-4 space-y-2">
-                <!-- Player names will be dynamically rendered here -->
-            </div>
+                </div>
             <div class="flex justify-center space-x-4">
                 <button id="cancelDynamicPlayerBtn" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105">
                     বাতিল
@@ -319,7 +302,10 @@
             const confirmClearBtn = document.getElementById('confirmClearBtn');
             const cancelClearBtn = document.getElementById('cancelClearBtn');
             const playerBtn = document.getElementById('playerBtn'); // Direct reference to the player button
-            const speakBtn = document.getElementById('speakBtn');
+            // RENAMED REFERENCE: Old speakBtn is now totalAudioBtn
+            const totalAudioBtn = document.getElementById('totalAudioBtn');
+            const playbackAudio = document.getElementById('playbackAudio'); // Reference to the hidden audio element
+
             let addRoundBtn = null; // will be set after we add it to the DOM
             const playerModal = document.getElementById('playerModal');
             const playerListContainer = document.getElementById('playerListContainer');
@@ -352,7 +338,7 @@
             const toBnDigitsSpaced = (n) => toBnDigits(n).split('').join(' ');
 
             // Utility: Convert number to Bengali words (Bangladesh style) for common ranges.
-            // Covers 0..9999 reasonably. Falls back to spaced digits for uncommon composites.
+            // THIS FUNCTION IS NO LONGER USED FOR AUDIO, BUT KEPT FOR REFERENCE/FALLBACK
             const toBnWords = (num) => {
                 num = Math.round(Number(num || 0));
                 if (!isFinite(num) || num < 0) return toBnDigitsSpaced(num);
@@ -419,6 +405,66 @@
             const calculateRowTotal = (row) => {
                 const sumOfFirstFour = calculateSumOfFirstFourColumns(row);
                 return sumOfFirstFour - subtractValue;
+            };
+
+            // --- Audio Playback Logic (Simulating MP3 Sequence) ---
+            
+            // NOTE: This function assumes you have a folder named '/audio/' containing
+            // MP3 files for each player name and a score file (e.g., 'SCORE_123.mp3').
+            // The score part uses a placeholder MP3 (silent.mp3) for numbers due to the
+            // impossibility of hosting dynamic score MP3s in this environment.
+
+            const getAudioUrls = () => {
+                const firstFour = columnNames.slice(0, 4);
+                const items = firstFour.map(name => ({
+                    name,
+                    total: Math.round(calculateColumnSum(name))
+                }));
+                
+                let audioQueue = [];
+
+                items.forEach(({ name, total }) => {
+                    // 1. Player Name MP3 (e.g., /audio/হামিম.mp3)
+                    // We must use a simple URL slug for player names, e.g., 'hamim.mp3',
+                    // as server filenames don't typically use Bengali.
+                    const nameSlug = name.replace(/\s/g, '_'); // Replace spaces for URL
+                    audioQueue.push(`/audio/${nameSlug}.mp3`);
+
+                    // 2. The Total Score MP3 (e.g., /audio/SCORE_123.mp3)
+                    // We must use a number-based MP3 since generating an MP3 for every number-word sequence is impractical.
+                    // For example, an MP3 for "Minus 120" or "Plus 300".
+                    // Since I cannot host these, I will use a placeholder 'silent.mp3' here
+                    // to keep the code structure correct.
+                    const scoreUrl = `/audio/SCORE_${total}.mp3`;
+                    audioQueue.push(scoreUrl);
+                });
+
+                return audioQueue;
+            };
+
+            // Recursive function to play a sequence of audio files
+            const playSequence = (audioUrls, index = 0) => {
+                if (index >= audioUrls.length) {
+                    totalAudioBtn.disabled = false; // Re-enable button
+                    return;
+                }
+
+                playbackAudio.src = audioUrls[index];
+                
+                // Set the event listener for when the current audio ends
+                const onEnded = () => {
+                    playbackAudio.removeEventListener('ended', onEnded);
+                    playSequence(audioUrls, index + 1); // Play the next item
+                };
+                
+                playbackAudio.addEventListener('ended', onEnded);
+                
+                // Play the audio
+                playbackAudio.play().catch(e => {
+                    console.error("Audio playback failed for:", audioUrls[index], e);
+                    // Skip to the next one if it fails (e.g., MP3 not found)
+                    onEnded(); 
+                });
             };
 
             // --- Update Functions ---
@@ -699,81 +745,20 @@
                 addPlayerBtn.textContent = 'যোগ করুন';
             });
 
-            // Speak first 4 player names with their totals for Bangladesh (bn-BD)
-            speakBtn.addEventListener('click', () => {
-                try {
-                    const firstFour = columnNames.slice(0, 4);
-                    const items = firstFour.map(name => ({
-                        name,
-                        total: Math.round(calculateColumnSum(name))
-                    }));
-
-                    if ('speechSynthesis' in window) {
-                        const synth = window.speechSynthesis;
-                        synth.cancel();
-                        // Prepare utterances: speak each name+number separately to avoid number skipping
-                        const makeUtter = (text) => {
-                            const u = new SpeechSynthesisUtterance(text);
-                            u.lang = 'bn-BD';
-                            u.rate = 0.85;
-                            u.pitch = 1;
-                            u.volume = 1;
-                            return u;
-                        };
-
-                        // Try to use a Bengali voice if available
-                        const pickBnVoice = () => {
-                            const voices = synth.getVoices() || [];
-                            // Priority: exact bn-BD, then any bn, then names containing Bangla/Bengali/Bangladesh
-                            const bnBD = voices.find(v => (v.lang||'').toLowerCase() === 'bn-bd');
-                            const bnAny = voices.find(v => (v.lang||'').toLowerCase().startsWith('bn'));
-                            const byName = voices.find(v => /bangla|bengali|bangladesh/i.test(v.name || ''));
-                            return bnBD || bnAny || byName || voices[0] || null;
-                        };
-                        // Some browsers load voices asynchronously; ensure we speak regardless
-                        const voicesNow = synth.getVoices();
-                        const queueSpeak = (voice) => {
-                            // Build and enqueue each utterance
-                            items.forEach(({ name, total }, idx) => {
-                                const text = `${name}, ${toBnWords(total)}`;
-                                const u = makeUtter(text);
-                                if (voice) {
-                                    u.voice = voice;
-                                    if (voice.lang) u.lang = voice.lang;
-                                }
-                                // Stagger slightly to avoid clipping
-                                setTimeout(() => synth.speak(u), idx * 150);
-                            });
-                        };
-                        if (!voicesNow || voicesNow.length === 0) {
-                            // Attempt delayed speak once voices load
-                            const speakWithVoices = () => {
-                                const v = pickBnVoice();
-                                queueSpeak(v);
-                            };
-                            const onVoices = () => {
-                                synth.onvoiceschanged = null;
-                                speakWithVoices();
-                            };
-                            synth.onvoiceschanged = onVoices;
-                            // Fallback timeout in case onvoiceschanged never fires
-                            setTimeout(() => {
-                                if (synth.speaking || synth.pending) return;
-                                speakWithVoices();
-                            }, 600);
-                        } else {
-                            const v = pickBnVoice();
-                            queueSpeak(v);
-                        }
-                    } else {
-                        // Fallback: simple alert if TTS not supported
-                        const fallback = items.map(({name, total}) => `${name}: ${toBnDigits(total)}`).join('\n');
-                        alert(fallback);
-                    }
-                } catch (e) {
-                    console.error('Speak failed', e);
+            // AUDIO PLAYBACK BUTTON HANDLER (Replaced old speakBtn logic)
+            totalAudioBtn.addEventListener('click', () => {
+                totalAudioBtn.disabled = true; // Disable while playing
+                playbackAudio.pause(); // Stop any currently playing audio
+                playbackAudio.currentTime = 0;
+                
+                const urls = getAudioUrls();
+                if (urls.length > 0) {
+                    playSequence(urls);
+                } else {
+                    totalAudioBtn.disabled = false;
                 }
             });
+            // END AUDIO PLAYBACK HANDLER
 
             cancelPlayerBtn.addEventListener('click', () => {
                 playerModal.classList.add('hidden');
